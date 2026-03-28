@@ -1,0 +1,7 @@
+{
+  "name": "proyecto-papa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
