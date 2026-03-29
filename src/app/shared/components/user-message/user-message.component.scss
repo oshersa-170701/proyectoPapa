@@ -1,0 +1,44 @@
+.user-card {
+  background: white;
+  border-radius: 20px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  // Tu detalle verde pero con una sombra sutil para que no se vea plano
+  border-left: 5px solid #48ff00; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  
+  display: flex;
+  flex-direction: column; // Texto arriba, icono abajo (o viceversa según prefieras)
+  gap: 10px;
+  position: relative;
+
+  .role-info {
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      margin: 5px 0 0 0;
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.4;
+    }
+  }
+
+  // Acomodamos el icono de usuario de forma elegante
+  .role-icon-box {
+    align-self: flex-start; // Lo pegamos a la izquierda bajo el texto
+    display: flex;
+    align-items: center;
+    color: #999;
+    
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}

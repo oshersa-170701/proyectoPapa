@@ -1,0 +1,64 @@
+/* ESTILO GUGAR PARA LISTAS */
+.hospital-card, .doctor-card {
+  background: #ffffff;
+  border-radius: 22px; // Curva suave profesional
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 8px 24px rgba(26, 115, 232, 0.06); // Sombra azul sutil
+  border: 1px solid rgba(26, 115, 232, 0.04);
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Iconos circulares azules */
+.icon-wrapper, .avatar-box {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  background: #eef7ff; // Azul Gugar muy claro
+  border-radius: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #1a73e8;
+  font-size: 28px;
+}
+
+/* Textos jerarquizados */
+h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a237e; // Azul profundo para lectura
+}
+
+p, .spec {
+  margin: 3px 0 0 0;
+  font-size: 0.9rem;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  color: #fabb05; // Amarillo de estrellas
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.arrow, .btn-next {
+  color: #cbd5e0;
+  font-size: 22px;
+  margin-left: auto;
+}

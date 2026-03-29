@@ -35,3 +35,27 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+/* Forzar tema claro global */
+body {
+  background-color: #ffffff !important;
+}
+
+:root {
+  --ion-background-color: #ffffff !important;
+  --ion-text-color: #202124 !important;
+  --ion-item-background: #ffffff !important;
+  /* El azul de Google */
+  --ion-color-primary: #1a73e8; 
+}
+
+/* Evitar que Ionic aplique estilos oscuros automáticamente */
+@media (prefers-color-scheme: dark) {
+  body.dark {
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #202124 !important;
+  }
+}
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+}

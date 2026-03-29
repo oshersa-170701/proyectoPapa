@@ -1,27 +1,293 @@
-#container {
+// Importamos la fuente que usa Gugar
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+.bg-light {
+  --background: #f4f6fa;
+}
+
+// --- HEADER AZUL (IDENTICO A GUGAR) ---
+.main-header {
+  background: linear-gradient(180deg, #0099ff 0%, #20b0ff 100%);
+  padding: 60px 20px 100px 20px; // Más padding para que luzca en móvil
+  color: white;
+  position: relative;
+  z-index: 1;
   text-align: center;
 
+  .main-logo-icon {
+    font-size: 80px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    margin-bottom: 15px;
+  }
+
+  .text-container {
+    h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    p {
+      margin: 8px 0 0 0;
+      font-size: 1rem;
+      opacity: 0.9;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+  }
+}
+
+// --- CONTENEDOR BLANCO (EL QUE SUBE) ---
+// Aseguramos que el contenido blanco suba sobre el header azul
+.white-container {
+  background: #f4f6fa;
+  margin-top: -50px; // Ajusta este valor según prefieras que suba la tarjeta
+  border-top-left-radius: 35px;
+  border-top-right-radius: 35px;
+  min-height: 80vh;
+  position: relative;
+  z-index: 2;
+  padding: 30px 20px;
+  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.05);
+}
+
+// --- ESTILO DE TARJETA (PARA MENSAJES O BOTONES) ---
+.role-card {
+  background: white;
+  border-radius: 20px;
+  padding: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+
+  .role-icon-box {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &.blue { background: #e3f2fd; }
+  }
+
+  .role-info {
+    flex: 1;
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+    }
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+}
+
+// --- FOOTER Y BOTÓN MICRO ---
+.mic-section {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 30px;
+  background: #f4f6fa;
+
+  .mic-button-gugar {
+  position: relative;
+  width: 65px;
+  height: 65px;
+  background: var(--ion-color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 30px;
+  transition: all 0.3s ease;
+  z-index: 10;
+
+  /* 📍 El círculo que parpadea cuando grabas */
+  &.active-mic {
+    background: #eb445a; // Rojo de grabación 🔴
+    transform: scale(1.1);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(235, 68, 90, 0.4);
+      animation: mic-pulse 1.5s infinite;
+      z-index: -1;
+    }
+  }
+}
+}
+#chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; // Espacio uniforme entre los mensajes
+  padding-bottom: 60px; // Espacio extra para que el footer no tape el último mensaje
+}
+.map-wrapper {
+  margin-bottom: 20px;
+  /* El contenedor que protege al mapa y le da el estilo Gugar */
+  padding: 5px;
+  background: white;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(26, 115, 232, 0.12);
+}
+
+.label-section {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a73e8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 15px 0 10px 10px;
+}
+
+.results-fade-in {
+  animation: slideUpFade 0.5s ease-out;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.loading-wrapper {
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  ion-spinner {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+  }
+
+  p {
+    color: var(--ion-color-primary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    /* Un toque de animación de pulso para el texto */
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+.mic-button-gugar {
+  transition: all 0.3s ease;
+  &.active-mic {
+    background: #ff4081; /* Un color vibrante para grabar */
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 64, 129, 0.5);
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+#chat-container {
+  scroll-behavior: smooth; /* 📍 Esto hace que el bajón sea elegante ✨ */
+  transition: all 0.3s ease;
+}
+/* 📍 Animación de la onda expansiva */
+@keyframes mic-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+/* 📍 Efecto de borde rojo parpadeante para la pantalla completa */
+.emergency-border-active {
+  box-shadow: inset 0 0 20px #eb445a, inset 0 0 40px #eb445a;
+  animation: border-blink 1s infinite alternate;
+  pointer-events: none; /* Para que no bloquee los clics en los botones */
   position: absolute;
+  top: 0;
   left: 0;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 0;
+  z-index: 999; 
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+@keyframes border-blink {
+  from { opacity: 0.2; }
+  to { opacity: 0.8; }
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+/* 📍 Estilo del Botón de Pánico 911 */
+.panic-button-container {
+  margin: 15px;
+  animation: bounceIn 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-#container a {
+.panic-button {
+  background: #eb445a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 15px;
   text-decoration: none;
+  font-weight: bold;
+  font-size: 1.3em;
+  box-shadow: 0 10px 20px rgba(235, 68, 90, 0.4);
+  
+  ion-icon { font-size: 1.5em; }
+  &:active { transform: scale(0.95); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.1); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.close-emergency {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 📍 Lo centramos para que sea más fácil de ver */
+  gap: 8px;
+  margin-top: 15px; /* 📍 Le damos espacio respecto al botón de 911 */
+  padding: 12px;     /* 📍 Aumentamos el área de clic */
+  color: #eb445a;
+  font-size: 1.1em;  /* 📍 Texto más legible */
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(235, 68, 90, 0.05); /* Un toque de color de fondo suave */
+  border-radius: 10px;
+  transition: background 0.2s ease;
+
+  ion-icon {
+    font-size: 1.3em; /* Icono más grande */
+  }
+
+  &:active {
+    background: rgba(235, 68, 90, 0.15); /* Efecto visual al tocarlo */
+  }
 }

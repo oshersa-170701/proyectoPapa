@@ -1,0 +1,61 @@
+.bot-card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 15px;
+  // Borde azul médico para contrastar con el verde del usuario
+  border-left: 5px solid #1a73e8; 
+  box-shadow: 0 8px 20px rgba(26, 115, 232, 0.08);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .header-bot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a73e8; // Nombre en azul
+      text-transform: uppercase;
+    }
+
+    ion-badge {
+      --background: #e1f0ff;
+      --color: #1a73e8;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(26, 115, 232, 0.2);
+    }
+  }
+
+  .bot-info {
+    p {
+      margin: 0;
+      font-size: 1rem;
+      color: #333;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+  }
+
+  .role-icon-box {
+    display: flex;
+    align-items: center;
+    color: #1a73e8;
+    opacity: 0.8;
+    
+    ion-icon {
+      font-size: 26px;
+    }
+  }
+}

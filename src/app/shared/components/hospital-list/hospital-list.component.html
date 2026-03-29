@@ -1,0 +1,21 @@
+<div class="hospital-container">
+  @for (h of hospitals; track h.name) {
+    <div class="hospital-card" (click)="goToHospital(h)">
+      <div class="icon-wrapper">
+        <ion-icon name="business"></ion-icon>
+      </div>
+      <div class="info">
+        <h3>{{ h.name }}</h3>
+        <p style="color: #ff4081;">
+          <ion-icon name="location-outline"></ion-icon> 
+          Toca para ver cómo llegar
+        </p>
+      </div>
+      <div class="arrow">
+        <ion-icon name="chevron-forward"></ion-icon>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">No hay hospitales cerca de tu ubicación.</div>
+  }
+</div>

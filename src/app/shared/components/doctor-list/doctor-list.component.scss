@@ -1,0 +1,117 @@
+/* ESTILO GUGAR PARA LISTAS */
+.hospital-card, .doctor-card {
+  background: #ffffff;
+  border-radius: 22px; // Curva suave profesional
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 8px 24px rgba(26, 115, 232, 0.06); // Sombra azul sutil
+  border: 1px solid rgba(26, 115, 232, 0.04);
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Iconos circulares azules */
+.icon-wrapper, .avatar-box {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  background: #eef7ff; // Azul Gugar muy claro
+  border-radius: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #1a73e8;
+  font-size: 28px;
+}
+
+/* Textos jerarquizados */
+h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a237e; // Azul profundo para lectura
+}
+
+p, .spec {
+  margin: 3px 0 0 0;
+  font-size: 0.9rem;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  color: #fabb05; // Amarillo de estrellas
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.arrow{
+  color: #cbd5e0;
+  font-size: 22px;
+  margin-left: auto;
+}
+.contact-actions-container {
+  border-top: 1px solid #f0f0f0;
+  margin-top: 10px;
+  padding-top: 5px;
+  animation: fadeIn 0.3s ease-in-out; // Un efecto suave al aparecer
+}
+
+.btn-next {
+  cursor: pointer;
+  padding: 10px;
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+    transition: transform 0.3s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.specialty {
+  color: #3880ff; /* Un azul vibrante para la especialidad (puedes usar var(--ion-color-primary)) */
+  font-weight: 600;
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.clinic {
+  color: #666666; /* Un gris intermedio para la clínica */
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  
+  // Si quieres que tenga un toque extra, podemos ponerle un color diferente
+  // color: #2dd36f; // Verde si quieres que resalte como lugar disponible
+}
+.custom-search {
+  --background: #ffffff;
+  --border-radius: 12px;
+  --placeholder-color: #000000;
+  --icon-color: var(--ion-color-primary);
+  margin-bottom: 15px;
+  padding: 0 10px;
+}
+
+.empty-state {
+  margin-top: 30px;
+  p {
+    color: #666;
+    font-style: italic;
+  }
+}

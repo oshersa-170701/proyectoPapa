@@ -1,0 +1,21 @@
+.options-container {
+  margin-top: 10px;
+  
+  .option-btn {
+    --background: #ffffff;
+    --color: #333;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: none; // Para que no salga todo en mayúsculas
+    
+    ion-icon {
+      color: #1a73e8; // Azul para resaltar el icono
+    }
+
+    &:active {
+      --background: #f0f0f0;
+    }
+  }
+}

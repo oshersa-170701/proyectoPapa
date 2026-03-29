@@ -1,0 +1,56 @@
+<ion-searchbar placeholder="Busca por especialidad o nombre..." [(ngModel)]="searchText" animated="true"
+  class="custom-search">
+</ion-searchbar>
+<ion-grid class="doctor-grid">
+  @for (doctor of (doctors | filter: searchText); track doctor.name) {
+  <ion-row class="doctor-row">
+    <ion-col size="2" class="avatar-col">
+      <ion-icon name="person-outline" class="doctor-icon"></ion-icon>
+    </ion-col>
+
+    <ion-col size="8" class="info-col">
+      <div class="doctor-header">
+        <h3>{{ doctor.name }}</h3>
+      </div>
+      <p class="specialty">
+        <ion-icon name="reader-outline" class="icon-detail"></ion-icon>
+        {{ doctor.specialty }}
+      </p>
+
+      <p class="clinic">
+        <ion-icon name="business-outline" class="icon-detail"></ion-icon>
+        {{ doctor.clinic }}
+      </p>
+    </ion-col>
+
+    <ion-col size="2" class="ion-text-right">
+      <div class="btn-next" (click)="toggleContact(doctor)">
+        <ion-icon [name]="doctor.showContact ? 'chevron-down' : 'chevron-forward'" class="arrow-icon">
+        </ion-icon>
+      </div>
+    </ion-col>
+
+    @if (doctor.showContact) {
+    <ion-col size="12" class="contact-actions-container">
+      <div class="contact-actions">
+        <ion-button fill="clear" [href]="'tel:' + doctor.phone" class="call-btn" color="tertiary">
+          <ion-icon name="call-outline"></ion-icon>
+          Llamar ({{ doctor.phone }})
+        </ion-button>
+
+        <ion-button fill="clear" [href]="'https://wa.me/' + doctor.whatsapp_number" target="_blank" class="wa-btn"
+          color="success">
+          <ion-icon name="logo-whatsapp"></ion-icon>
+          WhatsApp
+        </ion-button>
+      </div>
+    </ion-col>
+    }
+  </ion-row>
+  }
+  @empty {
+  <div class="ion-text-center ion-padding">
+    <p>No se encontraron resultados para "{{ searchText }}"</p>
+  </div>
+  }
+</ion-grid>

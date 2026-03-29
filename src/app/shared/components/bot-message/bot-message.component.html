@@ -1,0 +1,23 @@
+<div class="bot-card">
+  <div class="header-bot">
+    <h3>ANAasis</h3>
+    
+    <ion-badge 
+      [color]="isMuted ? 'medium' : 'primary'" 
+      mode="ios" 
+      (click)="onMuteClick()" 
+      style="cursor: pointer;">
+      
+      <ion-icon [name]="isMuted ? 'volume-mute' : 'volume-high'"></ion-icon>
+      {{ isMuted ? 'Silenciado' : 'Voz activa' }}
+    </ion-badge>
+  </div>
+  
+  <div class="bot-info">
+    <p><ng-content></ng-content></p>
+  </div>
+  
+  <div class="role-icon-box">
+    <ion-icon name="chatbubble-ellipses"></ion-icon>
+  </div>
+</div>

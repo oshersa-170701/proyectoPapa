@@ -1,2 +1,14 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+:root {
+  /* Azul principal de Gugar */
+  --gugar-blue: #1a73e8; 
+  /* Azul muy claro para degradado */
+  --gugar-blue-light: #f0f7ff; 
+  /* Azul suave para la sombra difuminada (Shadow Blue) */
+  --gugar-shadow-blue: rgba(26, 115, 232, 0.15); 
+  
+  /* Fondo global (Degradado sutil) */
+  --ion-background-color: linear-gradient(180deg, #ffffff 0%, var(--gugar-blue-light) 100%);
+  --ion-text-color: #202124;
+}

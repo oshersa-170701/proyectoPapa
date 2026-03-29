@@ -1,20 +1,79 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+@if (isEmergencyActive) {
+<div class="emergency-border-active"></div>
+}
+<ion-content [fullscreen]="true" class="bg-light">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <header class="main-header">
+    <div class="top-bar">
+      <ion-icon name="medical" class="main-logo-icon"></ion-icon>
+    </div>
+    <div class="text-container">
+      <h2>Asistente Virtual</h2>
+      <p>Hola, soy tu asistente virtual <b>ANAasis</b>.</p>
+    </div>
+  </header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <main class="white-container">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" id="chat-container">
+          @for (msg of chatMessages; track $index) {
+          @if (msg.role === 'bot') {
+          <app-bot-message [isMuted]="isMutedGlobal" [fullText]="msg.text" (toggleMute)="toggleAppMute()"
+            (requestSpeak)="speak($event, true)"> {{ msg.text }}
+          </app-bot-message>
+          } @else {
+          <app-user-message [messageText]="msg.text"></app-user-message>
+          }
+          }
+          <app-chat-options (optionSelected)="handleOptionSelected($event)"></app-chat-options>
+
+          <div class="results-fade-in">
+          @if (isEmergencyActive) {
+  <div class="panic-button-container">
+    <a href="tel:911" class="panic-button">
+      <ion-icon name="call"></ion-icon>
+      LLAMAR AL 911 AHORA
+    </a>
+    
+    <div class="close-emergency" (click)="isEmergencyActive = false">
+      <ion-icon name="close-circle"></ion-icon> 
+      Omitir alerta de emergencia
+    </div>
   </div>
+}
+            @if (isLoading) {
+            <div class="loading-wrapper ion-text-center">
+              <ion-spinner name="crescent" color="primary"></ion-spinner>
+              <p>Buscando lo mejor para ti... </p>
+            </div>
+            }
+            @if (showHospitals && !isLoading) {
+            <div class="map-wrapper" style="min-height: 250px;">
+              <app-medical-map [points]="listadoHospitales" [userLocation]="miUbicacionActual">
+              </app-medical-map>
+            </div>
+
+            <div class="label-section">Hospitales cercanos:</div>
+            <app-hospital-list [hospitals]="listadoHospitales"></app-hospital-list>
+            }
+
+            @if (showDoctors && !isLoading) {
+            <app-doctor-list [doctors]="listadoDoctores"></app-doctor-list>
+            }
+
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </main>
+
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="mic-section">
+    <div class="mic-button-gugar" (click)="startListening()" [class.active-mic]="isRecording">
+      <ion-icon name="mic"></ion-icon>
+    </div>
+  </div>
+</ion-footer>
