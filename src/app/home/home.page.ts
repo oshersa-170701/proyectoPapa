@@ -100,18 +100,24 @@ export class HomePage {
       this.isRecording = false;
     }
   }
- sendMessageToAI(text: string) {
+sendMessageToAI(text: string) {
+  // 📍 1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
+  this.showHospitals = false;
+  this.showDoctors = false;
+  this.listadoHospitales = [];
+  this.listadoDoctores = [];
+  this.showChatOptions = false; // Ocultamos botones hasta que el bot sugiera usarlos
+  
+  // Agregamos el mensaje del usuario al chat
   this.chatMessages.push({ role: 'user', text: text });
   this.isLoading = true;
-  this.showChatOptions = false; // 📍 Escondemos botones al empezar nueva duda
 
   this.medicalService.sendMessage(text).subscribe({
     next: (res) => {
       this.zone.run(async () => {
-        // --- PRIMERA RESPUESTA (La del servidor) ---
         this.chatMessages.push({ role: 'bot', text: res.reply });
         this.isLoading = false;
-        
+
         if (res.urgent) {
           this.isEmergencyActive = true;
           await this.speak("He detectado una posible emergencia...", true);
@@ -120,16 +126,16 @@ export class HomePage {
           await this.speak(res.reply);
         }
 
-        // --- SEGUNDA RESPUESTA AUTOMÁTICA (Sugerencia) ---
+        // --- SEGUNDA RESPUESTA AUTOMÁTICA ---
         setTimeout(async () => {
           const sugerencia = "También puedes consultar hospitales o médicos cercanos para una mejor atención. ¿Te gustaría verlos?";
           
           this.chatMessages.push({ role: 'bot', text: sugerencia });
-          this.showChatOptions = true; // 📍 AQUÍ habilitamos los botones
+          this.showChatOptions = true; // Solo aquí se vuelven a activar los botones
           
           await this.speak(sugerencia);
           this.cdr.detectChanges();
-        }, 1500); // 1.5 segundos de espera para que no sea brusco
+        }, 1500);
 
         this.cdr.detectChanges();
       });
