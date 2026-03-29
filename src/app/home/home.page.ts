@@ -4,7 +4,7 @@ import {
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle } from 'ionicons/icons';
+import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline } from 'ionicons/icons';
 
 // Importación del Servicio y HttpClient
 
@@ -19,6 +19,9 @@ import { MedicalService } from '../core/services/medical';
 import { Geolocation } from '@capacitor/geolocation';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { ToastController } from '@ionic/angular'; //  Importa ToastController
+import { App } from '@capacitor/app';
+import { Overpass } from '../core/services/overpass';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -33,7 +36,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 export class HomePage {
   showHospitals = false;
   showDoctors = false;
-  
+
   isLoading = false; // Nueva variable de control
   // Arreglos que se llenarán con la API
   listadoHospitales: any[] = [];
@@ -49,10 +52,14 @@ export class HomePage {
       text: 'Hola, soy tu asistente virtual ANAasis. ¿En qué puedo ayudarte hoy?'
     }
   ];
-  constructor(private medicalService: MedicalService, private cdr: ChangeDetectorRef, private zone: NgZone) {
+  constructor(private medicalService: MedicalService, private cdr: ChangeDetectorRef, private zone: NgZone,
+    private toastController: ToastController,
+    private overpassService: Overpass,
+  ) {
     // Añadí los iconos que usan tus listas para que no den error
-    addIcons({closeCircle,call,medical,mic,chatbubbleEllipses,star,business,locationOutline,personOutline,chevronForward});
+    addIcons({ call, closeCircle, arrowBackOutline, mic, medical, chatbubbleEllipses, star, business, locationOutline, personOutline, chevronForward });
     this.initSpeechRecognition();
+    this.setupBackButton(); // 📍 Llamamos a la configuración
   }
   async initSpeechRecognition() {
     // Verificamos si el plugin está disponible
@@ -67,7 +74,8 @@ export class HomePage {
 
     //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
     try {
-      await TextToSpeech.stop();
+      // 📍 No esperes al stop, lánzalo y sigue
+      TextToSpeech.stop().catch(() => { });
     } catch (e) {
       console.warn("Nada que detener en TTS");
     }
@@ -96,67 +104,81 @@ export class HomePage {
         this.isRecording = false;
       }
     } catch (e) {
-     // console.error(" Error en SpeechRecognition:", e);
+      // console.error(" Error en SpeechRecognition:", e);
       this.isRecording = false;
     }
   }
-sendMessageToAI(text: string) {
-  //  1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
-  this.showHospitals = false;
-  this.showDoctors = false;
-  this.listadoHospitales = [];
-  this.listadoDoctores = [];
-  this.showChatOptions = false; // Ocultamos botones hasta que el bot sugiera usarlos
-  
-  // Agregamos el mensaje del usuario al chat
-  this.chatMessages.push({ role: 'user', text: text });
-  this.isLoading = true;
+  sendMessageToAI(text: string) {
+    //  1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
+    this.showHospitals = false;
+    this.showDoctors = false;
+    this.listadoHospitales = [];
+    this.listadoDoctores = [];
+    this.showChatOptions = false; // Ocultamos botones hasta que el bot sugiera usarlos
 
-  this.medicalService.sendMessage(text).subscribe({
-    next: (res) => {
-      this.zone.run(async () => {
-        this.chatMessages.push({ role: 'bot', text: res.reply });
-        this.isLoading = false;
+    // Agregamos el mensaje del usuario al chat
+    this.chatMessages.push({ role: 'user', text: text });
+    this.isLoading = true;
 
-        if (res.urgent) {
-          this.isEmergencyActive = true;
-          await this.speak("He detectado una posible emergencia...", true);
-        } else {
-          this.isEmergencyActive = false;
-          await this.speak(res.reply);
-        }
+    this.medicalService.sendMessage(text).subscribe({
+      next: (res) => {
+        this.zone.run(async () => {
+          this.chatMessages.push({ role: 'bot', text: res.reply });
+          this.isLoading = false;
 
-        // --- SEGUNDA RESPUESTA AUTOMÁTICA ---
-        setTimeout(async () => {
-          const sugerencia = "También puedes consultar hospitales o médicos cercanos para una mejor atención. ¿Te gustaría verlos?";
-          
-          this.chatMessages.push({ role: 'bot', text: sugerencia });
-          this.showChatOptions = true; // Solo aquí se vuelven a activar los botones
-          
-          await this.speak(sugerencia);
+          if (res.urgent) {
+            this.isEmergencyActive = true;
+            await this.speak("He detectado una posible emergencia...", true);
+          } else {
+            this.isEmergencyActive = false;
+            await this.speak(res.reply);
+          }
+
+          // --- SEGUNDA RESPUESTA AUTOMÁTICA ---
+          setTimeout(async () => {
+            const sugerencia = "También puedes consultar hospitales o médicos cercanos para una mejor atención. ¿Te gustaría verlos?";
+
+            this.chatMessages.push({ role: 'bot', text: sugerencia });
+            this.showChatOptions = true; // Solo aquí se vuelven a activar los botones
+
+            await this.speak(sugerencia);
+            this.cdr.detectChanges();
+          }, 1500);
+
           this.cdr.detectChanges();
-        }, 1500);
-
-        this.cdr.detectChanges();
-      });
-    },
-    error: () => { this.isLoading = false; }
-  });
-}
+        });
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
   async handleOptionSelected(type: string) {
-    // 1. Limpiamos lo anterior y prendemos el loading
     this.showHospitals = false;
     this.showDoctors = false;
     this.isLoading = true;
 
     if (type === 'hospitals') {
+      // 📍 1. Paso inmediato: Carga hospitales de Oaxaca Centro para que el usuario vea ALGO ya.
+      this.miUbicacionActual = { lat: 17.0732, lng: -96.7266 };
+      this.buscarHospitalesReales(17.0732, -96.7266);
+
       try {
+        // 📍 2. Intentamos obtener la real con un tiempo más razonable (5 seg)
         const coordinates = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true
+          enableHighAccuracy: false, // 🚀 Mantenlo en false para que sea rápido
+          timeout: 5000
         });
-        this.fetchHospitals(coordinates.coords.latitude, coordinates.coords.longitude);
+
+        this.miUbicacionActual = {
+          lat: coordinates.coords.latitude,
+          lng: coordinates.coords.longitude
+        };
+
+        // 📍 3. Si obtenemos la real, refrescamos los hospitales
+        this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
+
       } catch (error) {
-        this.cargarHospitalesDefault();
+        console.warn("Se agotó el tiempo del GPS, se mantienen los resultados de Oaxaca Centro.");
+        this.isLoading = false; // 📍 Importante: Apagamos el spinner si falla el GPS
       }
     }
 
@@ -164,27 +186,12 @@ sendMessageToAI(text: string) {
       this.medicalService.getDoctors().subscribe({
         next: (res) => {
           this.listadoDoctores = res.doctors;
-          this.isLoading = false; //  Apagamos al recibir datos
-          this.showDoctors = true;
-        },
-        error: (err) => {
           this.isLoading = false;
-         // console.error(err);
-        }
+          this.showDoctors = true;
+          this.cdr.detectChanges();
+        },
+        error: (err) => { this.isLoading = false; }
       });
-    }
-    if (type === 'hospitals') {
-      try {
-        const coordinates = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
-        //  Guardamos la ubicación para el mapa
-        this.miUbicacionActual = {
-          lat: coordinates.coords.latitude,
-          lng: coordinates.coords.longitude
-        };
-        this.fetchHospitals(coordinates.coords.latitude, coordinates.coords.longitude);
-      } catch (error) {
-        this.cargarHospitalesDefault();
-      }
     }
   }
   //  Función que faltaba: Respaldo para Oaxaca Centro
@@ -226,7 +233,7 @@ sendMessageToAI(text: string) {
         category: 'ambient',
       });
     } catch (error) {
-     // console.error("Error en TTS:", error);
+      // console.error("Error en TTS:", error);
     }
   }
   async ionViewDidEnter() {
@@ -244,4 +251,55 @@ sendMessageToAI(text: string) {
   }
   // 1. Agrega la variable en tu clase HomePage
   isEmergencyActive = false;
+  showExitPop = false; //  Controla el mensaje pop
+  lastBackPress = 0;
+  timeLimit = 2000;
+  setupBackButton() {
+    App.addListener('backButton', () => {
+      this.zone.run(() => {
+        const currentTime = new Date().getTime();
+
+        if (currentTime - this.lastBackPress < this.timeLimit) {
+          App.exitApp(); // 🚪 Sale al segundo toque
+        } else {
+          this.lastBackPress = currentTime;
+          this.triggerExitPop(); //  Muestra el mensajito
+        }
+      });
+    });
+  }
+  triggerExitPop() {
+    this.showExitPop = true;
+
+    // Lo quitamos solito después de 2 segundos
+    setTimeout(() => {
+      this.zone.run(() => {
+        this.showExitPop = false;
+        this.cdr.detectChanges();
+      });
+    }, 2000);
+
+    this.cdr.detectChanges();
+  }
+buscarHospitalesReales(lat: number, lng: number) {
+  this.overpassService.getNearbyHospitals(lat, lng).subscribe({
+    next: (hospitales) => {
+      this.zone.run(() => {
+        // 📍 ORDENACIÓN POR DISTANCIA (Pitágoras)
+        this.listadoHospitales = hospitales.sort((a: any, b: any) => {
+          const distA = Math.sqrt(Math.pow(a.lat - lat, 2) + Math.pow(a.lng - lng, 2));
+          const distB = Math.sqrt(Math.pow(b.lat - lat, 2) + Math.pow(b.lng - lng, 2));
+          return distA - distB; // El más pequeño (cercano) va primero
+        });
+
+        this.isLoading = false;
+        this.showHospitals = true;
+        this.cdr.detectChanges();
+      });
+    },
+    error: () => { 
+      this.isLoading = false; 
+    }
+  });
+}
 }

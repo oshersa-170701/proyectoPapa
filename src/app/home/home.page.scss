@@ -316,3 +316,32 @@
   height: 100%;
   object-fit: contain; /* 📍 Mantiene la forma del logo sin estirarlo */
 }
+.exit-pop-container {
+  position: fixed;
+  bottom: 110px; /* 📍 Arriba del botón de micro */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10000; /* Siempre al frente */
+  pointer-events: none;
+}
+
+.exit-pop-content {
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 0.9em;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+
+  ion-icon {
+    color: #eb445a;
+    font-size: 1.2em;
+  }
+}

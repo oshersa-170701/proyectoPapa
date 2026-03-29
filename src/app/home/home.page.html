@@ -54,12 +54,12 @@
             }
             @if (showHospitals && !isLoading) {
             <div class="map-wrapper" style="min-height: 250px;">
-              <app-medical-map [points]="listadoHospitales" [userLocation]="miUbicacionActual">
-              </app-medical-map>
-            </div>
+              <app-medical-map [points]="listadoHospitales" [userLocation]="miUbicacionActual"></app-medical-map>
 
-            <div class="label-section">Hospitales cercanos:</div>
-            <app-hospital-list [hospitals]="listadoHospitales"></app-hospital-list>
+              <div class="label-section">Hospitales cercanos:</div>
+
+              <app-hospital-list [hospitals]="listadoHospitales" [userLocation]="miUbicacionActual"></app-hospital-list>
+            </div>
             }
 
             @if (showDoctors && !isLoading) {
@@ -71,7 +71,14 @@
       </ion-row>
     </ion-grid>
   </main>
-
+  @if (showExitPop) {
+  <div class="exit-pop-container results-fade-in">
+    <div class="exit-pop-content">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      Retrocede nuevamente para salir
+    </div>
+  </div>
+  }
 </ion-content>
 
 <ion-footer class="ion-no-border">

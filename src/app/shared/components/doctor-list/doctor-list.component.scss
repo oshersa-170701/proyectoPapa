@@ -100,18 +100,33 @@ p, .spec {
   // color: #2dd36f; // Verde si quieres que resalte como lugar disponible
 }
 .custom-search {
-  --background: #ffffff;
   --border-radius: 12px;
-  --placeholder-color: #000000;
-  --icon-color: var(--ion-color-primary);
-  margin-bottom: 15px;
-  padding: 0 10px;
+  --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  --background: #ffffff; // Fondo blanco sólido
+  --color: #000000;      // 📍 Texto que escribes en negro
+  --placeholder-color: #666666; // 📍 Texto de sugerencia en gris oscuro
+  --icon-color: #3880ff; // Lupa en azul para que combine con tu app
+  padding-bottom: 15px;
+
+  /* Forzamos el input interno por si las variables no bastan */
+  input {
+    color: #000 !important;
+    font-weight: 500 !important;
+  }
+}
+
+.search-container {
+  padding: 10px 15px;
+  background: white;
+  border-radius: 15px 15px 0 0;
 }
 
 .empty-state {
-  margin-top: 30px;
-  p {
-    color: #666;
-    font-style: italic;
-  }
+  text-align: center;
+  padding: 40px 20px;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }

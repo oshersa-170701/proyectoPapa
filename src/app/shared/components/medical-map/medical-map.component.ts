@@ -61,7 +61,7 @@ export class MedicalMapComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
  private updateMarkers() {
-  this.markersGroup.clearLayers();
+this.markersGroup.clearLayers();
   const bounds: L.LatLngExpression[] = [];
 
   //  1. Dibujar TU ubicación con Efecto de Pulso
@@ -97,8 +97,12 @@ export class MedicalMapComponent implements AfterViewInit, OnDestroy, OnChanges 
     });
   }
 
-  if (bounds.length > 0) {
-    this.map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
+ if (bounds.length > 0) {
+    // 📍 Usamos animate: false para que no gaste recursos en la transición
+    this.map.fitBounds(L.latLngBounds(bounds), { 
+      padding: [30, 30],
+      animate: false 
+    });
   }
 }
 

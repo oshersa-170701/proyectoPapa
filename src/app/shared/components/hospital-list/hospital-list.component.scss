@@ -62,3 +62,72 @@ p, .spec {
   font-size: 22px;
   margin-left: auto;
 }
+.custom-search {
+  --border-radius: 12px;
+  --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  --background: #ffffff; // Fondo blanco sólido
+  --color: #000000;      // 📍 Texto que escribes en negro
+  --placeholder-color: #666666; // 📍 Texto de sugerencia en gris oscuro
+  --icon-color: #3880ff; // Lupa en azul para que combine con tu app
+  padding-bottom: 15px;
+
+  /* Forzamos el input interno por si las variables no bastan */
+  input {
+    color: #000 !important;
+    font-weight: 500 !important;
+  }
+}
+
+.search-container {
+  padding: 10px 15px;
+  background: white;
+  border-radius: 15px 15px 0 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ... tus otros estilos de hospital-card ... */
+/* ... tus estilos existentes de hospital-card ... */
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+    font-weight: 600;
+  }
+
+  /* 📍 Estilo para la Distancia Calculada */
+  .distance {
+    font-size: 0.9em;
+    color: #666; /* Gris para la distancia */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+  }
+
+  .cta-maps {
+    font-size: 0.8em;
+    color: #ff4081; /* Rosa/Rojo para el CTA */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+}
+
+/* ... resto de estilos ... */

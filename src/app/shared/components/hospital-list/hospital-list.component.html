@@ -1,12 +1,27 @@
+<div class="search-container">
+  <ion-searchbar 
+    placeholder="Busca un hospital..." 
+    (ionInput)="handleSearch($event)"
+    animated="true"
+    class="custom-search">
+  </ion-searchbar>
+</div>
+
 <div class="hospital-container">
-  @for (h of hospitals; track h.name) {
+  @for (h of filteredHospitals; track h.name) {
     <div class="hospital-card" (click)="goToHospital(h)">
       <div class="icon-wrapper">
         <ion-icon name="business"></ion-icon>
       </div>
       <div class="info">
         <h3>{{ h.name }}</h3>
-        <p style="color: #ff4081;">
+        
+        <p class="distance">
+          <ion-icon name="location-outline"></ion-icon> 
+          {{ h.distanceText }}
+        </p>
+        
+        <p class="cta-maps">
           <ion-icon name="location-outline"></ion-icon> 
           Toca para ver cómo llegar
         </p>
@@ -16,6 +31,5 @@
       </div>
     </div>
   } @empty {
-    <div class="empty-state">No hay hospitales cerca de tu ubicación.</div>
-  }
+    }
 </div>
