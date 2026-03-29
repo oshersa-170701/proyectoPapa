@@ -42,23 +42,26 @@ export class MedicalMapComponent implements AfterViewInit, OnDestroy, OnChanges 
     setTimeout(() => this.initMap(), 600);
   }
 
-  private initMap() {
-    if (this.map) return;
+private initMap() {
+  if (this.map) return;
 
-    // Iniciamos en Oaxaca por defecto
-    this.map = L.map('medicalMapId', { 
-      zoomControl: false,
-      attributionControl: false 
-    }).setView([17.0732, -96.7266], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
-    this.markersGroup.addTo(this.map);
+  // 📍 Si ya tenemos la ubicación del usuario, iniciamos el mapa AHÍ, no en el centro
+  const startLat = this.userLocation?.lat || 17.0732;
+  const startLng = this.userLocation?.lng || -96.7266;
 
-    setTimeout(() => {
-      this.map.invalidateSize();
-      this.updateMarkers();
-    }, 400);
-  }
+  this.map = L.map('medicalMapId', { 
+    zoomControl: false,
+    attributionControl: false 
+  }).setView([startLat, startLng], 14); // 📍 Un poco más de zoom para ver San Jacinto mejor
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
+  this.markersGroup.addTo(this.map);
+
+  setTimeout(() => {
+    this.map.invalidateSize();
+    this.updateMarkers();
+  }, 400);
+}
 
  private updateMarkers() {
 this.markersGroup.clearLayers();

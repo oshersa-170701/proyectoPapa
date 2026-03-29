@@ -151,37 +151,40 @@ export class HomePage {
       error: () => { this.isLoading = false; }
     });
   }
-  async handleOptionSelected(type: string) {
-    this.showHospitals = false;
-    this.showDoctors = false;
-    this.isLoading = true;
+async handleOptionSelected(type: string) {
+  this.showHospitals = false;
+  this.showDoctors = false;
+  this.isLoading = true;
 
-    if (type === 'hospitals') {
-      // 📍 1. Paso inmediato: Carga hospitales de Oaxaca Centro para que el usuario vea ALGO ya.
+  if (type === 'hospitals') {
+    // 📍 1. Si ya tenemos ubicación, la usamos de inmediato para no esperar al GPS
+    if (this.miUbicacionActual) {
+      this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
+    } else {
+      // Si es la primera vez, Oaxaca Centro de respaldo
       this.miUbicacionActual = { lat: 17.0732, lng: -96.7266 };
       this.buscarHospitalesReales(17.0732, -96.7266);
-
-      try {
-        // 📍 2. Intentamos obtener la real con un tiempo más razonable (5 seg)
-        const coordinates = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: false, // 🚀 Mantenlo en false para que sea rápido
-          timeout: 5000
-        });
-
-        this.miUbicacionActual = {
-          lat: coordinates.coords.latitude,
-          lng: coordinates.coords.longitude
-        };
-
-        // 📍 3. Si obtenemos la real, refrescamos los hospitales
-        this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
-
-      } catch (error) {
-        console.warn("Se agotó el tiempo del GPS, se mantienen los resultados de Oaxaca Centro.");
-        this.isLoading = false; // 📍 Importante: Apagamos el spinner si falla el GPS
-      }
     }
 
+    try {
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true, // 💥 Cambia a TRUE para que San Jacinto aparezca exacto
+        timeout: 5000
+      });
+
+      // 📍 2. Actualizamos la ubicación exacta
+      this.miUbicacionActual = {
+        lat: coordinates.coords.latitude,
+        lng: coordinates.coords.longitude
+      };
+
+      this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
+
+    } catch (error) {
+      console.warn("Usando ubicación previa o por defecto.");
+      this.isLoading = false;
+    }
+  }
     if (type === 'doctors') {
       this.medicalService.getDoctors().subscribe({
         next: (res) => {

@@ -12,7 +12,7 @@ import { locationOutline, callOutline, businessOutline, chevronForward, business
   imports: [CommonModule, IonIcon, IonSearchbar] //  Agregamos IonSearchbar a los imports
 })
 export class HospitalListComponent implements OnInit, OnChanges {
-  @Input() hospitals: any[] = []; 
+  @Input() hospitals: any[] = [];
   //  Nueva entrada obligatoria para tu ubicación
   @Input() userLocation: { lat: number, lng: number } | null = null;
   //  Arreglo para mostrar los resultados filtrados
@@ -26,60 +26,77 @@ export class HospitalListComponent implements OnInit, OnChanges {
     // Inicializamos el filtro con todos los hospitales al cargar
     this.filteredHospitals = this.hospitals;
     this.updateDistancesAndFilter();
+
   }
 
   // Detectamos cambios en el Input de hospitales
   // 📍 Asegúrate de que los paréntesis NO estén vacíos
-ngOnChanges(changes: any) {
-  this.filteredHospitals = this.hospitals;
-  
-  // Ahora "changes" ya existe y el error TS2304 desaparecerá
-  if (changes['hospitals'] || changes['userLocation']) {
-    this.updateDistancesAndFilter();
+  ngOnChanges(changes: any) {
+    this.filteredHospitals = this.hospitals;
+
+    // Ahora "changes" ya existe y el error TS2304 desaparecerá
+    if (changes['hospitals'] || changes['userLocation']) {
+      this.updateDistancesAndFilter();
+    }
   }
-}
 
   // Función de filtrado
   handleSearch(event: any) {
     const query = event.target.value.toLowerCase();
-    
+
     if (!query) {
       this.filteredHospitals = this.hospitals;
       return;
     }
 
-    this.filteredHospitals = this.hospitals.filter(h => 
+    this.filteredHospitals = this.hospitals.filter(h =>
       h.name.toLowerCase().includes(query)
     );
   }
 
- goToHospital(hospital: any) {
-  //  URL Limpia para navegación directa
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}`;
-  window.open(url, '_system');
-}
-private updateDistancesAndFilter() {
-    if (!this.userLocation) {
-      this.filteredHospitals = this.hospitals;
-      return;
-    }
-
-    // Calculamos y añadimos la propiedad 'distanceText' a cada hospital
-    const hospitalsWithDistance = this.hospitals.map(h => {
-      const distance = this.calculateDistance(this.userLocation!.lat, this.userLocation!.lng, h.lat, h.lng);
-      return { ...h, distanceKM: distance, distanceText: this.formatDistance(distance) };
-    });
-
-    // Ordenamos por cercanía
-    this.filteredHospitals = hospitalsWithDistance.sort((a, b) => a.distanceKM - b.distanceKM);
+  goToHospital(hospital: any) {
+    //  URL Limpia para navegación directa
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}`;
+    window.open(url, '_system');
   }
+ private updateDistancesAndFilter() {
+  // 📍 Validamos que existan datos antes de procesar
+  if (!this.hospitals || this.hospitals.length === 0) {
+    this.filteredHospitals = [];
+    return;
+  }
+
+  // Si no hay ubicación aún, mostramos la lista normal
+  if (!this.userLocation) {
+    this.filteredHospitals = [...this.hospitals];
+    return;
+  }
+
+  // 📍 Calculamos distancias
+  const withDistance = this.hospitals.map(h => {
+    const dist = this.calculateDistance(
+      this.userLocation!.lat, 
+      this.userLocation!.lng, 
+      h.lat, 
+      h.lng
+    );
+    return { 
+      ...h, 
+      distanceKM: dist, 
+      distanceText: this.formatDistance(dist) 
+    };
+  });
+
+  // Ordenamos: El más cercano arriba
+  this.filteredHospitals = withDistance.sort((a, b) => a.distanceKM - b.distanceKM);
+}
 
   // 📍 Fórmula Haversine para distancia exacta
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371; // Radio de la Tierra en km
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
-    const a = 
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
