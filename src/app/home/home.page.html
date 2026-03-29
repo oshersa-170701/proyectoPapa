@@ -4,16 +4,16 @@
 <ion-content [fullscreen]="true" class="bg-light">
 
   <header class="main-header">
-  <div class="top-bar">
-    <div class="logo-wrapper">
-      <img src="assets/ana2.png" alt="ANAasis Logo" class="main-logo-img">
+    <div class="top-bar">
+      <div class="logo-wrapper">
+        <img src="assets/ana2.png" alt="ANAasis Logo" class="main-logo-img">
+      </div>
     </div>
-  </div>
-  <div class="text-container">
-    <h2>Asistente Virtual</h2>
-    <p>Hola, soy tu asistente virtual <b>ANAasis</b>.</p>
-  </div>
-</header>
+    <div class="text-container">
+      <h2>Asistente Virtual</h2>
+      <p>Hola, soy tu asistente virtual <b>ANAasis</b>.</p>
+    </div>
+  </header>
 
   <main class="white-container">
     <ion-grid>
@@ -29,8 +29,8 @@
           }
           }
           @if (showChatOptions) {
-  <app-chat-options (optionSelected)="handleOptionSelected($event)" class="results-fade-in"></app-chat-options>
-}
+          <app-chat-options (optionSelected)="handleOptionSelected($event)" class="results-fade-in"></app-chat-options>
+          }
 
           <div class="results-fade-in">
             @if (isEmergencyActive) {

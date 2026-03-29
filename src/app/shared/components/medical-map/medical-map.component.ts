@@ -64,7 +64,7 @@ export class MedicalMapComponent implements AfterViewInit, OnDestroy, OnChanges 
   this.markersGroup.clearLayers();
   const bounds: L.LatLngExpression[] = [];
 
-  // 📍 1. Dibujar TU ubicación con Efecto de Pulso
+  //  1. Dibujar TU ubicación con Efecto de Pulso
   if (this.userLocation && this.userLocation.lat) {
     
     // Creamos el icono de pulso con HTML
@@ -84,7 +84,7 @@ export class MedicalMapComponent implements AfterViewInit, OnDestroy, OnChanges 
     bounds.push([this.userLocation.lat, this.userLocation.lng]);
   }
 
-  // 🏥 2. Dibujar los hospitales (Tu icono original)
+  //  2. Dibujar los hospitales (Tu icono original)
   if (this.points && this.points.length > 0) {
     this.points.forEach(p => {
       if (p.lat && p.lng) {

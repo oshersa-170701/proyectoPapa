@@ -63,9 +63,9 @@ export class HomePage {
     }
   }
   async startListening() {
-    console.log("🟢 Intentando abrir micrófono...");
+    //console.log(" Intentando abrir micrófono...");
 
-    // 📍 LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
+    //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
     try {
       await TextToSpeech.stop();
     } catch (e) {
@@ -86,7 +86,7 @@ export class HomePage {
 
         if (result.matches && result.matches.length > 0) {
           const textoDetectado = result.matches[0];
-          console.log("🎙️ Texto capturado directamente:", textoDetectado);
+          //console.log(" Texto capturado directamente:", textoDetectado);
 
           this.cdr.markForCheck();
           this.sendMessageToAI(textoDetectado);
@@ -96,12 +96,12 @@ export class HomePage {
         this.isRecording = false;
       }
     } catch (e) {
-      console.error("❌ Error en SpeechRecognition:", e);
+     // console.error(" Error en SpeechRecognition:", e);
       this.isRecording = false;
     }
   }
 sendMessageToAI(text: string) {
-  // 📍 1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
+  //  1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
   this.showHospitals = false;
   this.showDoctors = false;
   this.listadoHospitales = [];
@@ -169,14 +169,14 @@ sendMessageToAI(text: string) {
         },
         error: (err) => {
           this.isLoading = false;
-          console.error(err);
+         // console.error(err);
         }
       });
     }
     if (type === 'hospitals') {
       try {
         const coordinates = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
-        // 📍 Guardamos la ubicación para el mapa
+        //  Guardamos la ubicación para el mapa
         this.miUbicacionActual = {
           lat: coordinates.coords.latitude,
           lng: coordinates.coords.longitude
@@ -204,12 +204,12 @@ sendMessageToAI(text: string) {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error(err);
+        //console.error(err);
       }
     });
   }
   async speak(text: string, isManual: boolean = false) {
-    // 📍 REGLA: Si está silenciado Y NO es un clic manual, no hables.
+    // REGLA: Si está silenciado Y NO es un clic manual, no hables.
     // Pero si es manual (isManual = true), ¡HABLA aunque esté en silencio!
     if (this.isMutedGlobal && !isManual) {
       return;
@@ -226,7 +226,7 @@ sendMessageToAI(text: string) {
         category: 'ambient',
       });
     } catch (error) {
-      console.error("Error en TTS:", error);
+     // console.error("Error en TTS:", error);
     }
   }
   async ionViewDidEnter() {

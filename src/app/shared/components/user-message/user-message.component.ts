@@ -11,7 +11,7 @@ import { chatbubbleEllipses, volumeHighOutline, personCircleOutline } from 'ioni
   imports: [IonicModule],
 })
 export class UserMessageComponent {
-  @Input() messageText: string = ''; // 📍 Creamos la entrada de texto
+  @Input() messageText: string = ''; //  Creamos la entrada de texto
 
   constructor() { 
     addIcons({ 

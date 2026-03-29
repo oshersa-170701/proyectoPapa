@@ -12,23 +12,23 @@ import { IonicModule } from "@ionic/angular";
 })
 export class BotMessageComponent  {
 @Input() isMuted: boolean = false;
-  @Input() fullText: string = ''; // 📍 Recibimos el texto que debe leer
+  @Input() fullText: string = ''; //  Recibimos el texto que debe leer
   @Output() toggleMute = new EventEmitter<void>();
-  @Output() requestSpeak = new EventEmitter<string>(); // 📍 Avisamos que queremos hablar
+  @Output() requestSpeak = new EventEmitter<string>(); //  Avisamos que queremos hablar
 
   constructor() { 
     addIcons({ 
       'person-circle-outline': personCircleOutline, 
       'chatbubble-ellipses': chatbubbleEllipses, 
       'volume-high': volumeHigh,
-      'volume-mute': volumeMute // 📍 Icono de silencio
+      'volume-mute': volumeMute //  Icono de silencio
     });
   }
 
  onMuteClick() {
   // Si ACTUALMENTE está silenciado y le doy clic, significa que se va a ACTIVAR
   if (this.isMuted) {
-    this.requestSpeak.emit(this.fullText); // 📍 Mandamos el texto ANTES de cambiar el estado
+    this.requestSpeak.emit(this.fullText); //  Mandamos el texto ANTES de cambiar el estado
   }
   this.toggleMute.emit();
 }

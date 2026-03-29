@@ -26,9 +26,9 @@ export class HospitalListComponent implements OnInit, AfterViewInit {
     
   }
 
-  // 👇 AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA
+  //  AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA
 goToHospital(hospital: any) {
-  // 📍 Creamos un enlace dinámico a Google Maps usando las coordenadas del hospital
+  // Creamos un enlace dinámico a Google Maps usando las coordenadas del hospital
   const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}`;
   
   // Abrimos en una pestaña nueva o en la app de mapas del cel
