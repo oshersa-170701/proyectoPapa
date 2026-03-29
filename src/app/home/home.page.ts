@@ -33,12 +33,14 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 export class HomePage {
   showHospitals = false;
   showDoctors = false;
+  
   isLoading = false; // Nueva variable de control
   // Arreglos que se llenarán con la API
   listadoHospitales: any[] = [];
   listadoDoctores: any[] = [];
   isRecording = false;
   recognition: any;
+  showChatOptions = false;
   miUbicacionActual: any = null;
   // Arreglo para manejar el historial del chat
   chatMessages: { role: 'user' | 'bot', text: string }[] = [
@@ -98,25 +100,36 @@ export class HomePage {
       this.isRecording = false;
     }
   }
-  sendMessageToAI(text: string) {
+ sendMessageToAI(text: string) {
   this.chatMessages.push({ role: 'user', text: text });
   this.isLoading = true;
+  this.showChatOptions = false; // 📍 Escondemos botones al empezar nueva duda
 
   this.medicalService.sendMessage(text).subscribe({
     next: (res) => {
-      this.zone.run(() => {
+      this.zone.run(async () => {
+        // --- PRIMERA RESPUESTA (La del servidor) ---
         this.chatMessages.push({ role: 'bot', text: res.reply });
         this.isLoading = false;
-
-        // 📍 Lógica de limpieza:
+        
         if (res.urgent) {
           this.isEmergencyActive = true;
-          this.speak("He detectado una posible emergencia...", true);
+          await this.speak("He detectado una posible emergencia...", true);
         } else {
-          // 🟢 Si la nueva respuesta NO es urgente, limpiamos TODO
-          this.isEmergencyActive = false; 
-          this.speak(res.reply);
+          this.isEmergencyActive = false;
+          await this.speak(res.reply);
         }
+
+        // --- SEGUNDA RESPUESTA AUTOMÁTICA (Sugerencia) ---
+        setTimeout(async () => {
+          const sugerencia = "También puedes consultar hospitales o médicos cercanos para una mejor atención. ¿Te gustaría verlos?";
+          
+          this.chatMessages.push({ role: 'bot', text: sugerencia });
+          this.showChatOptions = true; // 📍 AQUÍ habilitamos los botones
+          
+          await this.speak(sugerencia);
+          this.cdr.detectChanges();
+        }, 1500); // 1.5 segundos de espera para que no sea brusco
 
         this.cdr.detectChanges();
       });

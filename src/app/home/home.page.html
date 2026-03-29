@@ -26,22 +26,24 @@
           <app-user-message [messageText]="msg.text"></app-user-message>
           }
           }
-          <app-chat-options (optionSelected)="handleOptionSelected($event)"></app-chat-options>
+          @if (showChatOptions) {
+  <app-chat-options (optionSelected)="handleOptionSelected($event)" class="results-fade-in"></app-chat-options>
+}
 
           <div class="results-fade-in">
-          @if (isEmergencyActive) {
-  <div class="panic-button-container">
-    <a href="tel:911" class="panic-button">
-      <ion-icon name="call"></ion-icon>
-      LLAMAR AL 911 AHORA
-    </a>
-    
-    <div class="close-emergency" (click)="isEmergencyActive = false">
-      <ion-icon name="close-circle"></ion-icon> 
-      Omitir alerta de emergencia
-    </div>
-  </div>
-}
+            @if (isEmergencyActive) {
+            <div class="panic-button-container">
+              <a href="tel:911" class="panic-button">
+                <ion-icon name="call"></ion-icon>
+                LLAMAR AL 911 AHORA
+              </a>
+
+              <div class="close-emergency" (click)="isEmergencyActive = false">
+                <ion-icon name="close-circle"></ion-icon>
+                Omitir alerta de emergencia
+              </div>
+            </div>
+            }
             @if (isLoading) {
             <div class="loading-wrapper ion-text-center">
               <ion-spinner name="crescent" color="primary"></ion-spinner>
