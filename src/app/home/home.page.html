@@ -63,7 +63,14 @@
             }
 
             @if (showDoctors && !isLoading) {
-            <app-doctor-list [doctors]="listadoDoctores"></app-doctor-list>
+            <div class="results-fade-in">
+              <div class="label-section">Médicos disponibles cerca:</div>
+              @if (listadoDoctores.length > 0) {
+              <app-doctor-list [doctors]="listadoDoctores"></app-doctor-list>
+              } @else {
+              <p class="ion-padding ion-text-center">No se encontraron datos en la respuesta.</p>
+              }
+            </div>
             }
 
           </div>

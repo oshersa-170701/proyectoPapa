@@ -130,3 +130,24 @@ p, .spec {
   align-items: center;
   gap: 10px;
 }
+.slots-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 12px;
+
+  ion-chip {
+    --background: #e3f2fd;
+    --color: #1a73e8;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+.no-slots {
+  color: #eb445a;
+  font-size: 0.9rem;
+  font-weight: 500;
+}

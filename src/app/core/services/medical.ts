@@ -26,4 +26,29 @@ export class MedicalService {
     // Usamos los nombres de parámetros que Daniel puso: lat y lng
     return this.http.get(`${this.API_URL}/places.php?lat=${lat}&lng=${lng}`);
   }
+  // Añade este método a tu clase MedicalService
+// En src/app/core/services/medical.ts
+getNearbyDoctors(lat: number, lng: number): Observable<any> {
+  const body = {
+    action: "get_doctors_nearby",
+    api_key: "ANAASIS_2026", //  Agregamos la llave por si Daniel la pide
+    lat: lat,
+    lng: lng
+  };
+  return this.http.post(`${this.API_URL}/anaasis.php`, body); //  Usamos el endpoint correcto para obtener doctores cercanos
+}
+/** Obtener horarios disponibles desde agenda_service.php */
+getAvailability(doctorId: number, date: string): Observable<any> {
+  const body = {
+    action: "get_slots", // La acción que definimos en el PHP
+    doctor_id: doctorId,
+    date: date, // Formato YYYY-MM-DD
+    api_key: "ANAASIS_2026"
+  };
+  // Apuntamos al nuevo archivo de agenda
+  return this.http.post(`${this.API_URL}/agenda_service.php`, body);
+}
+createAppointment(data: any): Observable<any> {
+  return this.http.post(`${this.API_URL}/agenda_service.php`, data);
+}
 }

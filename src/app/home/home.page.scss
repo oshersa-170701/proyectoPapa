@@ -135,8 +135,10 @@
 #chat-container {
   display: flex;
   flex-direction: column;
-  gap: 15px; // Espacio uniforme entre los mensajes
-  padding-bottom: 60px; // Espacio extra para que el footer no tape el último mensaje
+  gap: 15px;
+  padding-bottom: 100px; /* 📍 Aumentamos para que la lista de médicos no quede debajo del footer */
+  scroll-behavior: smooth;
+  transition: all 0.3s ease;
 }
 .map-wrapper {
   margin-bottom: 20px;

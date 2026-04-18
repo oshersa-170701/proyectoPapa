@@ -74,10 +74,10 @@ export class HomePage {
 
     //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
     try {
-      // 📍 No esperes al stop, lánzalo y sigue
+      //  No esperes al stop, lánzalo y sigue
       TextToSpeech.stop().catch(() => { });
     } catch (e) {
-      console.warn("Nada que detener en TTS");
+     // console.warn("Nada que detener en TTS");
     }
 
     try {
@@ -108,95 +108,172 @@ export class HomePage {
       this.isRecording = false;
     }
   }
-  sendMessageToAI(text: string) {
-    //  1. LIMPIEZA TOTAL DE CONSULTAS ANTERIORES
-    this.showHospitals = false;
-    this.showDoctors = false;
-    this.listadoHospitales = [];
-    this.listadoDoctores = [];
-    this.showChatOptions = false; // Ocultamos botones hasta que el bot sugiera usarlos
+sendMessageToAI(text: string) {
+  const userText = text.toLowerCase();
+  this.isLoading = true;
+  this.showChatOptions = false;
+  this.chatMessages.push({ role: 'user', text: text });
+  this.cdr.detectChanges();
 
-    // Agregamos el mensaje del usuario al chat
-    this.chatMessages.push({ role: 'user', text: text });
-    this.isLoading = true;
+  // 🚨 1. DETECCIÓN LOCAL DE EMERGENCIA (Para respuesta instantánea)
+  const esEmergenciaLocal = userText.includes('emergencia') || userText.includes('ayuda') || userText.includes('auxilio') || userText.includes('sos');
+  
+  if (esEmergenciaLocal) {
+    this.isEmergencyActive = true; 
+    this.chatMessages.push({ role: 'bot', text: '⚠️ ¡EMERGENCIA DETECTADA! Activando protocolos y localizando hospitales cercanos...' });
+    this.handleOptionSelected('hospitals'); 
+    this.speak("He detectado una emergencia. Localizando ayuda inmediata.", true);
+    this.isLoading = false;
+    this.cdr.detectChanges();
+    return; // Detenemos aquí para modo rescate
+  }
 
-    this.medicalService.sendMessage(text).subscribe({
-      next: (res) => {
-        this.zone.run(async () => {
-          this.chatMessages.push({ role: 'bot', text: res.reply });
-          this.isLoading = false;
+// 🏥 2. DETECCIÓN LOCAL DE HOSPITALES
+  if (userText.includes('hospital') || userText.includes('clínica')) {
+    const txtHospital = '¡Entendido! Buscando hospitales cercanos... ';
+    this.chatMessages.push({ role: 'bot', text: txtHospital });
+    
+    // 🔊 AGREGAR ESTA LÍNEA:
+    this.speak(txtHospital, true); 
+    
+    this.handleOptionSelected('hospitals');
+    return;
+  }
 
-          if (res.urgent) {
-            this.isEmergencyActive = true;
-            await this.speak("He detectado una posible emergencia...", true);
-          } else {
-            this.isEmergencyActive = false;
-            await this.speak(res.reply);
-          }
+  // 👨‍⚕️ 3. DETECCIÓN LOCAL DE MÉDICOS
+  if (userText.includes('médico') || userText.includes('doctor') || userText.includes('especialista')) {
+    const txtDoctor = 'Claro, localizando médicos disponibles cerca de ti... ';
+    this.chatMessages.push({ role: 'bot', text: txtDoctor });
+    
+    // 🔊 AGREGAR ESTA LÍNEA:
+    this.speak(txtDoctor, true);
+    
+    this.handleOptionSelected('doctors');
+    return;
+  }
 
-          // --- SEGUNDA RESPUESTA AUTOMÁTICA ---
-          setTimeout(async () => {
-            const sugerencia = "También puedes consultar hospitales o médicos cercanos para una mejor atención. ¿Te gustaría verlos?";
+  //  4. FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)
+  // Aquí es donde entrará "dolor de panza", "dolor de pie", etc.
+this.medicalService.sendMessage(text).subscribe({
+  next: (res: any) => {
+    this.zone.run(async () => {
+      this.isLoading = false;
 
-            this.chatMessages.push({ role: 'bot', text: sugerencia });
-            this.showChatOptions = true; // Solo aquí se vuelven a activar los botones
-
-            await this.speak(sugerencia);
-            this.cdr.detectChanges();
-          }, 1500);
-
-          this.cdr.detectChanges();
+      //  1. Validación de seguridad total
+      if (!res || typeof res.reply === 'undefined') {
+        this.chatMessages.push({ 
+          role: 'bot', 
+          text: 'ANAasis está descansando.' 
         });
-      },
-      error: () => { this.isLoading = false; }
+        this.cdr.detectChanges();
+        return;
+      }
+
+      const botReply = res.reply;
+      this.chatMessages.push({ role: 'bot', text: botReply });
+
+      // 🚨 2. Manejo de Emergencia
+   if (res.urgent) {
+        this.isEmergencyActive = true;
+        await this.speak("Atención, esto parece serio. Localizando ayuda.", true);
+        this.handleOptionSelected('hospitals');
+      } else {
+        // ✅ AQUÍ ESTÁ EL AJUSTE:
+        await this.speak(botReply); // Primero dice la orientación médica
+        
+        setTimeout(async () => {
+          const sugerencia = "¿Te gustaría consultar hospitales o médicos cercanos?";
+          
+          // 1. Agregamos el texto al chat para que no salgan los botones solos
+          this.chatMessages.push({ role: 'bot', text: sugerencia });
+          
+          // 2. Activamos los botones visuales
+          this.showChatOptions = true;
+          
+          // 3. Hacemos que ANAasis lo diga por voz
+          await this.speak(sugerencia);
+          
+          this.cdr.detectChanges();
+        }, 2000); // Espera 2 segundos después de la respuesta larga
+      }
+      
+      this.cdr.detectChanges();
+    });
+  },
+  error: (err) => {
+    this.zone.run(() => {
+      this.isLoading = false;
+      this.chatMessages.push({ 
+        role: 'bot', 
+        text: "Error de red. ¿Tienes internet en el celular? 📶" 
+      });
+      this.cdr.detectChanges();
     });
   }
-async handleOptionSelected(type: string) {
+});
+}
+ async handleOptionSelected(type: string) {
   this.showHospitals = false;
   this.showDoctors = false;
   this.isLoading = true;
+  this.cdr.detectChanges(); //  Mostramos el spinner de inmediato
+
+  // 1. Valores por defecto (Oaxaca Centro - Ajustado a tus coordenadas de BD)
+  let lat = 17.0796; 
+  let lng = -96.7535;
+
+  try {
+    const coordinates = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: false, //  Más rápido para Android
+      timeout: 10000,
+      maximumAge: 3000
+    });
+
+    this.miUbicacionActual = {
+      lat: coordinates.coords.latitude,
+      lng: coordinates.coords.longitude
+    };
+
+    lat = this.miUbicacionActual.lat;
+    lng = this.miUbicacionActual.lng;
+  } catch (e) {
+  //  console.warn("No se pudo obtener GPS, usando respaldo de San Jacinto.");
+  }
 
   if (type === 'hospitals') {
-    // 📍 1. Si ya tenemos ubicación, la usamos de inmediato para no esperar al GPS
-    if (this.miUbicacionActual) {
-      this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
-    } else {
-      // Si es la primera vez, Oaxaca Centro de respaldo
-      this.miUbicacionActual = { lat: 17.0732, lng: -96.7266 };
-      this.buscarHospitalesReales(17.0732, -96.7266);
-    }
-
-    try {
-      const coordinates = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true, // 💥 Cambia a TRUE para que San Jacinto aparezca exacto
-        timeout: 5000
-      });
-
-      // 📍 2. Actualizamos la ubicación exacta
-      this.miUbicacionActual = {
-        lat: coordinates.coords.latitude,
-        lng: coordinates.coords.longitude
-      };
-
-      this.buscarHospitalesReales(this.miUbicacionActual.lat, this.miUbicacionActual.lng);
-
-    } catch (error) {
-      console.warn("Usando ubicación previa o por defecto.");
-      this.isLoading = false;
-    }
+    this.buscarHospitalesReales(lat, lng);
   }
-    if (type === 'doctors') {
-      this.medicalService.getDoctors().subscribe({
-        next: (res) => {
-          this.listadoDoctores = res.doctors;
+
+  if (type === 'doctors') {
+    this.medicalService.getNearbyDoctors(lat, lng).subscribe({
+      next: (res: any) => {
+        //  LA CLAVE PARA ANDROID: Ejecutar dentro de zone.run
+        this.zone.run(async () => {
           this.isLoading = false;
-          this.showDoctors = true;
+         // console.log("Respuesta Médicos:", res);
+
+          if (res.success && res.data && res.data.length > 0) {
+            //alert('Médicos recibidos: ' + res.data.length);
+            this.listadoDoctores = res.data;
+            this.showDoctors = true;
+          } else {
+            this.showDoctors = false;
+            await this.presentToast('No se encontraron médicos cerca de ti.');
+            await this.speak('Lo siento, no pude encontrar médicos cerca de ti.');
+          }
+          this.cdr.detectChanges(); //  Forzamos renderizado de la lista
+        });
+      },
+      error: async (err) => {
+        this.zone.run(() => {
+          this.isLoading = false;
+          this.presentToast('Error de conexión con el servidor de médicos.');
           this.cdr.detectChanges();
-        },
-        error: (err) => { this.isLoading = false; }
-      });
-    }
+        });
+      }
+    });
   }
+}
   //  Función que faltaba: Respaldo para Oaxaca Centro
   cargarHospitalesDefault() {
     const oaxacaLat = 17.0732;
@@ -284,25 +361,41 @@ async handleOptionSelected(type: string) {
 
     this.cdr.detectChanges();
   }
-buscarHospitalesReales(lat: number, lng: number) {
-  this.overpassService.getNearbyHospitals(lat, lng).subscribe({
-    next: (hospitales) => {
-      this.zone.run(() => {
-        // 📍 ORDENACIÓN POR DISTANCIA (Pitágoras)
-        this.listadoHospitales = hospitales.sort((a: any, b: any) => {
-          const distA = Math.sqrt(Math.pow(a.lat - lat, 2) + Math.pow(a.lng - lng, 2));
-          const distB = Math.sqrt(Math.pow(b.lat - lat, 2) + Math.pow(b.lng - lng, 2));
-          return distA - distB; // El más pequeño (cercano) va primero
-        });
+  buscarHospitalesReales(lat: number, lng: number) {
+    this.overpassService.getNearbyHospitals(lat, lng).subscribe({
+      next: (hospitales) => {
+        this.zone.run(() => {
+          //  ORDENACIÓN POR DISTANCIA (Pitágoras)
+          this.listadoHospitales = hospitales.sort((a: any, b: any) => {
+            const distA = Math.sqrt(Math.pow(a.lat - lat, 2) + Math.pow(a.lng - lng, 2));
+            const distB = Math.sqrt(Math.pow(b.lat - lat, 2) + Math.pow(b.lng - lng, 2));
+            return distA - distB; // El más pequeño (cercano) va primero
+          });
 
+          this.isLoading = false;
+          this.showHospitals = true;
+          this.cdr.detectChanges();
+        });
+      },
+      error: () => {
         this.isLoading = false;
-        this.showHospitals = true;
-        this.cdr.detectChanges();
-      });
-    },
-    error: () => { 
-      this.isLoading = false; 
-    }
-  });
-}
+      }
+    });
+  }
+  // Función auxiliar para el Toast
+  async presentToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 3000,
+      position: 'bottom',
+      color: 'dark',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'cancel'
+        }
+      ]
+    });
+    await toast.present();
+  }
 }
