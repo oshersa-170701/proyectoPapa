@@ -51,4 +51,14 @@ getAvailability(doctorId: number, date: string): Observable<any> {
 createAppointment(data: any): Observable<any> {
   return this.http.post(`${this.API_URL}/agenda_service.php`, data);
 }
+enviarAlertaAmbulancia(lat: number, lng: number, detalle: string): Observable<any> {
+  // Ahora apuntamos a tu proxy
+  const url = `${this.API_URL}/sos_proxy.php`; 
+  const body = {
+    latitud: lat,
+    longitud: lng,
+    paciente: detalle
+  };
+  return this.http.post(url, body);
+}
 }

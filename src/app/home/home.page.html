@@ -39,11 +39,28 @@
                 <ion-icon name="call"></ion-icon>
                 LLAMAR AL 911 AHORA
               </a>
+              <div class="panic-button-container">
+                <div [class.sos-success]="sosEnviado" [class.sos-ambulance-button]="!sosEnviado"
+                  (click)="!sosEnviado ? solicitarAmbulancia() : null">
+                  <ion-icon [name]="sosEnviado ? 'checkmark-circle' : 'medical'"></ion-icon>
+                  {{ sosEnviado ? 'AUXILIO SOLICITADO' : 'SOLICITAR AMBULANCIA (SOS)' }}
+                </div>
 
-              <div class="close-emergency" (click)="isEmergencyActive = false">
-                <ion-icon name="close-circle"></ion-icon>
-                Omitir alerta de emergencia
+                @if (sosEnviado && datosAmbulancia) {
+                <div class="ambulance-tracking results-fade-in">
+                  <div class="label-section">Sigue a tu ambulancia en tiempo real:</div>
+                  <app-medical-map
+                    [points]="[{ lat: datosAmbulancia.latitud, lng: datosAmbulancia.longitud, name: datosAmbulancia.codigo }]"
+                    [userLocation]="miUbicacionActual">
+                  </app-medical-map>
+                </div>
+                }
               </div>
+
+              <div class="close-emergency" (click)="cancelarEmergencia()">
+  <ion-icon name="close-circle"></ion-icon>
+  Cancelar alerta de emergencia
+</div>
             </div>
             }
             @if (isLoading) {
@@ -52,12 +69,10 @@
               <p>Buscando lo mejor para ti... </p>
             </div>
             }
-            @if (showHospitals && !isLoading) {
+            @if (showHospitals && !isLoading && !sosEnviado) {
             <div class="map-wrapper" style="min-height: 250px;">
               <app-medical-map [points]="listadoHospitales" [userLocation]="miUbicacionActual"></app-medical-map>
-
               <div class="label-section">Hospitales cercanos:</div>
-
               <app-hospital-list [hospitals]="listadoHospitales" [userLocation]="miUbicacionActual"></app-hospital-list>
             </div>
             }

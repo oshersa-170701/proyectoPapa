@@ -4,7 +4,7 @@ import {
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline } from 'ionicons/icons';
+import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline, navigateCircle } from 'ionicons/icons';
 
 // Importación del Servicio y HttpClient
 
@@ -57,7 +57,7 @@ export class HomePage {
     private overpassService: Overpass,
   ) {
     // Añadí los iconos que usan tus listas para que no den error
-    addIcons({ call, closeCircle, arrowBackOutline, mic, medical, chatbubbleEllipses, star, business, locationOutline, personOutline, chevronForward });
+    addIcons({navigateCircle,arrowBackOutline,mic,call,closeCircle,medical,chatbubbleEllipses,star,business,locationOutline,personOutline,chevronForward});
     this.initSpeechRecognition();
     this.setupBackButton(); // 📍 Llamamos a la configuración
   }
@@ -398,4 +398,59 @@ this.medicalService.sendMessage(text).subscribe({
     });
     await toast.present();
   }
+async solicitarAmbulancia() {
+  this.isLoading = true;
+  this.cdr.detectChanges();
+
+  try {
+    const coordinates = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000
+    });
+
+    const lat = coordinates.coords.latitude;
+    const lng = coordinates.coords.longitude;
+    const infoPaciente = "Alerta SOS desde App ANAasis - Paciente crítico";
+
+    this.medicalService.enviarAlertaAmbulancia(lat, lng, infoPaciente).subscribe({
+      next: async (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'ok') {
+          this.sosEnviado = true; // ✅ Cambia el botón a verde/check
+          this.datosAmbulancia = res.ambulancia; // 🚑 Guardamos ubicación de la ambulancia
+          
+          const mensajeExito = `¡Confirmado! La ${res.ambulancia.codigo} ya viene hacia ti. Está a ${res.distancia_km} km.`;
+          this.chatMessages.push({ role: 'bot', text: mensajeExito });
+          
+          await this.speak(mensajeExito, true);
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.presentToast("Error al solicitar auxilio. Intenta de nuevo.");
+      }
+    });
+  } catch (e) {
+    this.isLoading = false;
+    this.presentToast("Activa tu GPS para enviar la alerta.");
+  }
+}
+sosEnviado = false; // Controla si el botón cambia a verde
+datosAmbulancia: any = null; // Guarda la info que re
+cancelarEmergencia() {
+  this.isEmergencyActive = false; // Cierra el bloque de emergencia
+  this.sosEnviado = false;        // Resetea el botón de auxilio
+  this.datosAmbulancia = null;    // Oculta el mapa de seguimiento
+  
+  // ✅ El cambio clave: Ocultamos el mapa de hospitales al cancelar
+  this.showHospitals = false;
+  
+  // Añadimos un mensaje de cierre al chat
+  const mensajeCierre = "Entendido, he cancelado la alerta. ¿Puedo ayudarte con alguna otra consulta médica? ";
+  this.chatMessages.push({ role: 'bot', text: mensajeCierre });
+  this.speak(mensajeCierre);
+  
+  this.cdr.detectChanges();
+}
 }
