@@ -1,0 +1,49 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="success">
+    <ion-title>Mis Signos Vitales</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="forzarSincronizacionManual()" [disabled]="isLoading">
+        <ion-icon name="sync-outline" [class.spinner-animate]="isLoading"></ion-icon>
+      </ion-button>
+      <ion-button (click)="dismiss()"><ion-icon name="close-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding ion-text-center">
+  @if (isLoading && !vitals) {
+  <ion-spinner name="crescent"></ion-spinner>
+  <p>Consultando historial...</p>
+  }
+
+  @if (vitals) {
+  <div class="vitals-container">
+    <div class="vital-card">
+      <ion-icon name="heart-outline" color="danger"></ion-icon>
+      <h3>Pulso</h3>
+      <p class="value">{{ vitals?.heart_rate || '0' }} <span>LPM</span></p>
+    </div>
+    <div class="vital-card">
+      <ion-icon name="speedometer-outline" color="primary"></ion-icon>
+      <h3>Oxígeno en la sangre</h3>
+     <p class="value">{{ vitals?.spo2 || '0' }} <span>%</span></p>
+    </div>
+
+    <p class="last-update">Actualizado: {{ vitals.created_at | date:'mediumTime' }}</p>
+
+    @if (vitals.heart_rate === 0 || vitals.spo2 === 0) {
+    <p class="warning-text">⚠️ Detectando sensores...</p>
+    }
+  </div>
+  }
+  @if (!isLoading && !vitals) {
+  <div class="empty-state">
+    <ion-icon name="medical-outline" size="large" color="medium"></ion-icon>
+    <h3>Expediente vacío</h3>
+    <p>Aún no hay mediciones registradas hoy.</p>
+    <ion-button fill="solid" color="success" (click)="forzarSincronizacionManual()">
+      Sincronizar ahora
+    </ion-button>
+  </div>
+  }
+</ion-content>

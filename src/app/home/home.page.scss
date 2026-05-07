@@ -437,3 +437,24 @@ app-medical-map {
   width: 100%;
   height: 280px;
 }
+// Busca tu clase floating-profile-center y asegúrate de que tenga esto:
+.floating-profile-center {
+  position: absolute;
+  left: 50%;
+  bottom: -30px; // Justo en la frontera de tu diseño
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100; // Para que flote sobre el margin-top: -50px del contenedor blanco
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  
+  ion-icon {
+    color: #0099ff; // El azul de tu degradado para que se vea el icono
+    font-size: 2.2rem;
+  }
+}

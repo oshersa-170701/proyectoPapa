@@ -1,0 +1,70 @@
+.profile-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+
+  .avatar-section {
+    text-align: center;
+    margin-bottom: 20px;
+    ion-icon {
+      font-size: 80px;
+    }
+    h2 {
+      font-weight: 700;
+      color: var(--ion-color-primary);
+      margin-top: 10px;
+    }
+  }
+}
+
+.info-item {
+  --padding-start: 0;
+  margin-bottom: 10px;
+  p {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+  }
+  h3 {
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.action-section {
+  margin-top: 30px;
+  .logout-btn {
+    --border-radius: 15px;
+    --border-width: 2px;
+    font-weight: 700;
+  }
+}
+.no-profile-container {
+  padding-top: 50px;
+  
+  .ana-avatar-placeholder {
+    img {
+      width: 120px;
+      margin-bottom: 20px;
+      filter: grayscale(100%) opacity(0.7); // Un toque visual de "vacío"
+    }
+  }
+
+  h2 {
+    font-weight: 700;
+    color: var(--ion-color-dark);
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 1.1rem;
+    padding: 0 20px;
+  }
+
+  .instruction {
+    margin-top: 15px;
+    font-style: italic;
+    color: var(--ion-color-primary);
+  }
+}

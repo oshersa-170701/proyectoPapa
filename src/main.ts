@@ -9,12 +9,9 @@ import { provideHttpClient } from '@angular/common/http';
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(
-      {mode: 'md'}
-    ),
-    provideRouter(routes, withPreloading(PreloadAllModules),
-  ),
-  provideHttpClient(),
-  ToastController
+    provideIonicAngular({ mode: 'md' }), // 📍 Esto ya configura los controladores internamente
+    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideHttpClient(),
+    // ToastController // 💡 Nota: provideIonicAngular ya incluye los controladores, puedes quitar esta línea si gustas
   ],
 });

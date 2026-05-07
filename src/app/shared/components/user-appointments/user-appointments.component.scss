@@ -1,0 +1,60 @@
+.appointment-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 10px;
+
+    .date-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: bold;
+      color: var(--ion-color-primary);
+    }
+  }
+
+  .card-body {
+    .doctor-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      ion-icon { font-size: 30px; color: #666; }
+      h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+      p { margin: 0; color: #888; font-size: 1rem; }
+    }
+
+    .time-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #444;
+      background: #f4f6fa;
+      padding: 10px;
+      border-radius: 10px;
+      justify-content: center;
+    }
+  }
+
+  .btn-map {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+}
+
+.no-data {
+  margin-top: 100px;
+  ion-icon { font-size: 80px; color: #ccc; }
+  p { font-size: 1.2rem; color: #999; }
+}

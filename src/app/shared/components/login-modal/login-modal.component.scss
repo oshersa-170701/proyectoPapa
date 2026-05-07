@@ -1,0 +1,30 @@
+.ana-intro {
+  text-align: center;
+  padding: 20px 10px;
+  
+  p {
+    font-size: 1.2rem;
+    color: var(--ion-color-step-700);
+    line-height: 1.5;
+    
+    b {
+      color: var(--ion-color-primary);
+      font-size: 1.3rem;
+    }
+  }
+}
+
+.custom-input {
+  margin-bottom: 15px;
+  --background: #f9f9f9;
+  --border-radius: 12px;
+  font-size: 1.1rem;
+}
+
+.submit-btn {
+  --border-radius: 12px;
+  height: 55px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 25px;
+}

@@ -1,0 +1,43 @@
+.ana-intro {
+  text-align: center;
+  margin-bottom: 30px;
+  p {
+    font-size: 1.2rem;
+    color: #444;
+    line-height: 1.5;
+  }
+}
+
+.custom-input {
+  --background: #f9f9f9;
+  --border-radius: 12px;
+  margin-bottom: 15px;
+  
+  ion-label {
+    font-size: 1.1rem !important;
+    font-weight: 600;
+  }
+  
+  ion-input {
+    font-size: 1.2rem !important;
+    --padding-top: 15px;
+    --padding-bottom: 15px;
+  }
+}
+
+.submit-btn {
+  --height: 60px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  --border-radius: 15px;
+  margin-top: 20px;
+}
+/* register-modal.component.scss */
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-content {
+  --background: #ffffff;
+}

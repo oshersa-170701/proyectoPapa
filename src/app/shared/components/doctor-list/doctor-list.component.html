@@ -95,3 +95,15 @@
   [inputs]="alertInputs"
   (didDismiss)="isAlertOpen = false"
 ></ion-alert>
+<!-- Al final de doctor-list.component.html -->
+<ion-modal 
+  [isOpen]="isRegisterModalOpen" 
+  (didDismiss)="isRegisterModalOpen = false" 
+  [breakpoints]="[0, 0.9]" 
+  [initialBreakpoint]="0.9"
+  [handle]="true">
+  <ng-template>
+    <!-- 📍 Llamada al componente que ya importaste en el TS -->
+    <app-register-modal></app-register-modal>
+  </ng-template>
+</ion-modal>

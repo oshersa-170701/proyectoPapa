@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-  <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
-  <uses-permission android:name="android.permission.RECORD_AUDIO" />
-  <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permisos Estándar -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- 1. Permisos de Salud (Sintaxis limpia para Android 14+) -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE_SERIES" />
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+  
     <application
-
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,19 +21,45 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- 📍 2. BIBLIOTECAS Y PROPIEDADES (Correctamente ubicadas dentro de application) -->
+        <uses-library android:name="android.ext.adservices" android:required="false" />
+        <uses-library android:name="android.ext.adservices" android:required="false" />
+        <uses-library android:name="android.test.runner" android:required="false" />
+
+        <property android:name="android.health.READ_HEART_RATE" android:value="true"/>
+        <property android:name="android.health.READ_HEART_RATE_SERIES" android:value="true"/>
+        <property android:name="android.health.READ_HEALTH_DATA_IN_BACKGROUND" android:value="true"/>
+
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-            android:name=".MainActivity"
+            android:name="com.anaasis.vitals.daniel.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true">
+
+            <!-- 📍 3. RATIONALE (DEBE SER EL PRIMERO) -->
+            <intent-filter>
+                <action android:name="androidx.health.connect.HealthConnectClient.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="androidx.health.connect.HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS" />
+            </intent-filter>
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+            <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+          </intent-filter>
+          <intent-filter>
+        <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+        <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+    </intent-filter>
         </activity>
 
         <provider
@@ -39,9 +71,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
     </application>
 
-    <!-- Permissions -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

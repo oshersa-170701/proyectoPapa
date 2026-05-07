@@ -1,0 +1,34 @@
+<!-- login-modal.component.html -->
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Bienvenido de Nuevo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()"><ion-icon name="close-outline"></ion-icon></ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="ana-intro">
+    <p>¡Qué alegría verte! Soy <b>ANAasis</b>. Ingresa tus datos para continuar cuidándote.</p>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    <ion-item lines="outline" class="custom-input">
+      <ion-icon name="call-outline" slot="start"></ion-icon>
+      <ion-input formControlName="phone" type="tel" label="Teléfono" labelPlacement="floating"></ion-input>
+    </ion-item>
+
+  
+
+    <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="submit-btn ion-margin-top">
+      ENTRAR A MI CUENTA
+    </ion-button>
+  </form>
+
+  <div class="ion-text-center ion-padding-top">
+    <p (click)="goToRegister()" style="color: var(--ion-color-primary); cursor: pointer;">
+      ¿Eres nuevo? <b>Regístrate aquí</b>
+    </p>
+  </div>
+</ion-content>

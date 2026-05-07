@@ -1,0 +1,61 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Mi Perfil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding bg-light">
+  @if (userProfile) {
+    <!-- 👤 VISTA: USUARIO REGISTRADO -->
+    <div class="profile-card results-fade-in">
+      <div class="avatar-section">
+        <ion-icon name="person-circle" color="primary"></ion-icon>
+        <h2>Hola, {{ userProfile?.name }}</h2>
+      </div>
+
+      <ion-list lines="none" class="info-list">
+        <ion-item class="info-item">
+          <ion-icon name="call-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>Mi Teléfono</p>
+            <h3>{{ userProfile?.phone }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <ion-item class="info-item">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>Mi Correo</p>
+            <h3>{{ userProfile?.email }}</h3>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <div class="action-section">
+      <ion-button expand="block" color="danger" fill="outline" (click)="logout()" class="logout-btn">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+        CERRAR MI SESIÓN
+      </ion-button>
+    </div>
+  } @else {
+    <!--  VISTA: USUARIO NO REGISTRADO -->
+    <div class="no-profile-container ion-text-center results-fade-in">
+      <div class="ana-avatar-placeholder">
+        <img src="assets/ana2.png" alt="ANAasis">
+      </div>
+      <h2>¡Aún no te conozco! </h2>
+      <p>Aún no estás registrado en mi sistema.</p>
+      <p class="instruction">Dile a <b>ANAasis</b>: <i>"Quiero registrarme"</i> para poder agendar tus citas y cuidar de tu salud.</p>
+      
+      <ion-button expand="block" (click)="dismiss()" class="ion-margin-top">
+        ENTENDIDO
+      </ion-button>
+    </div>
+  }
+</ion-content>

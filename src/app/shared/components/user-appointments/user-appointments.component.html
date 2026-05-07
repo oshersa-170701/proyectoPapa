@@ -1,0 +1,66 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Mis Citas Médicas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding bg-light">
+  @if (isLoading) {
+    <div class="ion-text-center ion-padding">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Buscando tus citas...</p>
+    </div>
+  } @else if (appointments.length > 0) {
+    <div class="appointments-list">
+      @for (cita of appointments; track $index) {
+        <div class="appointment-card results-fade-in">
+          <div class="card-header">
+            <ion-badge color="success">{{ cita.status }}</ion-badge>
+            <div class="date-tag">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ cita.date }}
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="doctor-info">
+              <ion-icon name="person-outline"></ion-icon>
+              <div>
+                <h3>{{ cita.doctor }}</h3>
+                <p>{{ cita.specialty }}</p>
+              </div>
+            </div>
+
+            <div class="time-info">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ cita.time }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Dentro de la lista de citas -->
+<div class="card-footer">
+  @if (cita.status === 'scheduled') {
+    <ion-button 
+      expand="block" 
+      fill="outline" 
+      color="danger" 
+      (click)="confirmarCancelacion(cita)"
+      class="btn-cancel">
+      <ion-icon slot="start" name="trash-outline"></ion-icon>
+      CANCELAR MI CITA
+    </ion-button>
+  }
+</div>
+      }
+    </div>
+  } @else {
+    <div class="no-data ion-text-center">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <p>Aún no tienes citas agendadas.</p>
+    </div>
+  }
+</ion-content>
