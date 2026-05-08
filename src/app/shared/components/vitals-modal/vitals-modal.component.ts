@@ -75,9 +75,8 @@ async forzarSincronizacionManual() {
   if (!profile) return;
 
   try {
-    // 📍 Rango de 24 horas usando milisegundos para evitar errores de zona horaria
     const ahoraMs = Date.now();
-    const hace24hMs = ahoraMs - (24 * 60 * 60 * 1000);
+    const hace24hMs = ahoraMs - (24 * 60 * 60 * 1000); 
 
     const config = {
       timeRangeFilter: {
@@ -87,56 +86,61 @@ async forzarSincronizacionManual() {
       }
     };
 
-    // 📍 SOLO USAMOS LOS TIPOS QUE NO DAN CRASH
-    // Quitamos 'HeartRate' para siempre.
-    const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
-    const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
+    // 📍 LECTURA SIMULTÁNEA
+    const [rP, rO] = await Promise.all([
+      (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' }),
+      (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' })
+    ]);
 
     let hrFinal = 0;
     let oxFinal = 0;
 
-    // Extracción de Pulso (Desde la Serie)
-    if (rP.records && rP.records.length > 0) {
-      const ultimaSerie = rP.records[rP.records.length - 1];
-      if (ultimaSerie.samples && ultimaSerie.samples.length > 0) {
-        // Tomamos la última muestra del paquete
-        hrFinal = Math.round(ultimaSerie.samples[ultimaSerie.samples.length - 1].beatsPerMinute);
+    // 🎯 PULSO: Buscamos el latido con el timestamp más reciente de TODA la base de datos
+    if (rP.records?.length > 0) {
+      const todasMuestras = rP.records.flatMap((r: any) => r.samples || []);
+      if (todasMuestras.length > 0) {
+        const masReciente = todasMuestras.reduce((prev: any, curr: any) => 
+          new Date(curr.time).getTime() > new Date(prev.time).getTime() ? curr : prev
+        );
+        hrFinal = Math.round(masReciente.beatsPerMinute);
       }
     }
 
-    // Extracción de Oxígeno (SpO2)
-    if (rO.records && rO.records.length > 0) {
-      const registro = rO.records[rO.records.length - 1];
-      // Mapeo seguro para el 99% que vimos en tus fotos
-      let val = registro.percentage || registro.value || 0;
-      if (typeof val === 'object' && val.value) val = val.value;
-      
-      // Convertir decimal a entero (0.99 -> 99)
+    // 🎯 OXÍGENO: Buscamos la saturación más reciente
+    if (rO.records?.length > 0) {
+      const ultimoReg = rO.records[rO.records.length - 1];
+      let val = ultimoReg.percentage || ultimoReg.value || 0;
+      if (typeof val === 'object') val = val.value;
       oxFinal = Math.round(val <= 1 && val > 0 ? val * 100 : val);
     }
 
-    // 📍 GUARDADO SEGURO: Solo si detectamos algo real
-    if (hrFinal > 0 || oxFinal > 0) {
+    // 📍 LÓGICA ANTI-CERO Y ANTI-SIMULACIÓN:
+    // Si Google no nos dio oxígeno ahorita (oxFinal es 0), 
+    // usamos el que ya tenemos en la pantalla (this.vitals.spo2).
+    const oxigenoParaGuardar = (oxFinal > 0) ? oxFinal : (this.vitals?.spo2 || 0);
+
+    // Solo guardamos si el pulso es verídico (>30)
+    if (hrFinal > 30) {
       this.medicalService.saveVitals({
         phone: profile.phone,
         name: profile.name,
         heart_rate: hrFinal,
-        spo2: oxFinal
+        spo2: oxigenoParaGuardar // 👈 Ya no hay "|| 98"
       }).subscribe({
         next: () => {
           this.cargarSignos();
-          this.speak(`Sincronización verídica. Pulso ${hrFinal} y oxígeno ${oxFinal}.`);
+          this.speak(`Sincronización verídica. Pulso ${hrFinal} y oxígeno ${oxigenoParaGuardar}.`);
         },
         error: () => this.isLoading = false
       });
     } else {
       this.isLoading = false;
-      this.speak("Datos no disponibles en Health Connect. Abre Mi Fitness.");
+      this.speak("No se detectan datos nuevos en Health Connect.");
     }
 
   } catch (e) {
     this.isLoading = false;
-    console.error("ANAasis: Error controlado, no habrá crash.");
+    console.error("Fallo técnico en HealthConnect:", e);
   }
 }
   async speak(text: string) {

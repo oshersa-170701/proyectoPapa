@@ -650,7 +650,11 @@ export class HomePage {
 
     this.motorDeMonitoreoRealTime();
   }
-  async motorDeMonitoreoRealTime() {
+  // 📍 Declarar al inicio de la clase HomePage
+lastSavedHeartRate = 0;
+lastSavedTimestamp = 0;
+
+async motorDeMonitoreoRealTime() {
   const profile = this.userService.getProfile();
   if (!profile) return;
 
@@ -666,36 +670,55 @@ export class HomePage {
       }
     };
 
+    // Lectura de Health Connect
     const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
     const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
 
-    let pulsoVeridico = 0;
-    let oxigenoVeridico = 0;
+    let pulsoActual = 0;
+    let oxigenoActual = 0;
 
-    if (rP.records.length > 0) {
-      const ultimaMuestra = rP.records[rP.records.length - 1].samples;
-      if (ultimaMuestra?.length > 0) {
-        pulsoVeridico = Math.round(ultimaMuestra[ultimaMuestra.length - 1].beatsPerMinute || 0);
+    // Extracción de Pulso
+    if (rP.records && rP.records.length > 0) {
+      const muestras = rP.records[rP.records.length - 1].samples;
+      if (muestras?.length > 0) {
+        pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute || 0);
       }
     }
 
-    if (rO.records.length > 0) {
+    // Extracción de Oxígeno
+    if (rO.records && rO.records.length > 0) {
       const registro = rO.records[rO.records.length - 1];
       let val = registro.percentage || registro.value || 0;
       if (typeof val === 'object') val = val.value;
-      oxigenoVeridico = Math.round(val <= 1 && val > 0 ? val * 100 : val);
+      oxigenoActual = Math.round(val <= 1 && val > 0 ? val * 100 : val);
     }
 
-    // 📍 REGLA DE ORO: Solo mandamos a la tabla si detectamos vida (pulso > 0)
-    if (pulsoVeridico > 30) {
+    // 📍 LÓGICA DE EFICIENCIA PROFESIONAL
+    // Solo guardamos en la base de datos si:
+    // 1. Hay un cambio significativo (>= 3 latidos) para capturar arritmias o actividad.
+    // 2. O si han pasado más de 5 minutos (300,000 ms) para mantener el registro constante.
+    const diferenciaPulso = Math.abs(pulsoActual - this.lastSavedHeartRate);
+    const tiempoTranscurrido = ahoraMs - this.lastSavedTimestamp;
+
+    if (pulsoActual > 30 && (diferenciaPulso >= 3 || tiempoTranscurrido > 300000)) {
+      
+      // Actualizamos marcas de tiempo y valor
+      this.lastSavedHeartRate = pulsoActual;
+      this.lastSavedTimestamp = ahoraMs;
+
       this.medicalService.saveVitals({
         phone: profile.phone,
         name: profile.name,
-        heart_rate: pulsoVeridico,
-        spo2: oxigenoVeridico
+        heart_rate: pulsoActual,
+        spo2: oxigenoActual
       }).subscribe();
+      
+      console.log(`ANAasis: Cambio detectado (${pulsoActual} LPM). Registro guardado.`);
     }
-  } catch (e) { }
+
+  } catch (e) {
+    console.error("Error en motor de monitoreo:", e);
+  }
 }
   // 🧹 Limpieza: Si el usuario cierra la app, detenemos el reloj
   ngOnDestroy() {
