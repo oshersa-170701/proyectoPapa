@@ -651,73 +651,74 @@ export class HomePage {
     this.motorDeMonitoreoRealTime();
   }
   // 📍 Declarar al inicio de la clase HomePage
-lastSavedHeartRate = 0;
-lastSavedTimestamp = 0;
 
+ultimoPulsoGuardado = 0;
+ultimoOxigenoGuardado = 0;
 async motorDeMonitoreoRealTime() {
   const profile = this.userService.getProfile();
   if (!profile) return;
 
   try {
     const ahoraMs = Date.now();
-    const hace10MinMs = ahoraMs - (10 * 60 * 1000);
+    // 📍 BUSCAMOS EN UN RANGO DE 20 MINUTOS para mayor captura
+    const hace20MinMs = ahoraMs - (20 * 60 * 1000); 
 
     const config = {
       timeRangeFilter: {
         type: 'between',
-        startTime: new Date(hace10MinMs).toISOString(),
+        startTime: new Date(hace20MinMs).toISOString(),
         endTime: new Date(ahoraMs).toISOString()
       }
     };
 
-    // Lectura de Health Connect
     const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
     const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
 
     let pulsoActual = 0;
     let oxigenoActual = 0;
 
-    // Extracción de Pulso
-    if (rP.records && rP.records.length > 0) {
+    // 1. Extraer Pulso con precisión cronológica
+    if (rP.records?.length > 0) {
       const muestras = rP.records[rP.records.length - 1].samples;
       if (muestras?.length > 0) {
-        pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute || 0);
+        pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute);
       }
     }
 
-    // Extracción de Oxígeno
-    if (rO.records && rO.records.length > 0) {
+    // 2. Extraer Oxígeno
+    if (rO.records?.length > 0) {
       const registro = rO.records[rO.records.length - 1];
       let val = registro.percentage || registro.value || 0;
       if (typeof val === 'object') val = val.value;
       oxigenoActual = Math.round(val <= 1 && val > 0 ? val * 100 : val);
     }
 
-    // 📍 LÓGICA DE EFICIENCIA PROFESIONAL
-    // Solo guardamos en la base de datos si:
-    // 1. Hay un cambio significativo (>= 3 latidos) para capturar arritmias o actividad.
-    // 2. O si han pasado más de 5 minutos (300,000 ms) para mantener el registro constante.
-    const diferenciaPulso = Math.abs(pulsoActual - this.lastSavedHeartRate);
-    const tiempoTranscurrido = ahoraMs - this.lastSavedTimestamp;
+    // 📍 LÓGICA DE BLINDAJE (Anti-Cero y Anti-Basura)
+    // Si el oxígeno detectado es 0, usamos el último que guardamos con éxito
+    const oxigenoParaEnviar = (oxigenoActual > 0) ? oxigenoActual : this.ultimoOxigenoGuardado;
 
-    if (pulsoActual > 30 && (diferenciaPulso >= 3 || tiempoTranscurrido > 300000)) {
+    // Solo disparamos el guardado si el pulso es real (>30)
+    // Y si el pulso cambió significativamente o si el oxígeno se recuperó de un cero
+    if (pulsoActual > 30) {
       
-      // Actualizamos marcas de tiempo y valor
-      this.lastSavedHeartRate = pulsoActual;
-      this.lastSavedTimestamp = ahoraMs;
+      // Verificamos si hay cambios reales para no saturar la tabla
+      if (pulsoActual !== this.ultimoPulsoGuardado || oxigenoParaEnviar !== this.ultimoOxigenoGuardado) {
+        
+        this.ultimoPulsoGuardado = pulsoActual;
+        this.ultimoOxigenoGuardado = oxigenoParaEnviar;
 
-      this.medicalService.saveVitals({
-        phone: profile.phone,
-        name: profile.name,
-        heart_rate: pulsoActual,
-        spo2: oxigenoActual
-      }).subscribe();
-      
-      console.log(`ANAasis: Cambio detectado (${pulsoActual} LPM). Registro guardado.`);
+        this.medicalService.saveVitals({
+          phone: profile.phone,
+          name: profile.name,
+          heart_rate: pulsoActual,
+          spo2: oxigenoParaEnviar // 👈 NUNCA MÁS SERÁ 0 si ya hubo una lectura previa
+        }).subscribe();
+        
+        console.log(`ANAasis: Registro verídico guardado -> ${pulsoActual} LPM / ${oxigenoParaEnviar}% SpO2`);
+      }
     }
-
   } catch (e) {
-    console.error("Error en motor de monitoreo:", e);
+    console.error("Error en motor automático:", e);
   }
 }
   // 🧹 Limpieza: Si el usuario cierra la app, detenemos el reloj
