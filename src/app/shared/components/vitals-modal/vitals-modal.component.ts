@@ -5,7 +5,7 @@ import {
   IonButton, IonIcon, IonSpinner, ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, heartOutline, thermometerOutline, speedometerOutline, syncOutline, medical, water, waterOutline, medicalOutline } from 'ionicons/icons';
+import { closeOutline, heartOutline, thermometerOutline, speedometerOutline, syncOutline, medical, water, waterOutline, medicalOutline, moonOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { HealthConnect } from 'capacitor-health-connect';
 import { User } from 'src/app/core/services/user';
@@ -32,7 +32,7 @@ export class VitalsModalComponent implements OnInit {
   private updateTimer: any;
   private readonly userService = inject(User); // 📍 Inyectamos User
   constructor() {
-    addIcons({syncOutline,closeOutline,heartOutline,speedometerOutline,medicalOutline,waterOutline,medical,water,thermometerOutline});
+    addIcons({syncOutline,closeOutline,heartOutline,speedometerOutline,moonOutline,medicalOutline,waterOutline,medical,water,thermometerOutline});
   }
 
 ngOnInit() {

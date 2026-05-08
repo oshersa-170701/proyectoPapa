@@ -28,6 +28,11 @@
       <h3>Oxígeno en la sangre</h3>
      <p class="value">{{ vitals?.spo2 || '0' }} <span>%</span></p>
     </div>
+    <div class="vital-card">
+  <ion-icon name="moon-outline" color="tertiary"></ion-icon>
+  <h3>Horas de Sueño</h3>
+  <p class="value">{{ vitals?.sleep_hours || '0' }} <span>Hrs</span></p>
+</div>
 
     <p class="last-update">Actualizado: {{ vitals.created_at | date:'mediumTime' }}</p>
 

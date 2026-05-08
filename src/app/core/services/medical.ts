@@ -87,12 +87,9 @@ saveVitals(vitalsData: any): Observable<any> {
     api_key: "ANAASIS_2026",
     phone: vitalsData.phone,
     name: vitalsData.name,
-    heart_rate: vitalsData.heart_rate, // Aseguramos que el nombre coincida con el PHP
-    glucose: vitalsData.glucose || 0,
-    pressure_sys: vitalsData.pressure_sys || 0,
-    pressure_dia: vitalsData.pressure_dia || 0,
-    temperature: vitalsData.temperature || 0,
-    spo2: vitalsData.spo2 || 0
+    heart_rate: vitalsData.heart_rate,
+    spo2: vitalsData.spo2,
+   // sleep_hours: vitalsData.sleep_hours // 👈 Enviamos sueño real al servidor
   });
 }
 

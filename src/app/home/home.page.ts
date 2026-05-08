@@ -644,110 +644,86 @@ export class HomePage {
     await this.verificarPermisosHealth();
 
     // 📍 MOTOR DE ALTA VELOCIDAD: CADA 15 SEGUNDOS
-    setInterval(() => {
-      this.motorDeMonitoreoRealTime();
-    }, 15000);
+    //setInterval(() => {
+      //this.motorDeMonitoreoRealTime();
+   // }, 15000);
 
     this.motorDeMonitoreoRealTime();
   }
   // 📍 Declarar al inicio de la clase HomePage
 
+// 📍 1. Asegúrate de que estas variables estén fuera de la función, al inicio de export class HomePage
 ultimoPulsoGuardado = 0;
 ultimoOxigenoGuardado = 0;
+
 async motorDeMonitoreoRealTime() {
   const profile = this.userService.getProfile();
   if (!profile) return;
 
   try {
-    const ahoraMs = Date.now();
-    // 📍 BUSCAMOS EN UN RANGO DE 20 MINUTOS para mayor captura
-    const hace20MinMs = ahoraMs - (20 * 60 * 1000); 
+    const ahora = new Date();
+    // 📍 Rango de 24h: Esto asegura que siempre encuentre el último oxígeno real del reloj
+    const hace24h = new Date(ahora.getTime() - (24 * 60 * 60 * 1000));
 
     const config = {
       timeRangeFilter: {
         type: 'between',
-        startTime: new Date(hace20MinMs).toISOString(),
-        endTime: new Date(ahoraMs).toISOString()
+        startTime: hace24h.toISOString(),
+        endTime: ahora.toISOString()
       }
     };
-
-    const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
-    const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
 
     let pulsoActual = 0;
     let oxigenoActual = 0;
 
-    // 1. Extraer Pulso con precisión cronológica
-    if (rP.records?.length > 0) {
-      const muestras = rP.records[rP.records.length - 1].samples;
-      if (muestras?.length > 0) {
-        pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute);
-      }
-    }
-
-    // 2. Extraer Oxígeno
-    if (rO.records?.length > 0) {
-      const registro = rO.records[rO.records.length - 1];
-      let val = registro.percentage || registro.value || 0;
-      if (typeof val === 'object') val = val.value;
-      oxigenoActual = Math.round(val <= 1 && val > 0 ? val * 100 : val);
-    }
-
-    // 📍 LÓGICA DE BLINDAJE (Anti-Cero y Anti-Basura)
-    // Si el oxígeno detectado es 0, usamos el último que guardamos con éxito
-    const oxigenoParaEnviar = (oxigenoActual > 0) ? oxigenoActual : this.ultimoOxigenoGuardado;
-
-    // Solo disparamos el guardado si el pulso es real (>30)
-    // Y si el pulso cambió significativamente o si el oxígeno se recuperó de un cero
-    if (pulsoActual > 30) {
-      
-      // Verificamos si hay cambios reales para no saturar la tabla
-      if (pulsoActual !== this.ultimoPulsoGuardado || oxigenoParaEnviar !== this.ultimoOxigenoGuardado) {
-        
-        this.ultimoPulsoGuardado = pulsoActual;
-        this.ultimoOxigenoGuardado = oxigenoParaEnviar;
-
-        this.medicalService.saveVitals({
-          phone: profile.phone,
-          name: profile.name,
-          heart_rate: pulsoActual,
-          spo2: oxigenoParaEnviar // 👈 NUNCA MÁS SERÁ 0 si ya hubo una lectura previa
-        }).subscribe();
-        
-        console.log(`ANAasis: Registro verídico guardado -> ${pulsoActual} LPM / ${oxigenoParaEnviar}% SpO2`);
-      }
-    }
-  } catch (e) {
-    console.error("Error en motor automático:", e);
-  }
-}
-  // 🧹 Limpieza: Si el usuario cierra la app, detenemos el reloj
-  ngOnDestroy() {
-    //    if (this.monitoringTimer) {
-    //  clearInterval(this.monitoringTimer);
-    //   }
-  }
-  async verificarPermisosHealth() {
+    // 📍 LEER PULSO
     try {
-      console.log("ANAasis: Iniciando petición de permisos limpia...");
-
-      // 📍 QUITAMOS 'HeartRate' PORQUE CAUSA EL CRASH
-      // Solo dejamos el que el plugin sí entiende.
-      const status = await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries', 'OxygenSaturation'],
-        write: []
-      });
-
-      console.log("ANAasis: Respuesta de permisos ->", status);
-
-      if (status.hasAllPermissions) {
-        //  this.sincronizarPulseraReal();
+      const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
+      if (rP.records?.length > 0) {
+        const muestras = rP.records[rP.records.length - 1].samples;
+        if (muestras?.length > 0) pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute);
       }
-    } catch (error) {
-      // 🛡️ Esto evita que la app se cierre si Android rechaza la petición
-      console.error("ANAasis: Error controlado en salud:", error);
+    } catch (e) { console.error("Fallo Pulso"); }
+
+    // 📍 LEER OXÍGENO (Corrección del 0)
+    try {
+      const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
+      if (rO.records?.length > 0) {
+        const uO = rO.records[rO.records.length - 1];
+        let val = uO.percentage || uO.value || 0;
+        if (typeof val === 'object') val = val.value;
+        oxigenoActual = Math.round(val <= 1 && val > 0 ? val * 100 : val);
+      }
+    } catch (e) { console.error("Fallo Oxigeno"); }
+
+    // 📍 PERSISTENCIA: Si el sensor falló (da 0), usamos el último valor verídico guardado
+    const pulsoFinal = (pulsoActual > 0) ? pulsoActual : this.ultimoPulsoGuardado;
+    const oxFinal = (oxigenoActual > 0) ? oxigenoActual : this.ultimoOxigenoGuardado;
+
+    // Solo guardamos si el pulso es real y hubo cambios
+    if (pulsoFinal > 30 && (pulsoFinal !== this.ultimoPulsoGuardado || oxFinal !== this.ultimoOxigenoGuardado)) {
+      this.ultimoPulsoGuardado = pulsoFinal;
+      this.ultimoOxigenoGuardado = oxFinal;
+
+      this.medicalService.saveVitals({
+        phone: profile.phone,
+        name: profile.name,
+        heart_rate: pulsoFinal,
+        spo2: oxFinal
+      }).subscribe();
+      
+      console.log(`ANAasis: Guardado verídico -> ${pulsoFinal} LPM / ${oxFinal}% Oxigeno`);
     }
-  }
+  } catch (e) { }
+}
+async verificarPermisosHealth() {
+  try {
+    await (HealthConnect as any).requestHealthPermissions({
+      read: ['HeartRateSeries', 'OxygenSaturation'], 
+      write: []
+    });
+  } catch (e) { }
+}
   async abrirPermisosADerecha() {
     try {
       // 📍 Intento 1: Forzar la ventana de permisos interna
