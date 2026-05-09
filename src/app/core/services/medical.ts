@@ -81,15 +81,18 @@ cancelAppointment(appointmentId: number): Observable<any> {
   return this.http.post(`${this.API_URL}/anaasis.php`, body);
 }
 /** Guardar signos (vienen de la pulsera o manual) */
-saveVitals(vitalsData: any): Observable<any> {
-  return this.http.post(`${this.API_URL}/anaasis.php`, {
+// En src/app/core/services/medical.ts
+saveVitals(data: any): Observable<any> {
+  const url = `${this.API_URL}/anaasis.php`;
+  return this.http.post(url, {
     action: "save_vitals",
     api_key: "ANAASIS_2026",
-    phone: vitalsData.phone,
-    name: vitalsData.name,
-    heart_rate: vitalsData.heart_rate,
-    spo2: vitalsData.spo2,
-   // sleep_hours: vitalsData.sleep_hours // 👈 Enviamos sueño real al servidor
+    phone: data.phone,
+    name: data.name,
+    heart_rate: data.heart_rate || 0, // Mandamos 0 real si el sensor no detecta nada
+    spo2: data.spo2 || 0,
+    sleep_hours: data.sleep_hours || 0,
+    temperature: 36.5
   });
 }
 
@@ -101,4 +104,5 @@ getLatestVitals(phone: string): Observable<any> {
     phone: phone
   });
 }
+
 }

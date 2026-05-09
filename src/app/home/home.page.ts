@@ -26,6 +26,7 @@ import { VitalsModalComponent } from '../shared/components/vitals-modal/vitals-m
 import { User } from '../core/services/user';
 import { HealthConnect } from 'capacitor-health-connect';
 import { NativeSettings, AndroidSettings } from 'capacitor-native-settings';
+import { Health } from '../core/services/health';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -61,6 +62,7 @@ export class HomePage {
     private overpassService: Overpass,
     private modalCtrl: ModalController,
     private userService: User,
+    private healthService: Health,
   ) {
     // Añadí los iconos que usan tus listas para que no den error
     addIcons({ navigateCircle, arrowBackOutline, mic, call, closeCircle, medical, chatbubbleEllipses, star, business, locationOutline, personOutline, chevronForward });
@@ -237,24 +239,29 @@ export class HomePage {
       return;
     }
     // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ (Para mostrar el modal de signos con datos reales)
-    if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
-      const profile = this.userService.getProfile();
+   // Dentro de sendMessageToAI(text: string)
+if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
+  const profile = this.userService.getProfile();
 
-      if (!profile) {
-        const msg = "Para ver tus signos, necesito que primero inicies sesión.";
-        this.chatMessages.push({ role: 'bot', text: msg });
-        this.speak(msg, true);
-        return;
-      }
+  if (!profile) {
+    const msg = "Para ver tus signos, necesito que primero inicies sesión.";
+    this.chatMessages.push({ role: 'bot', text: msg });
+    this.speak(msg, true);
+    return;
+  }
 
-      const txtBot = 'Claro, estoy consultando tu última información médica...';
-      this.chatMessages.push({ role: 'bot', text: txtBot });
-      this.speak(txtBot, true);
+  const txtBot = 'Claro, estoy consultando tu pulsera ahora mismo...';
+  this.chatMessages.push({ role: 'bot', text: txtBot });
+  this.speak(txtBot, true);
 
-      this.openVitalsModal(profile.phone);
-      this.isLoading = false;
-      return;
-    }
+  // 🎯 Sincronización forzada antes de abrir el modal
+  this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then(() => {
+    this.openVitalsModal(profile.phone);
+  });
+  
+  this.isLoading = false;
+  return;
+}
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
     // FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)
     // Aquí es donde entrará "dolor de panza", "dolor de pie", etc.
@@ -655,66 +662,30 @@ export class HomePage {
 // 📍 1. Asegúrate de que estas variables estén fuera de la función, al inicio de export class HomePage
 ultimoPulsoGuardado = 0;
 ultimoOxigenoGuardado = 0;
-
+ultimaHoraSueno = 0; // 👈 Agregamos esta para el seguimiento
 async motorDeMonitoreoRealTime() {
   const profile = this.userService.getProfile();
   if (!profile) return;
 
   try {
-    const ahora = new Date();
-    // 📍 Rango de 24h: Esto asegura que siempre encuentre el último oxígeno real del reloj
-    const hace24h = new Date(ahora.getTime() - (24 * 60 * 60 * 1000));
-
-    const config = {
-      timeRangeFilter: {
-        type: 'between',
-        startTime: hace24h.toISOString(),
-        endTime: ahora.toISOString()
-      }
-    };
-
-    let pulsoActual = 0;
-    let oxigenoActual = 0;
-
-    // 📍 LEER PULSO
-    try {
-      const rP = await (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' });
-      if (rP.records?.length > 0) {
-        const muestras = rP.records[rP.records.length - 1].samples;
-        if (muestras?.length > 0) pulsoActual = Math.round(muestras[muestras.length - 1].beatsPerMinute);
-      }
-    } catch (e) { console.error("Fallo Pulso"); }
-
-    // 📍 LEER OXÍGENO (Corrección del 0)
-    try {
-      const rO = await (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' });
-      if (rO.records?.length > 0) {
-        const uO = rO.records[rO.records.length - 1];
-        let val = uO.percentage || uO.value || 0;
-        if (typeof val === 'object') val = val.value;
-        oxigenoActual = Math.round(val <= 1 && val > 0 ? val * 100 : val);
-      }
-    } catch (e) { console.error("Fallo Oxigeno"); }
-
-    // 📍 PERSISTENCIA: Si el sensor falló (da 0), usamos el último valor verídico guardado
-    const pulsoFinal = (pulsoActual > 0) ? pulsoActual : this.ultimoPulsoGuardado;
-    const oxFinal = (oxigenoActual > 0) ? oxigenoActual : this.ultimoOxigenoGuardado;
-
-    // Solo guardamos si el pulso es real y hubo cambios
-    if (pulsoFinal > 30 && (pulsoFinal !== this.ultimoPulsoGuardado || oxFinal !== this.ultimoOxigenoGuardado)) {
-      this.ultimoPulsoGuardado = pulsoFinal;
-      this.ultimoOxigenoGuardado = oxFinal;
-
-      this.medicalService.saveVitals({
-        phone: profile.phone,
-        name: profile.name,
-        heart_rate: pulsoFinal,
-        spo2: oxFinal
-      }).subscribe();
+    // 🚀 LLAMADA AL HARDWARE REAL (Tu Java Plugin)
+    const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
+    
+    if (res.success) {
+      const data = res.data;
       
-      console.log(`ANAasis: Guardado verídico -> ${pulsoFinal} LPM / ${oxFinal}% Oxigeno`);
+      // Verificamos si hubo cambios para no saturar el servidor
+      if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
+        this.ultimoPulsoGuardado = data.pulso;
+        this.ultimoOxigenoGuardado = data.oxigeno;
+        this.ultimaHoraSueno = data.horasSueno;
+
+        console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
+      }
     }
-  } catch (e) { }
+  } catch (e) {
+    console.error("Fallo en el monitoreo nativo:", e);
+  }
 }
 async verificarPermisosHealth() {
   try {

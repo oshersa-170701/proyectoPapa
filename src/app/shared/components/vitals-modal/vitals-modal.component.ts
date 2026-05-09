@@ -1,15 +1,19 @@
-import { Component, OnInit, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons,
   IonButton, IonIcon, IonSpinner, ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, heartOutline, thermometerOutline, speedometerOutline, syncOutline, medical, water, waterOutline, medicalOutline, moonOutline } from 'ionicons/icons';
+import { 
+  closeOutline, heartOutline, thermometerOutline, speedometerOutline, 
+  syncOutline, medical, water, waterOutline, medicalOutline, moonOutline 
+} from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
-import { HealthConnect } from 'capacitor-health-connect';
 import { User } from 'src/app/core/services/user';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Health } from 'src/app/core/services/health';
+
 @Component({
   selector: 'app-vitals-modal',
   templateUrl: './vitals-modal.component.html',
@@ -20,132 +24,91 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
     IonButtons, IonButton, IonIcon, IonSpinner
   ]
 })
-export class VitalsModalComponent implements OnInit {
+export class VitalsModalComponent implements OnInit, OnDestroy {
 
-  @Input() phone!: string; // Recibe el teléfono del usuario
+  @Input() phone!: string;
 
-  vitals: any = null; // 👈 Esto quita el error de 'vitals'
-  isLoading = true;   // 👈 Esto quita el error de 'isLoading'
+  vitals: any = null;
+  isLoading = true;
 
   private readonly medicalService = inject(MedicalService);
+  private readonly healthService = inject(Health); // 👈 Inyectamos el puente nativo
   private readonly modalCtrl = inject(ModalController);
+  private readonly userService = inject(User);
   private updateTimer: any;
-  private readonly userService = inject(User); // 📍 Inyectamos User
+
   constructor() {
-    addIcons({syncOutline,closeOutline,heartOutline,speedometerOutline,moonOutline,medicalOutline,waterOutline,medical,water,thermometerOutline});
+    addIcons({
+      syncOutline, closeOutline, heartOutline, speedometerOutline, 
+      moonOutline, medicalOutline, waterOutline, medical, water, thermometerOutline
+    });
   }
 
-ngOnInit() {
-  this.cargarSignos();
-  // 📍 RE-CARGAR CADA 3 SEGUNDOS PARA VER LA TABLA EN VIVO
-  this.updateTimer = setInterval(() => {
+  ngOnInit() {
     this.cargarSignos();
-  }, 3000); 
-}
+    // Refrescamos cada 5 segundos para ver los cambios del motor del Home
+    this.updateTimer = setInterval(() => {
+      this.cargarSignos();
+    }, 5000);
+  }
+
   ngOnDestroy() {
     if (this.updateTimer) clearInterval(this.updateTimer);
   }
 
-  dismiss() { // 👈 Esto quita el error de 'dismiss()'
+  dismiss() {
     this.modalCtrl.dismiss();
   }
 
-cargarSignos() {
-  this.medicalService.getLatestVitals(this.phone).subscribe({
-    next: (res: any) => {
-      if (res && res.success && res.data) {
-        this.vitals = res.data;
-        
-        // 📍 REPARACIÓN CRÍTICA: 
-        // Si el registro más reciente en la BD tiene spo2 = 0, 
-        // buscamos en el historial un valor que NO sea cero para no mostrar un error médico.
-        if (this.vitals.spo2 === 0) {
-           console.warn("ANAasis: Detectado 0 en BD, manteniendo consistencia visual.");
-           // Aquí podrías disparar una pequeña consulta extra o simplemente 
-           // dejar el valor anterior si la variable ya tenía algo.
+  /**
+   * Carga los datos que ya están en la BD de Daniel
+   */
+  cargarSignos() {
+    this.medicalService.getLatestVitals(this.phone).subscribe({
+      next: (res: any) => {
+        if (res && res.success && res.data) {
+          this.vitals = res.data; // Aquí ya viene heart_rate, spo2 y sleep_hours
         }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
       }
-      this.isLoading = false;
-    },
-    error: (err) => {
-      this.isLoading = false;
-    }
-  });
-}
-async forzarSincronizacionManual() {
-  this.isLoading = true;
-  const profile = this.userService.getProfile();
-  if (!profile) return;
-
-  try {
-    const ahoraMs = Date.now();
-    const hace24hMs = ahoraMs - (24 * 60 * 60 * 1000); 
-
-    const config = {
-      timeRangeFilter: {
-        type: 'between',
-        startTime: new Date(hace24hMs).toISOString(),
-        endTime: new Date(ahoraMs).toISOString()
-      }
-    };
-
-    // 📍 LECTURA SIMULTÁNEA
-    const [rP, rO] = await Promise.all([
-      (HealthConnect as any).readRecords({ ...config, type: 'HeartRateSeries' }),
-      (HealthConnect as any).readRecords({ ...config, type: 'OxygenSaturation' })
-    ]);
-
-    let hrFinal = 0;
-    let oxFinal = 0;
-
-    // 🎯 PULSO: Buscamos el latido con el timestamp más reciente de TODA la base de datos
-    if (rP.records?.length > 0) {
-      const todasMuestras = rP.records.flatMap((r: any) => r.samples || []);
-      if (todasMuestras.length > 0) {
-        const masReciente = todasMuestras.reduce((prev: any, curr: any) => 
-          new Date(curr.time).getTime() > new Date(prev.time).getTime() ? curr : prev
-        );
-        hrFinal = Math.round(masReciente.beatsPerMinute);
-      }
-    }
-
-    // 🎯 OXÍGENO: Buscamos la saturación más reciente
-    if (rO.records?.length > 0) {
-      const ultimoReg = rO.records[rO.records.length - 1];
-      let val = ultimoReg.percentage || ultimoReg.value || 0;
-      if (typeof val === 'object') val = val.value;
-      oxFinal = Math.round(val <= 1 && val > 0 ? val * 100 : val);
-    }
-
-    // 📍 LÓGICA ANTI-CERO Y ANTI-SIMULACIÓN:
-    // Si Google no nos dio oxígeno ahorita (oxFinal es 0), 
-    // usamos el que ya tenemos en la pantalla (this.vitals.spo2).
-    const oxigenoParaGuardar = (oxFinal > 0) ? oxFinal : (this.vitals?.spo2 || 0);
-
-    // Solo guardamos si el pulso es verídico (>30)
-    if (hrFinal > 30) {
-      this.medicalService.saveVitals({
-        phone: profile.phone,
-        name: profile.name,
-        heart_rate: hrFinal,
-        spo2: oxigenoParaGuardar // 👈 Ya no hay "|| 98"
-      }).subscribe({
-        next: () => {
-          this.cargarSignos();
-          this.speak(`Sincronización verídica. Pulso ${hrFinal} y oxígeno ${oxigenoParaGuardar}.`);
-        },
-        error: () => this.isLoading = false
-      });
-    } else {
-      this.isLoading = false;
-      this.speak("No se detectan datos nuevos en Health Connect.");
-    }
-
-  } catch (e) {
-    this.isLoading = false;
-    console.error("Fallo técnico en HealthConnect:", e);
+    });
   }
-}
+
+  /**
+   * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
+   */
+  async forzarSincronizacionManual() {
+    this.isLoading = true;
+    const profile = this.userService.getProfile();
+    if (!profile) return;
+
+    try {
+      await this.healthService.solicitarPermisosNativos();
+      // 🎯 Llamamos al hardware real a través del servicio
+      const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
+
+      if (res.success) {
+        // Actualizamos la vista local de inmediato
+        this.vitals = {
+          heart_rate: res.data.pulso,
+          spo2: res.data.oxigeno,
+          sleep_hours: res.data.horasSueno
+        };
+
+        const mensaje = `Sincronización completada. Pulso: ${res.data.pulso}, Oxígeno: ${res.data.oxigeno} por ciento y ${res.data.horasSueno} horas de sueño.`;
+        this.speak(mensaje);
+      }
+      this.isLoading = false;
+    } catch (e) {
+      this.isLoading = false;
+      this.speak("No pude conectar con tu pulsera. Asegúrate de tenerla puesta.");
+      console.error("Error en sincronización manual:", e);
+    }
+  }
+
   async speak(text: string) {
     try {
       await TextToSpeech.stop();
