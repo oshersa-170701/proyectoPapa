@@ -244,4 +244,21 @@ private async abrirModalRegistro() {
 
   // 📍 1. Agrega esta variable para controlar el modal
   isRegisterModalOpen = false;
+llamarDoctor(phone: string, event: Event) {
+  event.stopPropagation();
+  if (!phone) {
+    this.showToast('Número no disponible');
+    return;
+  }
+
+  // Limpiamos el número de espacios y caracteres raros
+  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+
+  // 🚀 CREAMOS UN LINK FANTASMA PARA FORZAR AL SISTEMA
+  const a = document.createElement('a');
+  a.href = `tel:${cleanPhone}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 }

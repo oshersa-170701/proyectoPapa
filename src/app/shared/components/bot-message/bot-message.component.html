@@ -1,23 +1,31 @@
-<div class="bot-card">
-  <div class="header-bot">
-    <h3>ANAasis</h3>
+<div class="message-wrapper bot-wrapper results-fade-in">
+  <div class="bot-card-container">
     
-    <ion-badge 
-      [color]="isMuted ? 'medium' : 'primary'" 
-      mode="ios" 
-      (click)="onMuteClick()" 
-      style="cursor: pointer;">
+    <div class="bot-avatar-box">
+      <div class="avatar-inner">
+        <ion-icon name="medical-outline"></ion-icon>
+      </div>
+    </div>
+
+    <div class="bot-message-content">
+      <div class="bot-header">
+        <div class="bot-name-tag">
+          <h3>ANAasis</h3>
+          <div class="status-dot"></div>
+        </div>
+        
+        <ion-badge 
+          [color]="isMuted ? 'medium' : 'primary'" 
+          mode="ios" 
+          (click)="onMuteClick()" 
+          class="voice-badge">
+          <ion-icon [name]="isMuted ? 'volume-mute' : 'volume-high'"></ion-icon>
+          <span>{{ isMuted ? 'Silenciado' : 'Voz activa' }}</span>
+        </ion-badge>
+      </div>
       
-      <ion-icon [name]="isMuted ? 'volume-mute' : 'volume-high'"></ion-icon>
-      {{ isMuted ? 'Silenciado' : 'Voz activa' }}
-    </ion-badge>
-  </div>
-  
-  <div class="bot-info">
-    <p><ng-content></ng-content></p>
-  </div>
-  
-  <div class="role-icon-box">
-    <ion-icon name="chatbubble-ellipses"></ion-icon>
+      <p><ng-content></ng-content></p>
+    </div>
+
   </div>
 </div>

@@ -7,7 +7,7 @@ import {
   ModalController, ToastController // 📍 Agregamos ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, personOutline, callOutline, mailOutline } from 'ionicons/icons';
+import { closeOutline, personOutline, callOutline, mailOutline, chevronForwardOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
 
 @Component({
@@ -33,7 +33,7 @@ export class RegisterModalComponent {
   });
 
   constructor() {
-    addIcons({ closeOutline, personOutline, callOutline, mailOutline });
+    addIcons({closeOutline,personOutline,callOutline,chevronForwardOutline,mailOutline});
   }
 
   dismiss() {

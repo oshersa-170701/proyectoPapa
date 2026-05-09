@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IonIcon, IonBadge } from "@ionic/angular/standalone";
 import { addIcons } from 'ionicons';
-import {  chatbubbleEllipses, personCircleOutline, volumeHigh, volumeMute} from 'ionicons/icons';
+import {  chatbubbleEllipses, medicalOutline, personCircleOutline, volumeHigh, volumeMute} from 'ionicons/icons';
 import { IonicModule } from "@ionic/angular";
 @Component({
   selector: 'app-bot-message',
@@ -21,7 +21,9 @@ export class BotMessageComponent  {
       'person-circle-outline': personCircleOutline, 
       'chatbubble-ellipses': chatbubbleEllipses, 
       'volume-high': volumeHigh,
-      'volume-mute': volumeMute //  Icono de silencio
+      'volume-mute': volumeMute,
+      "medical-outline": medicalOutline
+
     });
   }
 

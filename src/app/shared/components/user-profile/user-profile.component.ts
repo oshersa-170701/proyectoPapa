@@ -2,10 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, 
-  IonLabel, IonIcon, IonButton, IonButtons, ModalController 
-} from '@ionic/angular/standalone';
+  IonLabel, IonIcon, IonButton, IonButtons, ModalController, IonText } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, personCircle, callOutline, mailOutline, logOutOutline } from 'ionicons/icons';
+import { closeOutline, personCircle, callOutline, mailOutline, logOutOutline, personOutline, shieldCheckmarkOutline, chatbubblesOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
 import { TextToSpeech } from '@capacitor-community/text-to-speech'; 
 @Component({
@@ -13,7 +12,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonText, 
     CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, 
     IonList, IonItem, IonLabel, IonIcon, IonButton, IonButtons
   ]
@@ -25,7 +24,7 @@ export class UserProfileComponent implements OnInit {
   userProfile: any;
 
   constructor() {
-    addIcons({ closeOutline, personCircle, callOutline, mailOutline, logOutOutline });
+    addIcons({closeOutline,personOutline,callOutline,shieldCheckmarkOutline,logOutOutline,chatbubblesOutline,personCircle,mailOutline});
   }
 
   ngOnInit() {

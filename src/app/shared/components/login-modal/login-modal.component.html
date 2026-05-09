@@ -1,34 +1,52 @@
-<!-- login-modal.component.html -->
 <ion-header class="ion-no-border">
   <ion-toolbar color="primary">
-    <ion-title>Bienvenido de Nuevo</ion-title>
+    <ion-title class="ion-text-white login-title">Bienvenido de Nuevo</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()"><ion-icon name="close-outline"></ion-icon></ion-button>
+      <ion-button (click)="dismiss()" color="danger" fill="clear" >
+        <ion-icon slot="icon-only" name="close-outline" ></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="ana-intro">
-    <p>¡Qué alegría verte! Soy <b>ANAasis</b>. Ingresa tus datos para continuar cuidándote.</p>
+<ion-content class="ion-padding login-bg">
+  <div class="ana-welcome-section results-fade-in">
+    <div class="ana-avatar-mini">
+      <img src="assets/ana2.png" alt="ANAasis">
+    </div>
+    <div class="ana-bubble">
+      <p>¡Qué alegría verte de nuevo! Ingresa tu número para acceder a tu historial.</p>
+    </div>
   </div>
 
-  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-    <ion-item lines="outline" class="custom-input">
-      <ion-icon name="call-outline" slot="start"></ion-icon>
-      <ion-input formControlName="phone" type="tel" label="Teléfono" labelPlacement="floating"></ion-input>
-    </ion-item>
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form results-fade-in">
+    
+    <div class="input-container">
+      <ion-label class="input-label">Número de Teléfono</ion-label>
+      <ion-item lines="none" class="custom-login-item">
+        <ion-icon name="call-outline" slot="start" color="primary"></ion-icon>
+        <ion-input 
+          formControlName="phone" 
+          type="tel" 
+          maxlength="10" 
+          placeholder="Ej. 951 123 4567"
+          class="large-input">
+        </ion-input>
+      </ion-item>
+    </div>
 
-  
+    <div class="ion-padding-top">
+      <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="login-submit-btn">
+        ENTRAR A MI CUENTA
+        <ion-icon slot="end" name="key-outline"></ion-icon>
+      </ion-button>
+    </div>
 
-    <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="submit-btn ion-margin-top">
-      ENTRAR A MI CUENTA
-    </ion-button>
   </form>
 
-  <div class="ion-text-center ion-padding-top">
-    <p (click)="goToRegister()" style="color: var(--ion-color-primary); cursor: pointer;">
-      ¿Eres nuevo? <b>Regístrate aquí</b>
+  <div class="ion-text-center ion-padding-top footer-link">
+    <p (click)="goToRegister()">
+      ¿Eres nuevo? <b>Crea tu cuenta aquí</b>
     </p>
   </div>
 </ion-content>

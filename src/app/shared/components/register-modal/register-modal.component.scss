@@ -1,43 +1,148 @@
-.ana-intro {
-  text-align: center;
-  margin-bottom: 30px;
-  p {
-    font-size: 1.2rem;
-    color: #444;
-    line-height: 1.5;
-  }
-}
-
-.custom-input {
-  --background: #f9f9f9;
-  --border-radius: 12px;
-  margin-bottom: 15px;
-  
-  ion-label {
-    font-size: 1.1rem !important;
-    font-weight: 600;
-  }
-  
-  ion-input {
-    font-size: 1.2rem !important;
-    --padding-top: 15px;
-    --padding-bottom: 15px;
-  }
-}
-
-.submit-btn {
-  --height: 60px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  --border-radius: 15px;
-  margin-top: 20px;
-}
-/* register-modal.component.scss */
 :host {
-  display: block;
-  height: 100%;
+  --register-bg: #f7f9fb; // Fondo clínico suave
+  --card-white: #ffffff;
+
 }
 
-ion-content {
-  --background: #ffffff;
+.register-bg {
+  --background: var(--register-bg);
+}
+
+.register-title {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: white !important;
+}
+
+// 🤖 SECCIÓN DE BIENVENIDA
+.ana-welcome-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 35px;
+  padding-top: 10px;
+
+  .ana-avatar {
+    width: 90px;
+    height: 90px;
+    background: white;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    border: 3px solid var(--ion-color-primary-tint);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .ana-bubble {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 20px;
+    border-top-left-radius: 5px; // Estilo burbuja de chat
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    max-width: 90%;
+    
+    p {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #555;
+      line-height: 1.4;
+      text-align: center;
+    }
+  }
+}
+
+// 📝 FORMULARIO
+.register-form {
+  .input-wrapper {
+    margin-bottom: 20px;
+
+    ion-label {
+      display: block;
+      margin-left: 10px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .custom-item {
+      --background: var(--card-white);
+      --border-radius: 16px;
+      --padding-start: 15px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      
+      ion-icon {
+        font-size: 1.4rem;
+        margin-right: 10px;
+      }
+
+      ion-input {
+        --padding-top: 15px;
+        --padding-bottom: 15px;
+        font-weight: 500;
+        font-size: 1.1rem;
+        color: #333;
+      }
+    }
+  }
+}
+
+// 🚀 BOTÓN
+.submit-btn {
+  --height: 65px;
+  --border-radius: 18px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  margin-top: 15px;
+  
+  &::part(native) {
+    transition: transform 0.2s ease;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.main-shadow {
+  box-shadow: 0 8px 25px rgba(var(--ion-color-primary-rgb), 0.3);
+}
+
+// 🔗 FOOTER
+.login-footer {
+  p {
+    font-size: 0.95rem;
+    color: #888;
+    
+    b {
+      color: var(--ion-color-primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+// Animación suave de entrada
+.results-fade-in {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

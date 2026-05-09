@@ -1,44 +1,92 @@
-.user-card {
-  background: white;
-  border-radius: 20px;
-  padding: 15px 20px;
-  margin-bottom: 15px;
-  // Tu detalle verde pero con una sombra sutil para que no se vea plano
-  border-left: 5px solid #48ff00; 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  
+.user-wrapper {
   display: flex;
-  flex-direction: column; // Texto arriba, icono abajo (o viceversa según prefieras)
-  gap: 10px;
-  position: relative;
+  justify-content: flex-end; // Lo pega a la derecha para diferenciarlo de ANAasis
+  margin-bottom: 20px;
+  padding-left: 40px; // Espacio para que no choque con el bot
 
-  .role-info {
-    h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #333;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+  .user-card-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 100%;
+  }
+
+  .user-message-content {
+    // Graduado verde suave (Salud)
+    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+    border-radius: 20px;
+    border-top-right-radius: 4px; // Punta de burbuja
+    padding: 15px 18px;
+    box-shadow: 0 6px 15px rgba(52, 199, 89, 0.08); // Sombra verde sutil
+    border: 1px solid rgba(52, 199, 89, 0.1);
+    position: relative;
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding-bottom: 4px;
+
+      h3 {
+        margin: 0;
+        font-size: 0.85rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #2e7d32; // Verde oscuro médico
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: #34c759; // Verde brillante activo
+        border-radius: 50%;
+      }
     }
 
     p {
-      margin: 5px 0 0 0;
-      font-size: 1rem;
-      color: #444;
+      margin: 0;
+      font-size: 1.05rem;
+      color: #1a1a1a;
       line-height: 1.4;
+      text-align: right;
     }
   }
 
-  // Acomodamos el icono de usuario de forma elegante
-  .role-icon-box {
-    align-self: flex-start; // Lo pegamos a la izquierda bajo el texto
-    display: flex;
-    align-items: center;
-    color: #999;
-    
-    ion-icon {
-      font-size: 24px;
+  .user-avatar-box {
+    .avatar-inner {
+      background: #34c759; // Fondo verde sólido
+      width: 45px;
+      height: 45px;
+      border-radius: 15px; // Squircle (cuadrado redondeado)
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(52, 199, 89, 0.2);
+
+      ion-icon {
+        font-size: 1.5rem;
+        color: white; // Icono blanco para contraste
+      }
     }
+  }
+}
+
+// Animación de entrada
+.results-fade-in {
+  animation: slideLeft 0.4s ease-out forwards;
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

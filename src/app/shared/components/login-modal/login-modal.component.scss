@@ -1,30 +1,148 @@
-.ana-intro {
-  text-align: center;
-  padding: 20px 10px;
-  
-  p {
-    font-size: 1.2rem;
-    color: var(--ion-color-step-700);
-    line-height: 1.5;
+:host {
+  --login-bg: #f7f9fb; // Gris azulado clínico
+}
+
+.login-bg {
+  --background: var(--login-bg);
+}
+
+.login-title {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: white !important;
+}
+
+// 🤖 SECCIÓN DE BIENVENIDA
+.ana-welcome-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-top: 20px;
+
+  .ana-avatar-mini {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    border: 2px solid var(--ion-color-primary-tint);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .ana-bubble {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 18px;
+    border-top-right-radius: 4px; // Estilo chat
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    max-width: 85%;
     
-    b {
-      color: var(--ion-color-primary);
-      font-size: 1.3rem;
+    p {
+      margin: 0;
+      font-size: 1rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.4;
+      
+      b { color: var(--ion-color-primary); }
     }
   }
 }
 
-.custom-input {
-  margin-bottom: 15px;
-  --background: #f9f9f9;
-  --border-radius: 12px;
-  font-size: 1.1rem;
+// 📝 FORMULARIO DE ACCESO
+.login-form {
+  padding: 0 10px;
+
+  .input-container {
+    margin-bottom: 25px;
+
+    .input-label {
+      display: block;
+      margin-left: 10px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ion-color-step-600);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .custom-login-item {
+      --background: #ffffff;
+      --border-radius: 18px;
+      --padding-start: 18px;
+      --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+
+      ion-icon {
+        font-size: 1.5rem;
+        margin-right: 12px;
+      }
+
+      .large-input {
+        font-size: 1.2rem;
+        font-weight: 600;
+        --padding-top: 18px;
+        --padding-bottom: 18px;
+        color: #222;
+      }
+    }
+  }
 }
 
-.submit-btn {
-  --border-radius: 12px;
-  height: 55px;
-  font-weight: bold;
+// 🚀 BOTÓN DE ENTRADA
+.login-submit-btn {
+  --height: 65px;
+  --border-radius: 18px;
+  font-weight: 800;
   font-size: 1.1rem;
-  margin-top: 25px;
+  --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+  margin-top: 10px;
+
+  &::part(native) {
+    transition: transform 0.2s ease;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// 🔗 ENLACE INFERIOR
+.footer-link {
+  margin-top: 30px;
+  
+  p {
+    font-size: 0.95rem;
+    color: #888;
+    
+    b {
+      color: var(--ion-color-primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+// Animación de entrada suave
+.results-fade-in {
+  animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

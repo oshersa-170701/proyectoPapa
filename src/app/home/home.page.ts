@@ -689,27 +689,27 @@ async motorDeMonitoreoRealTime() {
 }
 async verificarPermisosHealth() {
   try {
+    // 🚀 AQUÍ ESTÁ EL ERROR: Te falta 'SleepSession' en la lista
     await (HealthConnect as any).requestHealthPermissions({
-      read: ['HeartRateSeries', 'OxygenSaturation'], 
+      read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 AGREGA 'SleepSession' AQUÍ
       write: []
     });
-  } catch (e) { }
-}
-  async abrirPermisosADerecha() {
-    try {
-      // 📍 Intento 1: Forzar la ventana de permisos interna
-      await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries'],
-        write: []
-      });
-    } catch (e) {
-      // 📍 Intento 2: Si falla, forzar la apertura del panel específico de ANAasis
-      // Esto obliga al sistema a registrar la App en la lista de salud
-      await NativeSettings.openAndroid({
-        option: AndroidSettings.ApplicationDetails,
-      });
-    }
+  } catch (e) {
+    console.error("Error pidiendo permisos iniciales:", e);
   }
+}
+async abrirPermisosADerecha() {
+  try {
+    await (HealthConnect as any).requestHealthPermissions({
+      read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 MANTÉN LA CONSISTENCIA AQUÍ TAMBIÉN
+      write: []
+    });
+  } catch (e) {
+    await NativeSettings.openAndroid({
+      option: AndroidSettings.ApplicationDetails,
+    });
+  }
+}
 
 
 }

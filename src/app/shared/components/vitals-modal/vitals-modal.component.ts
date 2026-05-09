@@ -7,8 +7,7 @@ import {
 import { addIcons } from 'ionicons';
 import { 
   closeOutline, heartOutline, thermometerOutline, speedometerOutline, 
-  syncOutline, medical, water, waterOutline, medicalOutline, moonOutline 
-} from 'ionicons/icons';
+  syncOutline, medical, water, waterOutline, medicalOutline, moonOutline, alertCircleOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
@@ -38,10 +37,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   private updateTimer: any;
 
   constructor() {
-    addIcons({
-      syncOutline, closeOutline, heartOutline, speedometerOutline, 
-      moonOutline, medicalOutline, waterOutline, medical, water, thermometerOutline
-    });
+    addIcons({syncOutline,closeOutline,heartOutline,waterOutline,moonOutline,alertCircleOutline,medicalOutline,speedometerOutline,medical,water,thermometerOutline});
   }
 
   ngOnInit() {

@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonInput, IonButton, IonButtons, IonIcon, 
-  ModalController, ToastController 
-} from '@ionic/angular/standalone';
+  ModalController, ToastController, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, callOutline, lockClosedOutline, mailOutline } from 'ionicons/icons';
+import { closeOutline, callOutline, lockClosedOutline, mailOutline, keyOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 @Component({
@@ -14,7 +13,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
   templateUrl: './login-modal.component.html',
   styleUrls: ['./login-modal.component.scss'],
 standalone: true,
-  imports: [
+  imports: [IonLabel, 
     CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, 
     IonContent, IonItem, IonInput, IonButton, IonButtons, IonIcon
   ]
@@ -30,7 +29,7 @@ export class LoginModalComponent  {
 });
 
   constructor() {
-    addIcons({closeOutline,callOutline,mailOutline,lockClosedOutline});
+    addIcons({closeOutline,callOutline,keyOutline,mailOutline,lockClosedOutline});
   }
 
   dismiss() {

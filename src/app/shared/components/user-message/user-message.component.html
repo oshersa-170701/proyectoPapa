@@ -1,11 +1,19 @@
-<div class="message-wrapper user">
-  <div class="role-card user-card">
-    <div class="role-info">
-      <h3>Tú</h3>
-      <p>{{ messageText }}</p> 
+<div class="message-wrapper user-wrapper results-fade-in">
+  <div class="user-card-container">
+    
+    <div class="user-message-content">
+      <div class="user-header">
+        <ion-text color="dark"><h3>Tú</h3></ion-text>
+        <div class="status-dot"></div>
+      </div>
+      <p>{{ messageText }}</p>
     </div>
-    <div class="role-icon-box dark">
-      <ion-icon name="person-circle-outline" color="medium" size="large"></ion-icon>
+
+    <div class="user-avatar-box">
+      <div class="avatar-inner">
+        <ion-icon name="person-outline"></ion-icon>
+      </div>
     </div>
+
   </div>
 </div>

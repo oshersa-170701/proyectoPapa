@@ -38,10 +38,13 @@
     @if (doctor.showContact) {
     <ion-col size="12" class="contact-actions-container">
       <div class="contact-actions">
-        <ion-button fill="clear" [href]="doctor.phone ? 'tel:' + doctor.phone : null" class="call-btn" color="tertiary">
-          <ion-icon name="call-outline"></ion-icon>
-          Llamar ({{ doctor.phone || 'N/A' }})
-        </ion-button>
+       <ion-button 
+  expand="block" 
+  fill="flat" 
+  class="contact-btn call"
+  (click)="llamarDoctor(doctor.phone, $event)"> <ion-icon name="call-outline" slot="start"></ion-icon>
+  <span>LLAMAR AL MÉDICO</span>
+</ion-button>
 
         @if (doctor.whatsapp_number) {
         <ion-button fill="clear" [href]="'https://wa.me/' + doctor.whatsapp_number" target="_blank" class="wa-btn"
