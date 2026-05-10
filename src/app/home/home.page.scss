@@ -24,21 +24,36 @@
     margin-bottom: 15px;
   }
 
-  .text-container {
-    h2 {
-      margin: 0;
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-    p {
-      margin: 8px 0 0 0;
-      font-size: 1rem;
-      opacity: 0.9;
-      font-weight: 300;
-      line-height: 1.4;
+.text-container {
+  padding: 10px 0;
+  text-align: center;
+
+  .main-title {
+    margin: 0;
+    font-size: 1.9rem; // Un poco más grande para que mande
+    font-weight: 800;
+    color: #ffffff; // ⚪ Blanco puro para contraste máximo sobre el azul
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Sombra sutil para profundidad
+  }
+
+  .main-subtitle {
+    margin: 5px 0 0 0;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9); // Blanco ligeramente transparente para jerarquía
+    font-weight: 400;
+    letter-spacing: 0.3px;
+
+    .ana-bold {
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-color: rgba(255, 255, 255, 0.4);
     }
   }
+}
 }
 
 // --- CONTENEDOR BLANCO (EL QUE SUBE) ---
@@ -456,5 +471,52 @@ app-medical-map {
   ion-icon {
     color: #0099ff; // El azul de tu degradado para que se vea el icono
     font-size: 2.2rem;
+  }
+}
+.header-content {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  // 🏷️ Una etiqueta pequeña y elegante arriba
+  .assistant-tag {
+    background: rgba(255, 255, 255, 0.2); // Blanco translúcido
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    //text-transform: uppercase;
+    letter-spacing: 1.5px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  // 🏠 El saludo principal
+  .welcome-text {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.6rem;
+    font-weight: 400; // Letra delgada para elegancia
+    letter-spacing: -0.5px;
+
+    .brand {
+      font-weight: 800; // Solo resaltamos el nombre
+      position: relative;
+      
+      // Una bolita sutil que indica "conectado/vivo"
+      &::after {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: #2dd36f; // Verde vida
+        border-radius: 50%;
+        margin-left: 4px;
+        vertical-align: middle;
+      }
+    }
   }
 }
