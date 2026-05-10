@@ -12,6 +12,8 @@ import { AlertController, ToastController, ModalController } from '@ionic/angula
 // 2. Importa el componente del modal
 import { RegisterModalComponent } from '../register-modal/register-modal.component';
 import { User } from 'src/app/core/services/user';
+import { Browser } from '@capacitor/browser';
+import { App } from '@capacitor/app';
 @Component({
   selector: 'app-doctor-list',
   templateUrl: './doctor-list.component.html',
@@ -244,21 +246,49 @@ private async abrirModalRegistro() {
 
   // 📍 1. Agrega esta variable para controlar el modal
   isRegisterModalOpen = false;
-llamarDoctor(phone: string, event: Event) {
+async llamarDoctor(phone: any, event: Event) {
   event.stopPropagation();
-  if (!phone) {
-    this.showToast('Número no disponible');
+  
+  // 📍 1. Diagnóstico: Si el número no sale, imprimimos qué está llegando
+  console.log("Dato recibido del doctor:", phone);
+
+  if (!phone || phone === 'NULL' || phone === '') {
+    this.showToast('Este médico no tiene un teléfono registrado en la base de datos.');
     return;
   }
 
-  // Limpiamos el número de espacios y caracteres raros
-  const cleanPhone = phone.replace(/[^0-9+]/g, '');
+  // 📍 2. Limpieza total de espacios y caracteres basura
+  const cleanPhone = phone.toString().replace(/[^0-9+]/g, '');
 
-  // 🚀 CREAMOS UN LINK FANTASMA PARA FORZAR AL SISTEMA
-  const a = document.createElement('a');
-  a.href = `tel:${cleanPhone}`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  // 📍 3. Salida directa al sistema (Bypass total de seguridad)
+  // Usamos window.open con _system porque es lo que Capacitor entiende mejor
+  window.open(`tel:${cleanPhone}`, '_system');
+}
+async abrirWhatsApp(whatsapp: any, event: Event) {
+  event.stopPropagation(); // Para que no se cierre la tarjeta del doctor
+  
+  if (!whatsapp || whatsapp === 'NULL' || whatsapp === '') {
+    this.showToast('Este médico no tiene WhatsApp registrado.');
+    return;
+  }
+
+  // 1. Limpieza profunda: Solo números (esto quita el +, espacios o guiones)
+  const soloNumeros = whatsapp.toString().replace(/[^0-9]/g, '');
+  
+  // 2. Formatear con código de país (México = 52)
+  // Si el número ya empieza con 52, lo dejamos. Si no, se lo ponemos.
+  const numeroFinal = soloNumeros.startsWith('52') ? soloNumeros : `52${soloNumeros}`;
+
+  try {
+    // 🚀 Usamos Browser.open con windowName: '_system' 
+    // Esto es lo que fuerza a Android a abrir la App de WhatsApp y no el navegador
+    await Browser.open({ 
+      url: `https://wa.me/${numeroFinal}`,
+      windowName: '_system' 
+    });
+  } catch (error) {
+    // Fallback por si el plugin de Browser falla
+    window.open(`https://wa.me/${numeroFinal}`, '_system');
+  }
 }
 }

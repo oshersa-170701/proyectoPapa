@@ -5,14 +5,15 @@ const config: CapacitorConfig = {
   appName: 'proyecto-papa',
   webDir: 'www',
   bundledWebRuntime: false,
+  // 🚀 AGREGA ESTE BLOQUE SERVER PARA DESBLOQUEAR LA LLAMADA:
+  server: {
+    allowNavigation: ['tel:*']
+  },
   plugins: {
     SplashScreen: {
-      // 📍 LA CLAVE: Desactivamos el auto-ocultado
       launchAutoHide: false, 
-      
-      // Opcional: Un tiempo de seguridad por si algo falla (10 segundos)
       launchShowDuration: 10000, 
-      backgroundColor: "#FFFFFF", // El color oscuro de tu splash
+      backgroundColor: "#FFFFFF",
       androidScaleType: "CENTER_CROP"
     },
   },

@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    
     <!-- 1. Permisos de Salud (Sintaxis limpia para Android 14+) -->
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE_SERIES" />
@@ -74,8 +75,14 @@
 
     </application>
 
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-    </queries>
-
+   <queries>
+    <package android:name="com.google.android.apps.healthdata" />
+    <intent>
+        <action android:name="android.intent.action.DIAL" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="tel" />
+    </intent>
+</queries>
 </manifest>

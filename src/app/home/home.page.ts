@@ -70,10 +70,15 @@ export class HomePage {
     this.setupBackButton(); // 📍 Llamamos a la configuración
   }
   async initSpeechRecognition() {
-    const available = await SpeechRecognition.available();
-    // Eliminamos la línea de requestPermissions de aquí para que no choque
-    console.log("Micrófono listo:", available);
+  const available = await SpeechRecognition.available();
+  console.log("Micrófono listo:", available);
+
+  // 📍 AGREGA ESTO: Solo para avisarle a Android que usaremos el teléfono
+  // Esto ayuda a que el sistema no bloquee el window.location posterior
+  if (window.navigator && (window.navigator as any).permissions) {
+    (window.navigator as any).permissions.query({ name: 'telephony' }).catch(() => {});
   }
+}
   async startListening() {
     //console.log(" Intentando abrir micrófono...");
     //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro

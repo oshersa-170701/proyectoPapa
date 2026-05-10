@@ -4,109 +4,83 @@
 
 <ion-grid class="doctor-grid">
   @if (doctors && doctors.length > 0) {
-  @for (doctor of (doctors | filter: searchText); track doctor.id) {
-  <ion-row class="doctor-row">
-    <ion-col size="2" class="avatar-col">
-      <ion-icon name="person-outline" class="doctor-icon"></ion-icon>
-    </ion-col>
+    @for (doctor of (doctors | filter: searchText); track doctor.id) {
+      <div class="doctor-card-container">
+        <ion-row class="doctor-row" (click)="toggleContact(doctor)">
+          <ion-col size="2.5" class="avatar-col">
+            <div class="avatar-box">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+          </ion-col>
 
-    <ion-col size="8" class="info-col">
-      <div class="doctor-header">
-        <h3>{{ doctor.name }}</h3>
-      </div>
-      <p class="specialty">
-        <ion-icon name="reader-outline" class="icon-detail"></ion-icon>
-        {{ doctor.specialty }}
-      </p>
-      <p class="clinic">
-        <ion-icon name="location-outline" class="icon-detail"></ion-icon>
-        {{ doctor.address || 'Oaxaca Centro' }}
-      </p>
-      @if(doctor.distance) {
-      <p class="distance-tag" style="color: var(--ion-color-medium); font-size: 0.8rem;">
-        A {{ doctor.distance | number:'1.1-2' }} km
-      </p>
-      }
-    </ion-col>
+          <ion-col size="7.5" class="info-col">
+            <h3>{{ doctor.name }}</h3>
+            <p class="specialty-tag">{{ doctor.specialty }}</p>
+            <p class="location-text">
+              <ion-icon name="location-outline"></ion-icon>
+              {{ doctor.address || 'Oaxaca Centro' }}
+            </p>
+            @if(doctor.distance) {
+              <span class="distance-badge">A {{ doctor.distance | number:'1.1-1' }} km</span>
+            }
+          </ion-col>
 
-    <ion-col size="2" class="ion-text-right">
-      <div class="btn-next" (click)="toggleContact(doctor)">
-        <ion-icon [name]="doctor.showContact ? 'chevron-down' : 'chevron-forward'"></ion-icon>
-      </div>
-    </ion-col>
+          <ion-col size="2" class="ion-text-right">
+            <ion-icon class="expand-icon" [name]="doctor.showContact ? 'chevron-down' : 'chevron-forward'"></ion-icon>
+          </ion-col>
+        </ion-row>
 
-    @if (doctor.showContact) {
-    <ion-col size="12" class="contact-actions-container">
-      <div class="contact-actions">
-       <ion-button 
-  expand="block" 
-  fill="flat" 
-  class="contact-btn call"
-  (click)="llamarDoctor(doctor.phone, $event)"> <ion-icon name="call-outline" slot="start"></ion-icon>
-  <span>LLAMAR AL MÉDICO</span>
-</ion-button>
+        @if (doctor.showContact) {
+          <div class="actions-panel results-fade-in">
+            <div class="button-group">
+              @if (doctor.phone && doctor.phone !== 'NULL') {
+                <button class="action-btn call-btn" (click)="llamarDoctor(doctor.phone, $event)">
+                  <ion-icon name="call"></ion-icon>
+                  Llamar
+                </button>
+              }
 
-        @if (doctor.whatsapp_number) {
-        <ion-button fill="clear" [href]="'https://wa.me/' + doctor.whatsapp_number" target="_blank" class="wa-btn"
-          color="success">
-          <ion-icon name="logo-whatsapp"></ion-icon>
-          WhatsApp
-        </ion-button>
-        }
-        <ion-button fill="outline" (click)="viewSchedule(doctor)" class="agenda-btn" color="primary">
-          <ion-icon name="calendar-outline" slot="start"></ion-icon>
-          Ver Agenda Disponibles
-        </ion-button>
+              @if (doctor.whatsapp_number && doctor.whatsapp_number !== 'NULL') {
+                <button class="action-btn wa-btn" (click)="abrirWhatsApp(doctor.whatsapp_number, $event)">
+                  <ion-icon name="logo-whatsapp"></ion-icon>
+                  WhatsApp
+                </button>
+              }
+            </div>
 
-        @if (doctor.showSchedule) {
-        <div class="slots-container results-fade-in">
-          <p class="slots-title">Horarios para hoy:</p>
-          <div class="slots-grid">
-            @for (slot of doctor.slots; track slot) {
-            <ion-chip color="secondary" (click)="selectSlot(slot, doctor)">
-              <ion-label>{{ slot }}</ion-label>
-            </ion-chip>
-            } @empty {
-            <p class="no-slots">No hay horarios disponibles por ahora. </p>
+            <button class="action-btn schedule-btn" (click)="viewSchedule(doctor)">
+              <ion-icon name="calendar-outline"></ion-icon>
+              Ver Agenda Disponible
+            </button>
+
+            @if (doctor.showSchedule) {
+              <div class="slots-container">
+                <p class="slots-title">Horarios disponibles para hoy:</p>
+                <div class="slots-grid">
+                  @for (slot of doctor.slots; track slot) {
+                    <ion-chip class="time-chip" (click)="selectSlot(slot, doctor)">
+                      <ion-label>{{ slot }}</ion-label>
+                    </ion-chip>
+                  } @empty {
+                    <p class="no-slots">No hay espacios disponibles.</p>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (doctor.isLoadingSlots) {
+              <div class="ion-text-center ion-padding">
+                <ion-spinner name="crescent" color="primary"></ion-spinner>
+              </div>
             }
           </div>
-        </div>
-        }
-
-        @if (doctor.isLoadingSlots) {
-        <div class="ion-text-center">
-          <ion-spinner name="dots"></ion-spinner>
-        </div>
         }
       </div>
-    </ion-col>
     }
-  </ion-row>
-  }
   } @else {
-  <div class="ion-text-center ion-padding">
-    <p>No se encontraron doctores en la zona.</p>
-  </div>
+    <div class="empty-state">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>No se encontraron especialistas.</p>
+    </div>
   }
 </ion-grid>
-<ion-alert
-  [isOpen]="isAlertOpen"
-  header="Confirmar Cita"
-  [subHeader]="'Médico: ' + selectedDoctor?.name"
-  [message]="'¿Deseas agendar tu cita a las ' + selectedSlotTime + '?'"
-  [buttons]="alertButtons"
-  [inputs]="alertInputs"
-  (didDismiss)="isAlertOpen = false"
-></ion-alert>
-<!-- Al final de doctor-list.component.html -->
-<ion-modal 
-  [isOpen]="isRegisterModalOpen" 
-  (didDismiss)="isRegisterModalOpen = false" 
-  [breakpoints]="[0, 0.9]" 
-  [initialBreakpoint]="0.9"
-  [handle]="true">
-  <ng-template>
-    <!-- 📍 Llamada al componente que ya importaste en el TS -->
-    <app-register-modal></app-register-modal>
-  </ng-template>
-</ion-modal>
