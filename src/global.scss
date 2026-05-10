@@ -59,3 +59,72 @@ body {
   max-width: none !important;
   max-height: none !important;
 }
+.alert-over-all {
+  --z-index: 99999 !important;
+  z-index: 99999 !important;
+}
+.custom-alert-top {
+  --z-index: 99999 !important;
+  z-index: 99999 !important;
+  position: relative;
+}
+
+/* Aseguramos que el fondo oscuro no lo tape */
+ion-alert {
+  --z-index: 99999 !important;
+}
+/* 📍 Estilo para que el modal de registro se vea perfecto */
+.medical-modal-full {
+  --height: 90%;
+  --width: 95%;
+  --border-radius: 20px;
+  --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+  
+  /* Esto asegura que el modal suba cuando sale el teclado */
+  &::part(content) {
+    border-radius: 20px 20px 0 0;
+  }
+}
+/* 🎨 Diseño para la confirmación de citas */
+.confirm-appointment-sheet {
+  --background: #ffffff;
+  
+  .action-sheet-title {
+    color: #1a1a1a !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+  }
+
+  .action-sheet-sub-title {
+    color: #3880ff !important;
+    font-weight: 600 !important;
+  }
+
+  /* Botón de Confirmar */
+  .action-sheet-button.action-sheet-confirm {
+    color: #ffffff !important;
+    background: #3880ff !important;
+    margin: 10px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  /* Botón de Cancelar */
+  .action-sheet-cancel {
+    --color: #ff4961 !important;
+    font-weight: 600;
+  }
+  .action-sheet-cancel-red {
+  color: #ff4961 !important; /* Rojo vibrante */
+  font-weight: 700 !important;
+}
+}
+/* 📍 Asegura que los Toasts y Alerts salgan por encima de todo */
+.toast-container, ion-toast, ion-action-sheet {
+  z-index: 99999 !important;
+}
+
+.action-sheet-cancel-red {
+  color: #ff4961 !important;
+  font-weight: 700 !important;
+}

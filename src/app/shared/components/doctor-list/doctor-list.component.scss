@@ -103,16 +103,19 @@
 
   .slots-title { font-size: 0.85rem; font-weight: 700; color: #4a5568; margin-bottom: 10px; }
   
-  .slots-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+ .slots-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: auto !important; // 👈 Habilita los eventos de toque
 }
-
+}
 .time-chip {
   --background: #f0f7ff;
   --color: #3880ff;
   font-weight: 700;
-  margin: 0;
+  margin: 4px;
+  cursor: pointer;
+  z-index: 99 !important; // 👈 Asegura que el clic no sea bloqueado por la card
+  position: relative;
 }

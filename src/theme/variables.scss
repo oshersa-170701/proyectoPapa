@@ -12,3 +12,33 @@
   --ion-background-color: linear-gradient(180deg, #ffffff 0%, var(--gugar-blue-light) 100%);
   --ion-text-color: #202124;
 }
+/* 🎨 Diseño para la confirmación de citas */
+.confirm-appointment-sheet {
+  --background: #ffffff;
+  
+  .action-sheet-title {
+    color: #1a1a1a !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+  }
+
+  .action-sheet-sub-title {
+    color: #3880ff !important;
+    font-weight: 600 !important;
+  }
+
+  /* Botón de Confirmar */
+  .action-sheet-button.action-sheet-confirm {
+    color: #ffffff !important;
+    background: #3880ff !important;
+    margin: 10px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  /* Botón de Cancelar */
+  .action-sheet-cancel {
+    --color: #ff4961 !important;
+    font-weight: 600;
+  }
+}

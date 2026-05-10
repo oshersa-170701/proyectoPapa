@@ -1,3 +1,5 @@
+/* The DoctorListComponent class in TypeScript is responsible for displaying a list of doctors,
+allowing users to view schedules, book appointments, and contact doctors via phone or WhatsApp. */
 import { ChangeDetectorRef, Component, Input, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonIcon, IonButton, IonGrid, IonRow, IonCol, IonSearchbar, IonSpinner, IonChip, IonLabel, IonAlert, IonModal } from '@ionic/angular/standalone';
@@ -8,12 +10,11 @@ import { FilterPipe } from 'src/app/core/pipes/filter-pipe';
 import { MedicalService } from 'src/app/core/services/medical';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 // 1. Agrega ModalController a los imports de @ionic/angular/standalone si no está
-import { AlertController, ToastController, ModalController } from '@ionic/angular'; 
+import { AlertController, ToastController, ModalController,ActionSheetController } from '@ionic/angular/standalone';
 // 2. Importa el componente del modal
 import { RegisterModalComponent } from '../register-modal/register-modal.component';
 import { User } from 'src/app/core/services/user';
 import { Browser } from '@capacitor/browser';
-import { App } from '@capacitor/app';
 @Component({
   selector: 'app-doctor-list',
   templateUrl: './doctor-list.component.html',
@@ -30,6 +31,7 @@ export class DoctorListComponent {
     private readonly toastController: ToastController, private readonly zone: NgZone,
      private readonly cdr: ChangeDetectorRef, private readonly modalCtrl: ModalController,
     private readonly userService: User,
+    private actionSheetCtrl: ActionSheetController,
     ) {
    addIcons({
   personOutline, 
@@ -40,6 +42,7 @@ export class DoctorListComponent {
   businessOutline, 
   medalOutline, 
   star,
+  close: 'close', // Icono de cierre para el ActionSheet
   chevronForward, 
   business, 
   searchOutline, 
@@ -57,8 +60,8 @@ viewSchedule(doctor: any) {
     doctor.showSchedule = false;
     return;
   }
-
-  const hoy = new Date().toISOString().split('T')[0];
+const dateObj = new Date();
+const hoy = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
   doctor.isLoadingSlots = true;
 
   this.medicalService.getAvailability(doctor.id, hoy).subscribe({
@@ -83,44 +86,46 @@ viewSchedule(doctor: any) {
     }
   });
 }
-
 private confirmarCita(slot: string, doctor: any) {
-  // 📍 1. Obtenemos el perfil real del storage
+  // 📍 1. Obtener perfil real
   const profile = this.userService.getProfile(); 
-  const hoy = new Date().toISOString().split('T')[0];
+  
+  // 📍 2. Fecha local exacta (Evita desfases de Daniel con el servidor)
+  const dateObj = new Date();
+  const hoy = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
   
   if (!profile) {
-    this.showToast('Error: No se encontró tu perfil.');
+    this.showToast('Error: No se encontró tu perfil de usuario.');
     return;
   }
 
+  // 📍 3. Objeto de datos con api_key y action
   const datosCita = {
     action: 'create_appointment',
+    api_key: 'ANAASIS_2026',
     doctor_id: doctor.id,
-    // 🚀 CLAVE: Usamos los datos del perfil, no del formulario manual
+    patient_id: profile.patient_id, // 🚀 Ligamos al usuario actual
     name: profile.name, 
     phone: profile.phone,
-    patient_id: profile.patient_id, // 📍 Enviamos el ID real que devolvió el registro
     date: hoy,
-    time: slot,
-    api_key: 'ANAASIS_2026'
+    time: slot
   };
 
   this.medicalService.createAppointment(datosCita).subscribe({
     next: (res: any) => {
       this.zone.run(() => {
         if (res.success) {
-          this.showToast('✅ Cita agendada con éxito.');
-          doctor.showSchedule = false;
-          this.viewSchedule(doctor); 
+          this.showToast('Cita agendada con éxito.');
+          doctor.showSchedule = false; // Cerramos agenda
+          this.viewSchedule(doctor);   // 🔄 Refrescamos para quitar el horario ocupado
         } else {
-          this.showToast('Error: ' + res.message);
+          this.showToast('Error: ' + (res.error || 'Horario no disponible.'));
         }
       });
-    }
+    },
+    error: () => this.showToast('Error de red al agendar cita.')
   });
 }
-
 async showToast(msg: string) {
   const toast = await this.toastController.create({
     message: msg,
@@ -155,79 +160,137 @@ async showToast(msg: string) {
       }
     }
   ];
+async selectSlot(slot: string, doctor: any) {
+  const profile = this.userService.getProfile();
+  if (!profile || !profile.phone) {
+    this.invitarARegistro();
+    return;
+  }
 
-selectSlot(slot: string, doctor: any) {
-  this.zone.run(async () => {
-    // 📍 Usamos la misma llave que definiste en tu User Service: 'anaasis_user_data'
-    const userJson = localStorage.getItem('anaasis_user_data'); 
+  console.log("Validando cita para el doctor:", doctor.id);
+
+  this.medicalService.getUserAppointments(profile.phone).subscribe({
+    next: async (res: any) => {
+      // 🛡️ PROTECCIÓN TOTAL: Si res es null, creamos un objeto vacío
+      const response = res || { success: false, data: [] };
+      const citas = response.data || [];
+
+      // Buscamos si ya tiene cita con este ID de doctor
+      const citaDuplicada = citas.find((c: any) => 
+        c.doctor_id == doctor.id && (c.status === 'scheduled' || c.status === 'programada')
+      );
+
+      if (citaDuplicada) {
+        const aviso = `Parece que ya tienes una cita con el doctor ${doctor.name}. Debes cancelar la cita existente antes de agendar una nueva.`;
+        
+       this.zone.run(() => {
+    TextToSpeech.speak({ text: aviso, lang: 'es-MX', rate: 1.0, category: 'ambient' });
     
-    if (!userJson) {
-      this.selectedDoctor = doctor;
-      const mensaje = `Lo siento, aún no estas registrado. Para poder agendar una cita con el doctor ${doctor.name}, primero necesito que te registres. ¿Te gustaría hacerlo ahora?`;
-      
-      await TextToSpeech.speak({
-        text: mensaje,
-        lang: 'es-MX',
-        rate: 1.0,
-        category: 'ambient'
-      });
+    // 🚀 Pasamos el color 'danger' (rojo)
+    this.showToast2(aviso, 'danger'); 
+  });
+  return;
+      }
 
-      this.invitarARegistro();
-      return; 
+      // ✅ Todo limpio, abrimos confirmación
+      this.abrirActionSheetConfirmacion(slot, doctor);
+    },
+    error: () => {
+      // Si el servidor falla, por cortesía abrimos la confirmación de todos modos
+      this.abrirActionSheetConfirmacion(slot, doctor);
     }
-
-    // 🚀 SI YA ESTÁ REGISTRADO: Confirmamos directo sin pedir datos
-    const confirm = await this.alertController.create({
-      header: 'Confirmar Cita',
-      message: `¿Deseas agendar tu cita con el Dr. ${doctor.name} a las ${slot}?`,
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { 
-          text: 'Agendar', 
-          handler: () => {
-            this.confirmarCita(slot, doctor); // Llama a la función actualizada
-          }
-        }
-      ]
-    });
-    await confirm.present();
   });
 }
-
+async showToast2(msg: string, color: string = 'dark') {
+  const toast = await this.toastController.create({
+    message: msg,
+    duration: 3000,
+    position: 'bottom',
+    color: color, // 👈 Ahora usa el color que le mandemos
+    cssClass: 'custom-toast-error' // 👈 Una clase para forzar el diseño
+  });
+  await toast.present();
+}
+private async abrirActionSheetConfirmacion(slot: string, doctor: any) {
+  const actionSheet = await this.actionSheetCtrl.create({
+    header: `Confirmar Cita - Dr. ${doctor.name}`,
+    subHeader: `Horario: ${slot} hrs`,
+    mode: 'md',
+    cssClass: 'confirm-appointment-sheet',
+    buttons: [
+      {
+        text: 'AGENDAR CITA',
+        role: 'confirm',
+        cssClass: 'action-sheet-button.action-sheet-confirm ',
+        handler: () => { this.confirmarCita(slot, doctor); }
+      },
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'action-sheet-cancel-red'
+      }
+    ]
+  });
+  await actionSheet.present();
+}
+// 📍 Función separada para que el ActionSheet no se bloquee por la lógica anterior
+private async abrirConfirmacionFinal(slot: string, doctor: any) {
+  const actionSheet = await this.actionSheetCtrl.create({
+    header: `Confirmar Cita`,
+    subHeader: `Médico: ${doctor.name} - Hora: ${slot}`,
+    mode: 'md',
+    cssClass: 'confirm-appointment-sheet',
+    buttons: [
+      {
+        text: 'AGENDAR AHORA',
+        role: 'confirm',
+        handler: () => { this.confirmarCita(slot, doctor); }
+      },
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'action-sheet-cancel-red'
+      }
+    ]
+  });
+  await actionSheet.present();
+}
 private async invitarARegistro() {
   const alert = await this.alertController.create({
-    header: 'Registro Necesario',
-    message: 'Para agendar citas y llevar tu historial médico, necesito crear tu perfil. ¿Deseas registrarte?',
+    header: 'Atención',
+    subHeader: 'Registro Necesario',
+    message: 'Para poder agendar tu cita con el especialista, primero necesitamos crear tu expediente médico. ¿Deseas hacerlo ahora?',
+    mode: 'md',
     buttons: [
-      { text: 'Después', role: 'cancel' },
-      { 
-        text: 'Registrarme', 
+      {
+        text: 'Después',
+        role: 'cancel',
+        cssClass: 'secondary'
+      },
+      {
+        text: 'Registrarme',
         handler: () => {
-          // 🚀 CAMBIO CLAVE: Activamos el modal directamente con el booleano
-          this.zone.run(() => {
-            this.isRegisterModalOpen = true;
-            this.cdr.detectChanges();
-          });
+          // 🚀 Ejecutamos tu función de modal profesional
+          this.abrirModalRegistro();
         }
       }
     ]
   });
+
   await alert.present();
 }
 // Nueva función para disparar el modal en Android
 private async abrirModalRegistro() {
   this.zone.run(async () => {
-    // 📍 Pequeña espera para que Android limpie el Alert anterior
-    await new Promise(resolve => setTimeout(resolve, 300));
-
     try {
+      // 📍 Cerramos cualquier modal previo por si acaso
+      await this.modalCtrl.dismiss().catch(() => {});
+
       const modal = await this.modalCtrl.create({
         component: RegisterModalComponent,
-        mode: 'md', 
-        breakpoints: [0, 0.9],
-        initialBreakpoint: 0.9,
-        handle: true,
-        backdropDismiss: false // Evita que se cierre por error al tocar afuera
+        mode: 'md', // Modo Android
+        cssClass: 'medical-modal-standard', // 👈 Usaremos esta clase en el global
+        backdropDismiss: false 
       });
 
       await modal.present();
@@ -238,8 +301,7 @@ private async abrirModalRegistro() {
         this.cdr.detectChanges();
       }
     } catch (error) {
-      console.error("Error abriendo modal:", error);
-      this.showToast("No se pudo abrir el registro. Intenta de nuevo.");
+      console.error("Error al abrir modal:", error);
     }
   });
 }

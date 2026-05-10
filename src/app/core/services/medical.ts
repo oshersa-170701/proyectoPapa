@@ -38,19 +38,26 @@ export class MedicalService {
     };
     return this.http.post(`${this.API_URL}/anaasis.php`, body); //  Usamos el endpoint correcto para obtener doctores cercanos
   }
-  /** Obtener horarios disponibles desde agenda_service.php */
+  /** Obtener horarios disponibles REALES desde anaasis.php */
   getAvailability(doctorId: number, date: string): Observable<any> {
     const body = {
-      action: "get_slots", // La acción que definimos en el PHP
+      action: "get_slots",
       doctor_id: doctorId,
       date: date, // Formato YYYY-MM-DD
       api_key: "ANAASIS_2026"
     };
-    // Apuntamos al nuevo archivo de agenda
-    return this.http.post(`${this.API_URL}/agenda_service.php`, body);
+    // 🚀 CAMBIO: Ahora apuntamos a anaasis.php
+    return this.http.post(`${this.API_URL}/anaasis.php`, body);
   }
+  /** Crear la cita médica en anaasis.php */
   createAppointment(data: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/agenda_service.php`, data);
+    const body = {
+      ...data,
+      action: "create_appointment",
+      api_key: "ANAASIS_2026"
+    };
+    // 🚀 CAMBIO: Ahora apuntamos a anaasis.php
+    return this.http.post(`${this.API_URL}/anaasis.php`, body);
   }
   enviarAlertaAmbulancia(lat: number, lng: number, detalle: string): Observable<any> {
     // Ahora apuntamos a tu proxy
@@ -63,46 +70,46 @@ export class MedicalService {
     return this.http.post(url, body);
   }
   /** Obtener el historial de citas del usuario por su teléfono */
-getUserAppointments(phone: string): Observable<any> {
-  const body = {
-    action: "get_user_appointments",
-    api_key: "ANAASIS_2026",
-    phone: phone
-  };
-  return this.http.post(`${this.API_URL}/anaasis.php`, body);
-}
-/** Cancelar una cita médica */
-cancelAppointment(appointmentId: number): Observable<any> {
-  const body = {
-    action: "cancel_appointment",
-    api_key: "ANAASIS_2026",
-    appointment_id: appointmentId
-  };
-  return this.http.post(`${this.API_URL}/anaasis.php`, body);
-}
-/** Guardar signos (vienen de la pulsera o manual) */
-// En src/app/core/services/medical.ts
-saveVitals(data: any): Observable<any> {
-  const url = `${this.API_URL}/anaasis.php`;
-  return this.http.post(url, {
-    action: "save_vitals",
-    api_key: "ANAASIS_2026",
-    phone: data.phone,
-    name: data.name,
-    heart_rate: data.heart_rate || 0, // Mandamos 0 real si el sensor no detecta nada
-    spo2: data.spo2 || 0,
-    sleep_hours: data.sleep_hours || 0,
-    temperature: 36.5
-  });
-}
+  getUserAppointments(phone: string): Observable<any> {
+    const body = {
+      action: "get_user_appointments",
+      api_key: "ANAASIS_2026",
+      phone: phone
+    };
+    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+  }
+  /** Cancelar una cita médica */
+  cancelAppointment(appointmentId: number): Observable<any> {
+    const body = {
+      action: "cancel_appointment",
+      api_key: "ANAASIS_2026",
+      appointment_id: appointmentId
+    };
+    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+  }
+  /** Guardar signos (vienen de la pulsera o manual) */
+  // En src/app/core/services/medical.ts
+  saveVitals(data: any): Observable<any> {
+    const url = `${this.API_URL}/anaasis.php`;
+    return this.http.post(url, {
+      action: "save_vitals",
+      api_key: "ANAASIS_2026",
+      phone: data.phone,
+      name: data.name,
+      heart_rate: data.heart_rate || 0, // Mandamos 0 real si el sensor no detecta nada
+      spo2: data.spo2 || 0,
+      sleep_hours: data.sleep_hours || 0,
+      temperature: 36.5
+    });
+  }
 
-/** Obtener los últimos signos para mostrar en el modal */
-getLatestVitals(phone: string): Observable<any> {
-  return this.http.post(`${this.API_URL}/anaasis.php`, {
-    action: "get_vitals",
-    api_key: "ANAASIS_2026",
-    phone: phone
-  });
-}
+  /** Obtener los últimos signos para mostrar en el modal */
+  getLatestVitals(phone: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "get_vitals",
+      api_key: "ANAASIS_2026",
+      phone: phone
+    });
+  }
 
 }
