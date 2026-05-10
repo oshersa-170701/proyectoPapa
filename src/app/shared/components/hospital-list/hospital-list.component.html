@@ -1,35 +1,41 @@
 <div class="search-container">
   <ion-searchbar 
-    placeholder="Busca un hospital..." 
+    placeholder="Busca un hospital o clínica..." 
     (ionInput)="handleSearch($event)"
     animated="true"
     class="custom-search">
   </ion-searchbar>
 </div>
 
-<div class="hospital-container">
+<div class="hospital-container ion-padding">
   @for (h of filteredHospitals; track h.name) {
     <div class="hospital-card" (click)="goToHospital(h)">
       <div class="icon-wrapper">
         <ion-icon name="business"></ion-icon>
       </div>
+      
       <div class="info">
         <h3>{{ h.name }}</h3>
         
-        <p class="distance">
-          <ion-icon name="location-outline"></ion-icon> 
-          {{ h.distanceText }}
-        </p>
-        
-        <p class="cta-maps">
-          <ion-icon name="location-outline"></ion-icon> 
-          Toca para ver cómo llegar
-        </p>
+        <div class="meta-info">
+          <span class="distance-badge">
+            <ion-icon name="navigate-circle-outline"></ion-icon> 
+            {{ h.distanceText }}
+          </span>
+          <p class="cta-maps">
+            Toca para abrir en Maps
+          </p>
+        </div>
       </div>
-      <div class="arrow">
-        <ion-icon name="chevron-forward"></ion-icon>
+
+      <div class="arrow-box">
+        <ion-icon name="chevron-forward-outline"></ion-icon>
       </div>
     </div>
   } @empty {
-    }
+    <div class="empty-state">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>No encontramos hospitales con ese nombre.</p>
+    </div>
+  }
 </div>

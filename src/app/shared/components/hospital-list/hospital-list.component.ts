@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { IonIcon, IonSearchbar } from '@ionic/angular/standalone'; // 📍 Importamos IonSearchbar
 import { addIcons } from 'ionicons';
-import { locationOutline, callOutline, businessOutline, chevronForward, business, searchOutline } from 'ionicons/icons';
+import { locationOutline, callOutline, businessOutline, chevronForward, business, searchOutline, navigateCircleOutline, chevronForwardOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-hospital-list',
@@ -19,7 +19,7 @@ export class HospitalListComponent implements OnInit, OnChanges {
   filteredHospitals: any[] = [];
 
   constructor() {
-    addIcons({ business, locationOutline, chevronForward, businessOutline, callOutline, searchOutline });
+    addIcons({business,navigateCircleOutline,chevronForwardOutline,searchOutline,locationOutline,chevronForward,businessOutline,callOutline});
   }
 
   ngOnInit() {

@@ -1,60 +1,146 @@
+.medical-bg {
+  --background: #f4f7f6;
+}
+
+.medical-title {
+  font-weight: 700;
+  color: white !important;
+  letter-spacing: -0.5px;
+}
+
+.appointments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .appointment-card {
+  display: flex;
   background: white;
   border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  min-height: 120px;
+  transition: opacity 0.3s ease;
 
-  .card-header {
+  // Lado de la fecha (Estilo agenda)
+  .date-side {
+    width: 80px;
+    background: var(--ion-color-primary);
+    color: white;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px dashed #eee;
-    padding-bottom: 10px;
+    justify-content: center;
+    padding: 10px;
 
-    .date-tag {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: bold;
-      color: var(--ion-color-primary);
-    }
-  }
-
-  .card-body {
-    .doctor-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
-      ion-icon { font-size: 30px; color: #666; }
-      h3 { margin: 0; font-size: 1.3rem; font-weight: 700; }
-      p { margin: 0; color: #888; font-size: 1rem; }
-    }
-
-    .time-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.2rem;
+    .month {
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #444;
-      background: #f4f6fa;
-      padding: 10px;
-      border-radius: 10px;
-      justify-content: center;
+      opacity: 0.9;
+    }
+
+    .day {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 2px 0;
+    }
+
+    .time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 2px 6px;
+      border-radius: 6px;
     }
   }
 
-  .btn-map {
-    margin-top: 10px;
-    font-weight: bold;
+  // Lado de la información
+  .info-side {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .status-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    h3 {
+      margin: 8px 0 2px 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1c1c1e;
+    }
+
+    .specialty-text {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--ion-color-primary);
+      font-weight: 600;
+    }
+
+    .actions-row {
+      margin-top: 10px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+
+      .btn-cancel-mini {
+        --padding-start: 0;
+        --padding-end: 0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        height: 30px;
+      }
+    }
+  }
+
+  // Estilo para tarjetas canceladas
+  &.cancelled-card {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+    .date-side { background: #8e8e93; }
+    h3 { text-decoration: line-through; }
   }
 }
 
-.no-data {
-  margin-top: 100px;
-  ion-icon { font-size: 80px; color: #ccc; }
-  p { font-size: 1.2rem; color: #999; }
+// Estados de carga y vacío
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  text-align: center;
+  padding: 0 40px;
+  color: #8e8e93;
+
+  .empty-icon-box {
+    width: 100px;
+    height: 100px;
+    background: #eef2f1;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    ion-icon { font-size: 50px; color: #cbd5e0; }
+  }
+
+  h3 {
+    color: #1c1c1e;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
 }

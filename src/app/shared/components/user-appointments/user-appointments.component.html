@@ -1,66 +1,62 @@
 <ion-header class="ion-no-border">
   <ion-toolbar color="primary">
-    <ion-title>Mis Citas Médicas</ion-title>
+    <ion-title class="medical-title">Mis Citas Médicas</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">
+      <ion-button (click)="dismiss()" class="close-btn" color="danger" fill="clear">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding bg-light">
+
+<ion-content class="medical-bg">
   @if (isLoading) {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Buscando tus citas...</p>
+    <div class="state-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Sincronizando agenda...</p>
     </div>
   } @else if (appointments.length > 0) {
-    <div class="appointments-list">
-      @for (cita of appointments; track $index) {
-        <div class="appointment-card results-fade-in">
-          <div class="card-header">
-            <ion-badge color="success">{{ cita.status }}</ion-badge>
-            <div class="date-tag">
-              <ion-icon name="calendar-outline"></ion-icon>
-              {{ cita.date }}
-            </div>
+    <div class="appointments-container ion-padding">
+      @for (cita of appointments; track cita.id) {
+        <div class="appointment-card results-fade-in" [class.cancelled-card]="cita.status !== 'scheduled'">
+          
+          <div class="date-side">
+            <span class="month">{{ cita.date | date:'MMM' | uppercase }}</span>
+            <span class="day">{{ cita.date | date:'dd' }}</span>
+            <span class="time">{{ cita.time }}</span>
           </div>
 
-          <div class="card-body">
-            <div class="doctor-info">
-              <ion-icon name="person-outline"></ion-icon>
-              <div>
-                <h3>{{ cita.doctor }}</h3>
-                <p>{{ cita.specialty }}</p>
-              </div>
+          <div class="info-side">
+            <div class="status-row">
+              <ion-badge [color]="cita.status === 'scheduled' ? 'success' : 'medium'" class="status-badge">
+                {{ cita.status === 'scheduled' ? 'Confirmada' : 'Cancelada' }}
+              </ion-badge>
             </div>
 
-            <div class="time-info">
-              <ion-icon name="time-outline"></ion-icon>
-              <span>{{ cita.time }}</span>
+            <div class="doctor-detail">
+              <h3>{{ cita.doctor }}</h3>
+              <p class="specialty-text">{{ cita.specialty }}</p>
             </div>
+
+            @if (cita.status === 'scheduled') {
+              <div class="actions-row">
+                <ion-button fill="clear" color="danger" (click)="confirmarCancelacion(cita)" class="btn-cancel-mini">
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Cancelar cita
+                </ion-button>
+              </div>
+            }
           </div>
         </div>
-        <!-- Dentro de la lista de citas -->
-<div class="card-footer">
-  @if (cita.status === 'scheduled') {
-    <ion-button 
-      expand="block" 
-      fill="outline" 
-      color="danger" 
-      (click)="confirmarCancelacion(cita)"
-      class="btn-cancel">
-      <ion-icon slot="start" name="trash-outline"></ion-icon>
-      CANCELAR MI CITA
-    </ion-button>
-  }
-</div>
       }
     </div>
   } @else {
-    <div class="no-data ion-text-center">
-      <ion-icon name="calendar-outline"></ion-icon>
-      <p>Aún no tienes citas agendadas.</p>
+    <div class="state-container">
+      <div class="empty-icon-box">
+        <ion-icon name="calendar-clear-outline"></ion-icon>
+      </div>
+      <h3>Sin citas próximas</h3>
+      <p>Tus citas agendadas aparecerán aquí para que lleves un mejor control.</p>
     </div>
   }
 </ion-content>

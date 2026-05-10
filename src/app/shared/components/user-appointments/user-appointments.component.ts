@@ -4,7 +4,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, 
   IonLabel, IonIcon, IonButton, IonButtons, IonBadge, ModalController, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, calendarOutline, timeOutline, personOutline, locationOutline, trashOutline } from 'ionicons/icons';
+import { closeOutline, calendarOutline, timeOutline, personOutline, locationOutline, trashOutline, calendarClearOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { AlertController } from '@ionic/angular';
@@ -29,7 +29,7 @@ export class UserAppointmentsComponent implements OnInit {
   private readonly zone = inject(NgZone); // 📍 Inyectamos
   private readonly alertCtrl = inject(AlertController);
   constructor() {
-    addIcons({closeOutline,calendarOutline,personOutline,timeOutline,trashOutline,locationOutline});
+    addIcons({closeOutline,trashOutline,calendarClearOutline,calendarOutline,personOutline,timeOutline,locationOutline});
   }
 ngOnInit() {
     this.cargarCitas();
