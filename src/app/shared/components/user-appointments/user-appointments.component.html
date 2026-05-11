@@ -27,11 +27,15 @@
           </div>
 
           <div class="info-side">
-            <div class="status-row">
-              <ion-badge [color]="cita.status === 'scheduled' ? 'success' : 'medium'" class="status-badge">
-                {{ cita.status === 'scheduled' ? 'Confirmada' : 'Cancelada' }}
-              </ion-badge>
-            </div>
+           <div class="status-row">
+  @if (cita.status === 'scheduled') {
+    <ion-badge color="success" class="status-badge">Confirmada</ion-badge>
+  } @else if (cita.status === 'expired') {
+    <ion-badge color="warning" class="status-badge">Expirada</ion-badge>
+  } @else {
+    <ion-badge color="medium" class="status-badge">Finalizada</ion-badge>
+  }
+</div>
 
             <div class="doctor-detail">
               <h3>{{ cita.doctor }}</h3>

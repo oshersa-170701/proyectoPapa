@@ -259,12 +259,23 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
   this.chatMessages.push({ role: 'bot', text: txtBot });
   this.speak(txtBot, true);
 
-  // 🎯 Sincronización forzada antes de abrir el modal
-  this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then(() => {
-    this.openVitalsModal(profile.phone);
+  // 🎯 Sincronización forzada con manejo de respuesta real
+  this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then((res: any) => {
+    this.zone.run(() => {
+      if (res && res.success) {
+        // 🎙️ ANAasis ahora tiene los datos reales para hablar
+        const pulso = res.data.pulso || 0;
+        const ox = res.data.oxigeno || 0;
+        const sueno = res.data.horasSueno || 0;
+        
+        const resumenVoz = `Sincronización lista. Tu pulso es de ${pulso} latidos y tu oxígeno está al ${ox} por ciento.`;
+        this.speak(resumenVoz);
+      }
+      this.openVitalsModal(profile.phone);
+      this.isLoading = false;
+    });
   });
   
-  this.isLoading = false;
   return;
 }
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
@@ -654,20 +665,12 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
   async ionViewDidEnter() {
     try { await (HealthConnect as any).SplashScreen.hide(); } catch (e) { }
     await this.verificarPermisosHealth();
-
-    // 📍 MOTOR DE ALTA VELOCIDAD: CADA 15 SEGUNDOS
-    //setInterval(() => {
-      //this.motorDeMonitoreoRealTime();
-   // }, 15000);
-
     this.motorDeMonitoreoRealTime();
   }
-  // 📍 Declarar al inicio de la clase HomePage
 
-// 📍 1. Asegúrate de que estas variables estén fuera de la función, al inicio de export class HomePage
-ultimoPulsoGuardado = 0;
-ultimoOxigenoGuardado = 0;
-ultimaHoraSueno = 0; // 👈 Agregamos esta para el seguimiento
+ultimoPulsoGuardado: number = 0;
+ultimoOxigenoGuardado: number = 0;
+ultimaHoraSueno: number = 0; // 👈 Asegúrate que diga : number
 async motorDeMonitoreoRealTime() {
   const profile = this.userService.getProfile();
   if (!profile) return;
@@ -677,17 +680,17 @@ async motorDeMonitoreoRealTime() {
     const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
     
     if (res.success) {
-      const data = res.data;
-      
-      // Verificamos si hubo cambios para no saturar el servidor
-      if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
-        this.ultimoPulsoGuardado = data.pulso;
-        this.ultimoOxigenoGuardado = data.oxigeno;
-        this.ultimaHoraSueno = data.horasSueno;
+  const data = res.data;
+  
+  if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
+    this.ultimoPulsoGuardado = Number(data.pulso);
+    this.ultimoOxigenoGuardado = Number(data.oxigeno);
+    // 🚀 LA SOLUCIÓN AL ERROR: Convertimos a Number explícitamente
+    this.ultimaHoraSueno = Number(data.horasSueno); 
 
-        console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
-      }
-    }
+    console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
+  }
+}
   } catch (e) {
     console.error("Fallo en el monitoreo nativo:", e);
   }

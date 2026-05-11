@@ -69,6 +69,7 @@
       text-transform: uppercase;
       padding: 4px 8px;
       border-radius: 8px;
+      color: white !important;
     }
 
     h3 {
@@ -89,7 +90,7 @@
       margin-top: 10px;
       border-top: 1px solid #f0f0f0;
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
 
       .btn-cancel-mini {
         --padding-start: 0;

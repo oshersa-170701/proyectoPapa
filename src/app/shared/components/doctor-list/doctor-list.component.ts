@@ -87,24 +87,17 @@ const hoy = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padS
   });
 }
 private confirmarCita(slot: string, doctor: any) {
-  // 📍 1. Obtener perfil real
   const profile = this.userService.getProfile(); 
-  
-  // 📍 2. Fecha local exacta (Evita desfases de Daniel con el servidor)
   const dateObj = new Date();
   const hoy = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
   
-  if (!profile) {
-    this.showToast('Error: No se encontró tu perfil de usuario.');
-    return;
-  }
+  if (!profile) return;
 
-  // 📍 3. Objeto de datos con api_key y action
   const datosCita = {
     action: 'create_appointment',
     api_key: 'ANAASIS_2026',
     doctor_id: doctor.id,
-    patient_id: profile.patient_id, // 🚀 Ligamos al usuario actual
+    patient_id: profile.patient_id,
     name: profile.name, 
     phone: profile.phone,
     date: hoy,
@@ -113,25 +106,28 @@ private confirmarCita(slot: string, doctor: any) {
 
   this.medicalService.createAppointment(datosCita).subscribe({
     next: (res: any) => {
+      // 🚀 FORZAR INTERFAZ
       this.zone.run(() => {
         if (res.success) {
-          this.showToast('Cita agendada con éxito.');
-          doctor.showSchedule = false; // Cerramos agenda
-          this.viewSchedule(doctor);   // 🔄 Refrescamos para quitar el horario ocupado
+          // 🟢 ESTE ES EL TOAST QUE NO VEÍAS
+          this.showToast('✅ Cita agendada con éxito.', 'success'); 
+          doctor.showSchedule = false; 
+          this.viewSchedule(doctor);
         } else {
-          this.showToast('Error: ' + (res.error || 'Horario no disponible.'));
+          this.showToast('Error: ' + (res.error || 'Horario no disponible.'), 'warning');
         }
       });
     },
-    error: () => this.showToast('Error de red al agendar cita.')
+    error: () => this.showToast('Error de red al agendar.', 'danger')
   });
 }
-async showToast(msg: string) {
+async showToast(msg: string, color: string = 'dark') {
   const toast = await this.toastController.create({
     message: msg,
     duration: 2500,
     position: 'bottom',
-    color: 'dark'
+    color: color, // 'success' para verde, 'danger' para rojo
+    cssClass: color === 'danger' ? 'custom-toast-error' : ''
   });
   await toast.present();
 }
@@ -167,39 +163,54 @@ async selectSlot(slot: string, doctor: any) {
     return;
   }
 
-  console.log("Validando cita para el doctor:", doctor.id);
-
   this.medicalService.getUserAppointments(profile.phone).subscribe({
     next: async (res: any) => {
-      // 🛡️ PROTECCIÓN TOTAL: Si res es null, creamos un objeto vacío
       const response = res || { success: false, data: [] };
       const citas = response.data || [];
 
-      // Buscamos si ya tiene cita con este ID de doctor
       const citaDuplicada = citas.find((c: any) => 
         c.doctor_id == doctor.id && (c.status === 'scheduled' || c.status === 'programada')
       );
 
       if (citaDuplicada) {
-        const aviso = `Parece que ya tienes una cita con el doctor ${doctor.name}. Debes cancelar la cita existente antes de agendar una nueva.`;
-        
-       this.zone.run(() => {
-    TextToSpeech.speak({ text: aviso, lang: 'es-MX', rate: 1.0, category: 'ambient' });
-    
-    // 🚀 Pasamos el color 'danger' (rojo)
-    this.showToast2(aviso, 'danger'); 
-  });
-  return;
+        const aviso = `Parece que ya tienes una cita programada con el doctor ${doctor.name}.Primero debes cancelarla la cita programada antes de agendar una nueva.`;
+        this.zone.run(() => {
+          TextToSpeech.speak({ text: aviso, lang: 'es-MX', rate: 1.0, category: 'ambient' });
+          this.showToast2(aviso, 'danger'); 
+        });
+        return; 
       }
 
-      // ✅ Todo limpio, abrimos confirmación
+      // ✅ Unificamos en una sola función limpia
       this.abrirActionSheetConfirmacion(slot, doctor);
     },
-    error: () => {
-      // Si el servidor falla, por cortesía abrimos la confirmación de todos modos
-      this.abrirActionSheetConfirmacion(slot, doctor);
-    }
+    error: () => this.abrirActionSheetConfirmacion(slot, doctor)
   });
+}
+
+private async abrirActionSheetConfirmacion(slot: string, doctor: any) {
+  const actionSheet = await this.actionSheetCtrl.create({
+    header: `Confirmar Cita`,
+    subHeader: `Dr. ${doctor.name} - ${slot} hrs`,
+    mode: 'md',
+    cssClass: 'confirm-appointment-sheet',
+    buttons: [
+      {
+        text: 'AGENDAR CITA AHORA',
+        role: 'confirm',
+        handler: () => { 
+          // 🚀 Ejecutamos la confirmación real
+          this.confirmarCita(slot, doctor); 
+        }
+      },
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+        cssClass: 'action-sheet-cancel-red'
+      }
+    ]
+  });
+  await actionSheet.present();
 }
 async showToast2(msg: string, color: string = 'dark') {
   const toast = await this.toastController.create({
@@ -211,50 +222,7 @@ async showToast2(msg: string, color: string = 'dark') {
   });
   await toast.present();
 }
-private async abrirActionSheetConfirmacion(slot: string, doctor: any) {
-  const actionSheet = await this.actionSheetCtrl.create({
-    header: `Confirmar Cita - Dr. ${doctor.name}`,
-    subHeader: `Horario: ${slot} hrs`,
-    mode: 'md',
-    cssClass: 'confirm-appointment-sheet',
-    buttons: [
-      {
-        text: 'AGENDAR CITA',
-        role: 'confirm',
-        cssClass: 'action-sheet-button.action-sheet-confirm ',
-        handler: () => { this.confirmarCita(slot, doctor); }
-      },
-      {
-        text: 'Cancelar',
-        role: 'cancel',
-        cssClass: 'action-sheet-cancel-red'
-      }
-    ]
-  });
-  await actionSheet.present();
-}
-// 📍 Función separada para que el ActionSheet no se bloquee por la lógica anterior
-private async abrirConfirmacionFinal(slot: string, doctor: any) {
-  const actionSheet = await this.actionSheetCtrl.create({
-    header: `Confirmar Cita`,
-    subHeader: `Médico: ${doctor.name} - Hora: ${slot}`,
-    mode: 'md',
-    cssClass: 'confirm-appointment-sheet',
-    buttons: [
-      {
-        text: 'AGENDAR AHORA',
-        role: 'confirm',
-        handler: () => { this.confirmarCita(slot, doctor); }
-      },
-      {
-        text: 'Cancelar',
-        role: 'cancel',
-        cssClass: 'action-sheet-cancel-red'
-      }
-    ]
-  });
-  await actionSheet.present();
-}
+
 private async invitarARegistro() {
   const alert = await this.alertController.create({
     header: 'Atención',

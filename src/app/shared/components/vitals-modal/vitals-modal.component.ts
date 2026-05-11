@@ -76,35 +76,49 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   /**
    * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
    */
-  async forzarSincronizacionManual() {
-    this.isLoading = true;
-    const profile = this.userService.getProfile();
-    if (!profile) return;
+ async forzarSincronizacionManual() {
+  this.isLoading = true;
+  const profile = this.userService.getProfile();
+  if (!profile) return;
 
-    try {
-      await this.healthService.solicitarPermisosNativos();
-      // 🎯 Llamamos al hardware real a través del servicio
-      const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
+  try {
+    await this.healthService.solicitarPermisosNativos();
+    const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
 
-      if (res.success) {
-        // Actualizamos la vista local de inmediato
-        this.vitals = {
-          heart_rate: res.data.pulso,
-          spo2: res.data.oxigeno,
-          sleep_hours: res.data.horasSueno
-        };
+    if (res.success) {  
+      const hr = res.data.pulso || 0;
+      const ox = res.data.oxigeno || 0;
+      const sh = res.data.horasSueno || 0;
 
-        const mensaje = `Sincronización completada. Pulso: ${res.data.pulso}, Oxígeno: ${res.data.oxigeno} por ciento y ${res.data.horasSueno} horas de sueño.`;
-        this.speak(mensaje);
+      this.vitals = {
+        heart_rate: hr,
+        spo2: ox,
+        sleep_hours: sh
+      };
+
+      // 🎙️ Construimos el mensaje de voz amigable e inteligente
+      let mensajeVoz = "Sincronización completada. ";
+      
+      // Pulso y Oxígeno
+      mensajeVoz += hr > 0 ? `Tu pulso es de ${hr} latidos. ` : "No detecté tu pulso. ";
+      mensajeVoz += ox > 0 ? `Tu oxígeno está al ${ox} por ciento. ` : "No detecté tu oxígeno. ";
+      
+      // 💤 Lógica de Sueño (Nueva)
+      if (Number(sh) > 0) {
+        mensajeVoz += `Y has dormido ${sh} horas.`;
+      } else {
+        mensajeVoz += "Aún no cuento con registros de sueño recientes para mostrar; asegúrate de haber usado tu pulsera al dormir.";
       }
-      this.isLoading = false;
-    } catch (e) {
-      this.isLoading = false;
-      this.speak("No pude conectar con tu pulsera. Asegúrate de tenerla puesta.");
-      console.error("Error en sincronización manual:", e);
-    }
-  }
 
+      this.speak(mensajeVoz);
+      this.cargarSignos(); 
+    }
+    this.isLoading = false;
+  } catch (e) {
+    this.isLoading = false;
+    this.speak("Disculpa, no pude conectar con tu pulsera. Asegúrate de tenerla bien ajustada.");
+  }
+}
   async speak(text: string) {
     try {
       await TextToSpeech.stop();

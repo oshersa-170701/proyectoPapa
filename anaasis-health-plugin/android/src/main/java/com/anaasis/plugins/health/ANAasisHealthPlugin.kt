@@ -28,39 +28,48 @@ class ANAasisHealthPlugin : Plugin() {
         val response = JSObject()
 
         // runBlocking permite ejecutar la lectura de forma síncrona para el plugin
-        runBlocking {
-            try {
-                // 1. Pulso
-                val pRes = client.readRecords(
-                    ReadRecordsRequest(HeartRateRecord::class, timeRange)
-                )
-                if (pRes.records.isNotEmpty()) {
-                    response.put("pulso", pRes.records.last().samples[0].beatsPerMinute)
-                }
+      runBlocking {
+    try {
+        // Aumentamos el rango a 48 horas para asegurar que siempre pesquemos algo
+        val startTime = Instant.now().minus(48, ChronoUnit.HOURS)
+        val endTime = Instant.now()
+        val timeRange = TimeRangeFilter.between(startTime, endTime)
 
-                // 2. Oxígeno
-                val oRes = client.readRecords(
-                    ReadRecordsRequest(OxygenSaturationRecord::class, timeRange)
-                )
-                if (oRes.records.isNotEmpty()) {
-                    response.put("oxigeno", oRes.records.last().percentage.value)
-                }
-
-                // 3. Sueño
-                val sRes = client.readRecords(
-                    ReadRecordsRequest(SleepSessionRecord::class, timeRange)
-                )
-                if (sRes.records.isNotEmpty()) {
-                    val s = sRes.records[0]
-                    val mins = ChronoUnit.MINUTES.between(s.startTime, s.endTime)
-                    response.put("horasSueno", mins.toDouble() / 60.0)
-                }
-
-                call.resolve(response)
-            } catch (e: Exception) {
-                call.reject("Error de hardware real: ${e.message}")
+        // 1. Pulso (Mejoramos la extracción)
+        val pRes = client.readRecords(ReadRecordsRequest(HeartRateRecord::class, timeRange))
+        if (pRes.records.isNotEmpty()) {
+            val lastRecord = pRes.records.last()
+            if (lastRecord.samples.isNotEmpty()) {
+                response.put("pulso", lastRecord.samples.last().beatsPerMinute)
             }
         }
+
+        // 2. Oxígeno
+        val oRes = client.readRecords(ReadRecordsRequest(OxygenSaturationRecord::class, timeRange))
+        if (oRes.records.isNotEmpty()) {
+            response.put("oxigeno", oRes.records.last().percentage.value)
+        }
+
+        // 3. Sueño
+        val sRes = client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, timeRange))
+        if (sRes.records.isNotEmpty()) {
+            val s = sRes.records.last() // Usamos el último registro de sueño
+            val mins = ChronoUnit.MINUTES.between(s.startTime, s.endTime)
+            response.put("horasSueno", mins.toDouble() / 60.0)
+        }
+
+        // Si después de todo sigue vacío, ponemos ceros explícitos para que el TS no reciba null
+        if (!response.has("pulso")) response.put("pulso", 0)
+        if (!response.has("oxigeno")) response.put("oxigeno", 0)
+        if (!response.has("horasSueno")) response.put("horasSueno", 0)
+
+        call.resolve(response)
+    } catch (e: Exception) {
+        // Log para depuración en Android Studio
+        android.util.Log.e("HEALTH_PLUGIN", "Error: ${e.message}")
+        call.reject(e.message)
+    }
+}
     }
 
     @PluginMethod

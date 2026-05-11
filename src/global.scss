@@ -128,3 +128,14 @@ ion-alert {
   color: #ff4961 !important;
   font-weight: 700 !important;
 }
+/* 📍 Toast de Error (Rojo y Blanco) */
+.custom-toast-error {
+  --background: #eb445a !important; /* Rojo Danger de Ionic */
+  --color: #ffffff !important;     /* Letras blancas */
+  --button-color: #ffffff !important;
+  font-weight: 600;
+  
+  &::part(message) {
+    text-align: center;
+  }
+}

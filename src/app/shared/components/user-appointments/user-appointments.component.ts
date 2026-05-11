@@ -44,26 +44,23 @@ cargarCitas() {
       return;
     }
 
-    this.medicalService.getUserAppointments(profile.phone).subscribe({
-      next: (res: any) => {
-        // 🚀 LA CLAVE: Ejecutamos dentro de la zona de Angular
-        this.zone.run(() => {
-          if (res.success) {
-            this.appointments = res.data;
-            console.log('Citas recibidas:', this.appointments.length);
-          }
-          this.isLoading = false;
-          this.cdr.detectChanges(); // 📢 ¡Avisamos a la pantalla que hay datos!
-        });
-      },
-      error: (err) => {
-        this.zone.run(() => {
-          this.isLoading = false;
-          console.error('Error al cargar citas:', err);
-          this.cdr.detectChanges();
-        });
+  this.medicalService.getUserAppointments(profile.phone).subscribe({
+  next: (res: any) => {
+    this.zone.run(() => {
+      if (res.success) {
+        this.appointments = res.data;
+        
+        // 🎙️ ANAasis detecta si hay citas que acaban de expirar
+        const hayExpiradas = this.appointments.some(c => c.status === 'expired');
+        if (hayExpiradas) {
+           this.speak("Parece que algunas citas han expirado porque pasó el tiempo de tolerancia.");
+        }
       }
+      this.isLoading = false;
+      this.cdr.detectChanges();
     });
+  }
+});
   }
 // 1. Función para mostrar alerta de confirmación
  async confirmarCancelacion(cita: any) {
