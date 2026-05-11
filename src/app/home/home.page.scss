@@ -520,3 +520,194 @@ app-medical-map {
     }
   }
 }
+.help-suggestion {
+  text-align: center;
+  padding: 10px;
+  margin: 10px 20px;
+  background: #f0f7ff; // Un azul muy clarito
+  border-radius: 15px;
+  border: 1px dashed #20b0ff;
+  
+  p {
+    color: #555;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  
+  b {
+    color: var(--ion-color-primary);
+  }
+}
+.guide-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 15px;
+  margin: 10px 20px 20px 20px;
+  border: 1px solid rgba(32, 176, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  .guide-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #20b0ff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    ion-icon { font-size: 1.2rem; }
+  }
+
+  .guide-intro {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0 0 10px 0;
+  }
+
+  .command-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 6px;
+      padding-left: 5px;
+      
+      b { color: #007bff; }
+    }
+  }
+
+  .guide-footer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+    font-style: italic;
+  }
+}
+.guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); // Oscurece el fondo
+  backdrop-filter: blur(4px); // Efecto desenfoque Pro
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.guide-window {
+  background: white;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 30px;
+  padding: 25px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+
+
+  .guide-header-pop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    span { font-weight: 800; font-size: 1.1rem; color: #333; }
+    ion-icon { font-size: 1.5rem; }
+  }
+
+  .guide-desc { font-size: 0.85rem; color: #666; margin-bottom: 15px; }
+
+  .command-row {
+    background: #f8faff;
+    margin-bottom: 8px;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #444;
+    border-left: 4px solid #20b0ff;
+    b { color: #007bff; }
+  }
+
+  .consultation-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff4f7;
+    border-radius: 15px;
+    p { font-size: 0.8rem; color: #d63384; margin: 0; line-height: 1.3; }
+  }
+}
+.guide-trigger-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px dashed #20b0ff;
+  padding: 12px 20px;
+  margin: 15px 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  animation: pulse-border 2s infinite;
+
+  ion-icon {
+    color: #20b0ff;
+    font-size: 1.2rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: #555;
+    text-align: center;
+    
+    b {
+      color: #0099ff;
+      text-decoration: underline;
+    }
+  }
+}
+
+// 💫 Animación sutil para llamar la atención sin molestar
+@keyframes pulse-border {
+  0% { border-color: rgba(32, 176, 255, 0.3); transform: scale(1); }
+  50% { border-color: rgba(32, 176, 255, 1); transform: scale(1.02); }
+  100% { border-color: rgba(32, 176, 255, 0.3); transform: scale(1); }
+}
+.sticky-guide {
+  position: sticky;
+  top: 10px; // Se queda a 10px del borde superior del contenedor blanco
+  z-index: 100; // Asegura que los mensajes pasen por debajo
+  margin: 0 15px 15px 15px !important; // Ajustamos márgenes
+  background: rgba(255, 255, 255, 0.95) !important; // Fondo más sólido para legibilidad
+  backdrop-filter: blur(8px); // Efecto Pro de cristalmerilado
+  box-shadow: 0 4px 15px rgba(32, 176, 255, 0.15); // Sombra para separar de los mensajes
+  
+  /* Hacemos la nota un poco más compacta para que no robe mucho espacio arriba */
+  padding: 8px 15px !important;
+  border-radius: 12px !important;
+  
+  span {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Animación de entrada suave */
+.results-fade-in {
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* ⚪ Forzar letras blancas en el botón de la guía */
+.guide-window ion-button {
+  --color: #ffffff !important; // Esto cambia el color del texto a blanco puro
+  font-weight: 700;           // Para que resalte más
+  letter-spacing: 1px;        // Un toque de elegancia
+}

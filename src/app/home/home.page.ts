@@ -1,10 +1,9 @@
 import { ChangeDetectorRef, Component, Input, NgZone } from '@angular/core'; // Usaremos inject para más limpieza
 import {
-  IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController
-} from '@ionic/angular/standalone';
+  IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController, IonButton } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline, navigateCircle } from 'ionicons/icons';
+import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline, navigateCircle, informationCircleOutline, sparkles, closeOutline } from 'ionicons/icons';
 import { UserMessageComponent } from '../shared/components/user-message/user-message.component';
 import { BotMessageComponent } from '../shared/components/bot-message/bot-message.component';
 import { ChatOptionsComponent } from "../shared/components/chat-options/chat-options.component";
@@ -32,16 +31,17 @@ import { Health } from '../core/services/health';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonSpinner,
+  imports: [IonButton, IonSpinner,
     CommonModule, IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon,
     UserMessageComponent, BotMessageComponent, ChatOptionsComponent,
     DoctorListComponent, HospitalListComponent, MedicalMapComponent
   ],
 })
+
 export class HomePage {
   showHospitals = false;
   showDoctors = false;
-
+showGuideModal = false;
   isLoading = false; // Nueva variable de control
   // Arreglos que se llenarán con la API
   listadoHospitales: any[] = [];
@@ -65,20 +65,20 @@ export class HomePage {
     private healthService: Health,
   ) {
     // Añadí los iconos que usan tus listas para que no den error
-    addIcons({ navigateCircle, arrowBackOutline, mic, call, closeCircle, medical, chatbubbleEllipses, star, business, locationOutline, personOutline, chevronForward });
+    addIcons({call,closeCircle,arrowBackOutline,sparkles,closeOutline,mic,informationCircleOutline,navigateCircle,medical,chatbubbleEllipses,star,business,locationOutline,personOutline,chevronForward});
     this.initSpeechRecognition();
     this.setupBackButton(); // 📍 Llamamos a la configuración
   }
   async initSpeechRecognition() {
-  const available = await SpeechRecognition.available();
-  console.log("Micrófono listo:", available);
+    const available = await SpeechRecognition.available();
+    console.log("Micrófono listo:", available);
 
-  // 📍 AGREGA ESTO: Solo para avisarle a Android que usaremos el teléfono
-  // Esto ayuda a que el sistema no bloquee el window.location posterior
-  if (window.navigator && (window.navigator as any).permissions) {
-    (window.navigator as any).permissions.query({ name: 'telephony' }).catch(() => {});
+    // 📍 AGREGA ESTO: Solo para avisarle a Android que usaremos el teléfono
+    // Esto ayuda a que el sistema no bloquee el window.location posterior
+    if (window.navigator && (window.navigator as any).permissions) {
+      (window.navigator as any).permissions.query({ name: 'telephony' }).catch(() => { });
+    }
   }
-}
   async startListening() {
     //console.log(" Intentando abrir micrófono...");
     //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
@@ -119,11 +119,33 @@ export class HomePage {
   }
   sendMessageToAI(text: string) {
     const userText = text.toLowerCase();
+
+    // 2. EVITAR DUPLICIDAD (Silenciamos cualquier proceso de voz anterior)
+    TextToSpeech.stop().catch(() => { });
+    this.limpiarPantalla(); // 👈 Esto asegura que mapas y listas se borren de inmediato
+    this.chatMessages.push({ role: 'user', text: text });
     this.isLoading = true;
     this.showChatOptions = false;
-    this.chatMessages.push({ role: 'user', text: text });
     this.cdr.detectChanges();
+    // 🚀 Lógica de Ayuda / Guía mejorada
+   if (userText.includes('guía') || userText.includes('guíame') || userText.includes('comandos')) {
+  this.limpiarPantalla(); // Limpiamos rastro de mapas/listas
+  this.showGuideModal = true; // 🚀 ACTIVAMOS LA VENTANITA
+  
+  const comandosVoz = `Claro , he abierto mi guía de funciones en tu pantalla. Puedes consultar médicos, hospitales, tus signos o incluso preguntarme sobre alguna enfermedad.`;
+  this.speak(comandosVoz, true);
+  
+  this.isLoading = false;
+  this.cdr.detectChanges();
+  return;
+}
 
+    // 🧹 Limpiamos antes de procesar nueva búsqueda de médicos/hospitales
+    if (userText.includes('médico') || userText.includes('hospital') || userText.includes('doctor')) {
+      this.limpiarPantalla();
+    }
+
+ 
     // 🚨 1. DETECCIÓN LOCAL DE EMERGENCIA (Para respuesta instantánea)
     const esEmergenciaLocal = userText.includes('emergencia') || userText.includes('ayuda') || userText.includes('auxilio') || userText.includes('sos');
 
@@ -244,40 +266,43 @@ export class HomePage {
       return;
     }
     // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ (Para mostrar el modal de signos con datos reales)
-   // Dentro de sendMessageToAI(text: string)
-if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
-  const profile = this.userService.getProfile();
+    // Dentro de sendMessageToAI(text: string)
+    if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
+      const profile = this.userService.getProfile();
 
-  if (!profile) {
-    const msg = "Para ver tus signos, necesito que primero inicies sesión.";
-    this.chatMessages.push({ role: 'bot', text: msg });
-    this.speak(msg, true);
-    return;
-  }
-
-  const txtBot = 'Claro, estoy consultando tu pulsera ahora mismo...';
-  this.chatMessages.push({ role: 'bot', text: txtBot });
-  this.speak(txtBot, true);
-
-  // 🎯 Sincronización forzada con manejo de respuesta real
-  this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then((res: any) => {
-    this.zone.run(() => {
-      if (res && res.success) {
-        // 🎙️ ANAasis ahora tiene los datos reales para hablar
-        const pulso = res.data.pulso || 0;
-        const ox = res.data.oxigeno || 0;
-        const sueno = res.data.horasSueno || 0;
-        
-        const resumenVoz = `Sincronización lista. Tu pulso es de ${pulso} latidos y tu oxígeno está al ${ox} por ciento.`;
-        this.speak(resumenVoz);
+      if (!profile) {
+        const msg = "Necesitas iniciar sesión para ver tus signos.";
+        this.chatMessages.push({ role: 'bot', text: msg });
+        this.speak(msg, true);
+        this.isLoading = false;
+        return;
       }
-      this.openVitalsModal(profile.phone);
-      this.isLoading = false;
-    });
-  });
-  
-  return;
-}
+
+      const txtBot = 'Claro un momento, estoy consultando tu pulsera ahora mismo...';
+      this.chatMessages.push({ role: 'bot', text: txtBot });
+
+      // 🔊 Esperamos a que ANAasis termine de hablar antes de seguir
+      this.speak(txtBot, true).then(() => {
+        // ⏱️ Un pequeño respiro de 500ms tras hablar para que no sea brusco
+        setTimeout(() => {
+          this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then((res: any) => {
+            this.zone.run(() => {
+              if (res && res.success) {
+                const pulso = res.data.pulso || 0;
+                const ox = res.data.oxigeno || 0;
+                const resumenVoz = `Sincronización lista. Tu pulso es de ${pulso} latidos y tu oxígeno está al ${ox} por ciento.`;
+                this.speak(resumenVoz);
+              }
+              this.openVitalsModal(profile.phone);
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            });
+          });
+        }, 500);
+      });
+
+      return;
+    }
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
     // FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)
     // Aquí es donde entrará "dolor de panza", "dolor de pie", etc.
@@ -342,6 +367,7 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
   async handleOptionSelected(type: string) {
     this.showHospitals = false;
     this.showDoctors = false;
+    this.limpiarPantalla(); // 👈 Limpieza obligatoria antes de mostrar nuevos resultados
     this.isLoading = true;
     this.cdr.detectChanges(); //  Mostramos el spinner de inmediato
 
@@ -422,16 +448,12 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
       }
     });
   }
-  async speak(text: string, isManual: boolean = false) {
-    // REGLA: Si está silenciado Y NO es un clic manual, no hables.
-    // Pero si es manual (isManual = true), ¡HABLA aunque esté en silencio!
-    if (this.isMutedGlobal && !isManual) {
-      return;
-    }
+  async speak(text: string, isManual: boolean = false): Promise<void> {
+    if (this.isMutedGlobal && !isManual) return Promise.resolve();
 
     try {
       await TextToSpeech.stop();
-      await TextToSpeech.speak({
+      return await TextToSpeech.speak({
         text: text,
         lang: 'es-MX',
         rate: 1.0,
@@ -440,7 +462,7 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
         category: 'ambient',
       });
     } catch (error) {
-      // console.error("Error en TTS:", error);
+      return Promise.resolve();
     }
   }
   isMutedGlobal = false;
@@ -578,9 +600,11 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
     this.zone.run(async () => {
       const modal = await this.modalCtrl.create({
         component: UserProfileComponent,
+        mode: 'ios',
+        backdropDismiss: true,
         breakpoints: [0, 0.6, 0.9],
         initialBreakpoint: 0.6,
-        handle: true
+        handle: false // 👈 Quitamos el "tirador" que causa el movimiento
       });
       await modal.present();
 
@@ -606,9 +630,11 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
     this.zone.run(async () => {
       const modal = await this.modalCtrl.create({
         component: UserAppointmentsComponent,
+        mode: 'ios',
+        backdropDismiss: true,
         breakpoints: [0, 0.7, 0.9],
         initialBreakpoint: 0.7,
-        handle: true
+        handle: false // 👈 Quitamos el "tirador" que causa el movimiento
       });
       await modal.present();
     });
@@ -618,9 +644,11 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
     this.zone.run(async () => {
       const modal = await this.modalCtrl.create({
         component: RegisterModalComponent,
+        mode: 'ios',
+        backdropDismiss: true,
         breakpoints: [0, 0.8], // El que ya usábamos para registro
         initialBreakpoint: 0.8,
-        handle: true
+        handle: false // 👈 Quitamos el "tirador" que causa el movimiento
       });
       await modal.present();
 
@@ -640,9 +668,11 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
     this.zone.run(async () => {
       const modal = await this.modalCtrl.create({
         component: LoginModalComponent, // Necesitas crear este componente
+        mode: 'ios',
+        backdropDismiss: true,
         breakpoints: [0, 0.6],
         initialBreakpoint: 0.6,
-        handle: true
+        handle: false
       });
       await modal.present();
 
@@ -657,67 +687,84 @@ if (userText.includes('signos') || userText.includes('presión') || userText.inc
     this.zone.run(async () => {
       const modal = await this.modalCtrl.create({
         component: VitalsModalComponent,
+        mode: 'ios',
         componentProps: { phone: phone }
       });
       await modal.present();
     });
   }
   async ionViewDidEnter() {
+    // 🎙️ Bienvenida por voz con pequeño retraso para asegurar inicialización
+    setTimeout(() => {
+      const bienvenida = 'Hola, soy tu asistente virtual ANAasis. ¿En qué puedo ayudarte hoy?';
+      this.speak(bienvenida);
+    }, 1000); // 1 segundo de cortesía para el hardware
+
     try { await (HealthConnect as any).SplashScreen.hide(); } catch (e) { }
     await this.verificarPermisosHealth();
     this.motorDeMonitoreoRealTime();
   }
 
-ultimoPulsoGuardado: number = 0;
-ultimoOxigenoGuardado: number = 0;
-ultimaHoraSueno: number = 0; // 👈 Asegúrate que diga : number
-async motorDeMonitoreoRealTime() {
-  const profile = this.userService.getProfile();
-  if (!profile) return;
+  ultimoPulsoGuardado: number = 0;
+  ultimoOxigenoGuardado: number = 0;
+  ultimaHoraSueno: number = 0; // 👈 Asegúrate que diga : number
+  async motorDeMonitoreoRealTime() {
+    const profile = this.userService.getProfile();
+    if (!profile) return;
 
-  try {
-    // 🚀 LLAMADA AL HARDWARE REAL (Tu Java Plugin)
-    const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
-    
-    if (res.success) {
-  const data = res.data;
-  
-  if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
-    this.ultimoPulsoGuardado = Number(data.pulso);
-    this.ultimoOxigenoGuardado = Number(data.oxigeno);
-    // 🚀 LA SOLUCIÓN AL ERROR: Convertimos a Number explícitamente
-    this.ultimaHoraSueno = Number(data.horasSueno); 
+    try {
+      // 🚀 LLAMADA AL HARDWARE REAL (Tu Java Plugin)
+      const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
 
-    console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
-  }
-}
-  } catch (e) {
-    console.error("Fallo en el monitoreo nativo:", e);
-  }
-}
-async verificarPermisosHealth() {
-  try {
-    // 🚀 AQUÍ ESTÁ EL ERROR: Te falta 'SleepSession' en la lista
-    await (HealthConnect as any).requestHealthPermissions({
-      read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 AGREGA 'SleepSession' AQUÍ
-      write: []
-    });
-  } catch (e) {
-    console.error("Error pidiendo permisos iniciales:", e);
-  }
-}
-async abrirPermisosADerecha() {
-  try {
-    await (HealthConnect as any).requestHealthPermissions({
-      read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 MANTÉN LA CONSISTENCIA AQUÍ TAMBIÉN
-      write: []
-    });
-  } catch (e) {
-    await NativeSettings.openAndroid({
-      option: AndroidSettings.ApplicationDetails,
-    });
-  }
-}
+      if (res.success) {
+        const data = res.data;
 
+        if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
+          this.ultimoPulsoGuardado = Number(data.pulso);
+          this.ultimoOxigenoGuardado = Number(data.oxigeno);
+          // 🚀 LA SOLUCIÓN AL ERROR: Convertimos a Number explícitamente
+          this.ultimaHoraSueno = Number(data.horasSueno);
+
+          console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
+        }
+      }
+    } catch (e) {
+      console.error("Fallo en el monitoreo nativo:", e);
+    }
+  }
+  async verificarPermisosHealth() {
+    try {
+      // 🚀 AQUÍ ESTÁ EL ERROR: Te falta 'SleepSession' en la lista
+      await (HealthConnect as any).requestHealthPermissions({
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 AGREGA 'SleepSession' AQUÍ
+        write: []
+      });
+    } catch (e) {
+      console.error("Error pidiendo permisos iniciales:", e);
+    }
+  }
+  async abrirPermisosADerecha() {
+    try {
+      await (HealthConnect as any).requestHealthPermissions({
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 MANTÉN LA CONSISTENCIA AQUÍ TAMBIÉN
+        write: []
+      });
+    } catch (e) {
+      await NativeSettings.openAndroid({
+        option: AndroidSettings.ApplicationDetails,
+      });
+    }
+  }
+limpiarPantalla() {
+  this.zone.run(() => {
+    this.showHospitals = false;
+    this.showDoctors = false;
+    this.showChatOptions = false;
+    this.listadoHospitales = [];
+    this.listadoDoctores = [];
+    this.isEmergencyActive = false;
+    this.cdr.detectChanges(); // 👈 Vital para que el mapa desaparezca
+  });
+}
 
 }

@@ -139,3 +139,13 @@ ion-alert {
     text-align: center;
   }
 }
+.medical-modal-fix {
+  --height: 85%;
+  --border-radius: 20px 20px 0 0;
+  --backdrop-opacity: 0.5;
+  
+  &::part(content) {
+    position: absolute;
+    bottom: 0;
+  }
+}

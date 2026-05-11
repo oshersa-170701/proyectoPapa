@@ -9,18 +9,24 @@
         <img src="assets/ana2.png" alt="ANAasis Logo" class="main-logo-img">
       </div>
     </div>
-   <div class="header-content">
-  <div class="assistant-tag">Asistente Virtual</div>
-  <h2 class="welcome-text">
-   <span class="brand">ANAasis</span>
-  </h2>
-</div>
+    <div class="header-content">
+      <div class="assistant-tag">Asistente Virtual</div>
+      <h2 class="welcome-text">
+        <span class="brand">ANAasis</span>
+      </h2>
+    </div>
   </header>
 
   <main class="white-container">
     <ion-grid>
       <ion-row>
         <ion-col size="12" id="chat-container">
+          @if (!showGuideModal) {
+          <div class="guide-trigger-note results-fade-in sticky-guide" (click)="showGuideModal = true">
+            <ion-icon name="sparkles"></ion-icon>
+            <span>¿No sabes qué decir? Di <b>"Guíame"</b> o <b>toca aquí</b> para ver mis comandos.</span>
+          </div>
+          }
           @for (msg of chatMessages; track $index) {
           @if (msg.role === 'bot') {
           <app-bot-message [isMuted]="isMutedGlobal" [fullText]="msg.text" (toggleMute)="toggleAppMute()"
@@ -30,6 +36,8 @@
           <app-user-message [messageText]="msg.text"></app-user-message>
           }
           }
+          
+
           @if (showChatOptions) {
           <app-chat-options (optionSelected)="handleOptionSelected($event)" class="results-fade-in"></app-chat-options>
           }
@@ -60,9 +68,9 @@
               </div>
 
               <div class="close-emergency" (click)="cancelarEmergencia()">
-  <ion-icon name="close-circle"></ion-icon>
-  Cancelar alerta de emergencia
-</div>
+                <ion-icon name="close-circle"></ion-icon>
+                Cancelar alerta de emergencia
+              </div>
             </div>
             }
             @if (isLoading) {
@@ -100,6 +108,37 @@
     <div class="exit-pop-content">
       <ion-icon name="arrow-back-outline"></ion-icon>
       Retrocede nuevamente para salir
+    </div>
+  </div>
+  }
+  @if (showGuideModal) {
+  <div class="guide-overlay results-fade-in" (click)="showGuideModal = false">
+    <div class="guide-window" (click)="$event.stopPropagation()">
+      <div class="guide-header-pop">
+        <ion-icon name="sparkles" color="primary"></ion-icon>
+        <span>Guía de Funciones</span>
+        <ion-button fill="clear" (click)="showGuideModal = false">
+          <ion-icon name="close-outline" slot="icon-only" color="medium"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="guide-body">
+        <p class="guide-desc">Puedes hablar conmigo usando estos comandos:</p>
+
+        <div class="command-row">🗣️ <b>"Hospitales"</b> o <b>"Médicos"</b></div>
+        <div class="command-row">📊 <b>"Ver mis signos"</b> o <b>"¿Cómo estoy?"</b></div>
+        <div class="command-row">📅 <b>"Mis citas"</b> o <b>"Cancelar cita"</b></div>
+        <div class="command-row">👤 <b>"Mi perfil"</b> o <b>"Registrarme"</b></div>
+        <div class="command-row">🚨 <b>"Emergencia"</b> o <b>"SOS"</b></div>
+
+        <div class="consultation-box">
+          <p>💡 También puedes consultarme sobre padecimientos como <b>"dolor de cabeza"</b> o <b>"fiebre"</b>.</p>
+        </div>
+      </div>
+
+      <ion-button expand="block" shape="round" (click)="showGuideModal = false" class="ion-margin-top" style="--color: white;">
+  ¡ENTENDIDO!
+</ion-button>
     </div>
   </div>
   }
