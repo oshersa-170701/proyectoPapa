@@ -89,6 +89,7 @@ export class MedicalService {
   }
   /** Guardar signos (vienen de la pulsera o manual) */
   // En src/app/core/services/medical.ts
+/** Guardar signos (vienen de la pulsera o manual con temperatura) */
   saveVitals(data: any): Observable<any> {
     const url = `${this.API_URL}/anaasis.php`;
     return this.http.post(url, {
@@ -96,10 +97,10 @@ export class MedicalService {
       api_key: "ANAASIS_2026",
       phone: data.phone,
       name: data.name,
-      heart_rate: data.heart_rate || 0, // Mandamos 0 real si el sensor no detecta nada
+      heart_rate: data.heart_rate || 0,
       spo2: data.spo2 || 0,
       sleep_hours: data.sleep_hours || 0,
-      temperature: 36.5
+      temperature: data.temperature || 0 
     });
   }
 

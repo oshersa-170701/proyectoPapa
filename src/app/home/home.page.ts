@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, Input, NgZone } from '@angular/core'; // Usaremos inject para más limpieza
+import { ChangeDetectorRef, Component, Input, NgZone, EnvironmentInjector } from '@angular/core';
 import {
   IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController, IonButton } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline, navigateCircle, informationCircleOutline, sparkles, closeOutline } from 'ionicons/icons';
@@ -14,7 +15,6 @@ import { MedicalService } from '../core/services/medical';
 import { Geolocation } from '@capacitor/geolocation';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
-import { ToastController } from '@ionic/angular'; //  Importa ToastController
 import { App } from '@capacitor/app';
 import { Overpass } from '../core/services/overpass';
 import { UserProfileComponent } from '../shared/components/user-profile/user-profile.component';
@@ -26,6 +26,7 @@ import { User } from '../core/services/user';
 import { HealthConnect } from 'capacitor-health-connect';
 import { NativeSettings, AndroidSettings } from 'capacitor-native-settings';
 import { Health } from '../core/services/health';
+import { RegistrarTemperaturaComponent } from '../shared/components/registrar-temperatura/registrar-temperatura.component';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -34,7 +35,7 @@ import { Health } from '../core/services/health';
   imports: [IonButton, IonSpinner,
     CommonModule, IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon,
     UserMessageComponent, BotMessageComponent, ChatOptionsComponent,
-    DoctorListComponent, HospitalListComponent, MedicalMapComponent
+    DoctorListComponent, HospitalListComponent, MedicalMapComponent, RegistrarTemperaturaComponent
   ],
 })
 
@@ -63,6 +64,7 @@ showGuideModal = false;
     private modalCtrl: ModalController,
     private userService: User,
     private healthService: Health,
+    public environmentInjector: EnvironmentInjector
   ) {
     // Añadí los iconos que usan tus listas para que no den error
     addIcons({call,closeCircle,arrowBackOutline,sparkles,closeOutline,mic,informationCircleOutline,navigateCircle,medical,chatbubbleEllipses,star,business,locationOutline,personOutline,chevronForward});
@@ -303,6 +305,28 @@ showGuideModal = false;
 
       return;
     }
+   // 🌡️ 10. DETECCIÓN DE REGISTRO DE TEMPERATURA POR VOZ
+    if (userText.includes('registrar mi temperatura') || userText.includes('temperatura') || userText.includes('registrar temperatura')) {
+      const profile = this.userService.getProfile();
+
+      if (!profile) {
+        const msg = "Necesitas iniciar sesión para poder registrar tu temperatura en el sistema.";
+        this.chatMessages.push({ role: 'bot', text: msg });
+        this.speak(msg, true);
+        this.isLoading = false;
+        return;
+      }
+
+      const txtTemperatura = 'Claro, abriendo el registro de tu temperatura corporal actual...';
+      this.chatMessages.push({ role: 'bot', text: txtTemperatura });
+      this.speak(txtTemperatura, true);
+      this.isLoading = false;
+
+      // 🚀 Abrimos el modal automáticamente
+      this.openTemperaturaModal();
+      this.cdr.detectChanges();
+      return; // Detenemos el flujo para que no se envíe a la IA externa
+    }
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
     // FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)
     // Aquí es donde entrará "dolor de panza", "dolor de pie", etc.
@@ -357,7 +381,7 @@ showGuideModal = false;
           this.isLoading = false;
           this.chatMessages.push({
             role: 'bot',
-            text: "Error de red. ¿Tienes internet en el celular? 📶"
+            text: "Error de red. ¿Tienes internet en el celular? "
           });
           this.cdr.detectChanges();
         });
@@ -766,5 +790,24 @@ limpiarPantalla() {
     this.cdr.detectChanges(); // 👈 Vital para que el mapa desaparezca
   });
 }
+async openTemperaturaModal() {
+    this.zone.run(async () => {
+      // 1. Creamos el modal con las opciones nativas de Ionic estándar
+      const modal = await this.modalCtrl.create({
+        component: RegistrarTemperaturaComponent,
+        mode: 'ios',
+        backdropDismiss: true,
+        breakpoints: [0, 0.5],
+        initialBreakpoint: 0.5,
+        handle: true
+      });
 
+      // 2. Asignamos de forma dinámica el inyector del entorno de la HomePage 
+      // para que resuelva los Providers Standalone sin errores de TypeScript
+      (modal as any).environmentInjector = this.environmentInjector;
+
+      // 3. Lo presentamos en pantalla de forma nativa
+      await modal.present();
+    });
+  }
 }

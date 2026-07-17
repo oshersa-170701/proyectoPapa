@@ -64,6 +64,19 @@
           <p>Descanso diario capturado</p>
         </div>
       </div>
+       <div class="vital-card vital-card-temperature">
+        <div class="card-header">
+        <ion-icon name="thermometer-outline"></ion-icon>
+          <h3>Registro de Temperatura</h3>
+        </div>
+        <div class="card-body">
+          <p class="value">{{ vitals?.temperature || '0' }}</p>
+          <span class="unit">°C</span>
+        </div>
+        <div class="card-footer">
+          <p>Temperatura corporal registrada</p>
+        </div>
+      </div>
 
       <p class="last-update">Última lectura médica: {{ vitals.created_at | date:'mediumTime' }}</p>
 

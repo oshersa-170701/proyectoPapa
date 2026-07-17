@@ -56,9 +56,6 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
     this.modalCtrl.dismiss();
   }
 
-  /**
-   * Carga los datos que ya están en la BD de Daniel
-   */
   cargarSignos() {
     this.medicalService.getLatestVitals(this.phone).subscribe({
       next: (res: any) => {

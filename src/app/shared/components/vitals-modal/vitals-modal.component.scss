@@ -161,6 +161,25 @@ ion-buttons ion-button {
     border-left: 5px solid var(--med-purple);
     .card-header ion-icon { color: var(--med-purple); }
   }
+  .vital-card-temperature {
+    // Fondo sutil con degradado rojo
+    background: linear-gradient(145deg, #ffffff, #fff5f5);
+    border: 1px solid rgba(48, 189, 255, 0.1);
+
+    .card-header {
+      // Icono de gota grande y rojo
+      ion-icon { 
+        color: var(--med-blue); 
+        font-size: 2.5rem;
+        filter: drop-shadow(0 2px 4px rgba(48, 189, 255, 0.2));
+      }
+      h3 { color: rgb(51, 85, 170); } // Texto del título ligeramente rojizo
+    }
+    
+    .card-body .value {
+      color: rgb(34, 75, 187); // Valor numérico en rojo oscuro
+    }
+  }
 
   .last-update {
     font-size: 0.85rem;
