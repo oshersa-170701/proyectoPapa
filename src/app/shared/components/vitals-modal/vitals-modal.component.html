@@ -2,7 +2,7 @@
   <ion-toolbar color="success">
     <ion-title class="medical-title">Mis Signos Vitales</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="forzarSincronizacionManual()" [disabled]="isLoading" >
+      <ion-button (click)="forzarSincronizacionManual()" [disabled]="isLoading">
         <ion-icon name="sync-outline" [class.spinner-animate]="isLoading"></ion-icon>
       </ion-button>
       <ion-button (click)="dismiss()" color="danger" fill="clear">
@@ -23,6 +23,7 @@
   @if (vitals) {
     <div class="vitals-container">
       
+      <!-- Frecuencia Cardíaca -->
       <div class="vital-card vital-card-hr">
         <div class="card-header">
           <ion-icon name="heart-outline"></ion-icon>
@@ -37,6 +38,7 @@
         </div>
       </div>
 
+      <!-- Saturación de Oxígeno -->
       <div class="vital-card vital-card-spo2">
         <div class="card-header">
           <ion-icon name="water-outline"></ion-icon>
@@ -51,6 +53,7 @@
         </div>
       </div>
 
+      <!-- Registro de Sueño -->
       <div class="vital-card vital-card-sleep">
         <div class="card-header">
           <ion-icon name="moon-outline"></ion-icon>
@@ -64,9 +67,11 @@
           <p>Descanso diario capturado</p>
         </div>
       </div>
-       <div class="vital-card vital-card-temperature">
+
+      <!-- Registro de Temperatura -->
+      <div class="vital-card vital-card-temperature">
         <div class="card-header">
-        <ion-icon name="thermometer-outline"></ion-icon>
+          <ion-icon name="thermometer-outline"></ion-icon>
           <h3>Registro de Temperatura</h3>
         </div>
         <div class="card-body">
@@ -75,6 +80,36 @@
         </div>
         <div class="card-footer">
           <p>Temperatura corporal registrada</p>
+        </div>
+      </div>
+
+      <!-- 👟 Contador de Pasos -->
+      <div class="vital-card vital-card-steps">
+        <div class="card-header">
+          <ion-icon name="walk-outline"></ion-icon>
+          <h3>Pasos Diarios</h3>
+        </div>
+        <div class="card-body">
+          <p class="value">{{ vitals?.steps || '0' }}</p>
+          <span class="unit">Pasos</span>
+        </div>
+        <div class="card-footer">
+          <p>Actividad de caminata detectada</p>
+        </div>
+      </div>
+
+      <!-- 🔥 Calorías Quemadas -->
+      <div class="vital-card vital-card-calories">
+        <div class="card-header">
+          <ion-icon name="flame-outline"></ion-icon>
+          <h3>Calorías Quemadas</h3>
+        </div>
+        <div class="card-body">
+          <p class="value">{{ (vitals?.calories || 0) | number:'1.0-1' }}</p>
+          <span class="unit">Kcal</span>
+        </div>
+        <div class="card-footer">
+          <p>Energía metabólica consumida</p>
         </div>
       </div>
 

@@ -732,12 +732,12 @@ showGuideModal = false;
   ultimoPulsoGuardado: number = 0;
   ultimoOxigenoGuardado: number = 0;
   ultimaHoraSueno: number = 0; // 👈 Asegúrate que diga : number
-  async motorDeMonitoreoRealTime() {
+ async motorDeMonitoreoRealTime() {
     const profile = this.userService.getProfile();
     if (!profile) return;
 
     try {
-      // 🚀 LLAMADA AL HARDWARE REAL (Tu Java Plugin)
+      // 🚀 LLAMADA AL HARDWARE REAL (Tu Kotlin Plugin)
       const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
 
       if (res.success) {
@@ -746,10 +746,10 @@ showGuideModal = false;
         if (data.pulso !== this.ultimoPulsoGuardado || data.oxigeno !== this.ultimoOxigenoGuardado) {
           this.ultimoPulsoGuardado = Number(data.pulso);
           this.ultimoOxigenoGuardado = Number(data.oxigeno);
-          // 🚀 LA SOLUCIÓN AL ERROR: Convertimos a Number explícitamente
           this.ultimaHoraSueno = Number(data.horasSueno);
 
-          console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño`);
+          // Imprimimos la analítica completa en el LogCat incluyendo pasos y calorías
+          console.log(`[ANAasis Nativo] Sincronizado: ${data.pulso} BPM | ${data.oxigeno}% SpO2 | ${data.horasSueno}h Sueño | ${data.steps} Pasos | ${data.calories} Kcal`);
         }
       }
     } catch (e) {
@@ -758,19 +758,20 @@ showGuideModal = false;
   }
   async verificarPermisosHealth() {
     try {
-      // 🚀 AQUÍ ESTÁ EL ERROR: Te falta 'SleepSession' en la lista
+      // 🚀 CAMBIO CRÍTICO: Cambiamos 'TotalCaloriesBurned' por 'ActiveCaloriesBurned'
       await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 AGREGA 'SleepSession' AQUÍ
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'], 
         write: []
       });
     } catch (e) {
       console.error("Error pidiendo permisos iniciales:", e);
     }
   }
-  async abrirPermisosADerecha() {
+async abrirPermisosADerecha() {
     try {
+      // 🚀 Cambiamos también aquí para mantener la consistencia
       await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession'], // 👈 MANTÉN LA CONSISTENCIA AQUÍ TAMBIÉN
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'], 
         write: []
       });
     } catch (e) {

@@ -161,6 +161,17 @@ ion-buttons ion-button {
     border-left: 5px solid var(--med-purple);
     .card-header ion-icon { color: var(--med-purple); }
   }
+  // PASOS (Azul Médico)
+.vital-card-steps {
+  border-left: 5px solid var(--med-blue);
+  .card-header ion-icon { color: var(--med-blue); }
+}
+
+// CALORÍAS (Naranja/Púrpura Fitness)
+.vital-card-calories {
+  border-left: 5px solid #ff9500;
+  .card-header ion-icon { color: #ff9500; }
+}
   .vital-card-temperature {
     // Fondo sutil con degradado rojo
     background: linear-gradient(145deg, #ffffff, #fff5f5);

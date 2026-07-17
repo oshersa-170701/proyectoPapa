@@ -90,6 +90,7 @@ export class MedicalService {
   /** Guardar signos (vienen de la pulsera o manual) */
   // En src/app/core/services/medical.ts
 /** Guardar signos (vienen de la pulsera o manual con temperatura) */
+/** Guardar signos y datos fitness (vienen de la pulsera o manual) */
   saveVitals(data: any): Observable<any> {
     const url = `${this.API_URL}/anaasis.php`;
     return this.http.post(url, {
@@ -100,7 +101,9 @@ export class MedicalService {
       heart_rate: data.heart_rate || 0,
       spo2: data.spo2 || 0,
       sleep_hours: data.sleep_hours || 0,
-      temperature: data.temperature || 0 
+      temperature: data.temperature || 0,
+      steps: data.steps || 0,         // 👟 Pasos dinámicos
+      calories: data.calories || 0.0  // 🔥 Calorías dinámicas
     });
   }
 

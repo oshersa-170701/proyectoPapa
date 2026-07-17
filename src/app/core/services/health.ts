@@ -16,21 +16,23 @@ export class Health {
   /**
    * Sincroniza los signos vitales reales del sensor con la base de datos de Daniel
    */
-  async sincronizarConHealthConnect(phone: string, name: string) {
+ async sincronizarConHealthConnect(phone: string, name: string) {
     try {
-        // 🚀 Paso 1: Pedir mediciones (El Java ahora busca 48h atrás)
+        // 🚀 Paso 1: Pedir mediciones al plugin nativo en Kotlin
         const data = await ANAasisHealth.obtenerMediciones();
         
-        // 🚀 Paso 2: Asegurar valores numéricos (Limpieza total)
+        // 🚀 Paso 2: Asegurar valores numéricos e incluir pasos y calorías (Limpieza total)
         const vitalsData = {
             phone: phone,
             name: name,
             heart_rate: Math.round(Number(data.pulso || 0)),
             spo2: Math.round(Number(data.oxigeno || 0)),
-            sleep_hours: Number(data.horasSueno || 0).toFixed(1) // 1 decimal para sueño
+            sleep_hours: Number(data.horasSueno || 0).toFixed(1), // 1 decimal para sueño
+            steps: Math.round(Number(data.pasos || 0)),           // 👟 Mapeo de pasos
+            calories: Number(data.calorias || 0.0)                // 🔥 Mapeo de calorías
         };
 
-        // 🚀 Paso 3: Enviar al PHP
+        // 🚀 Paso 3: Enviar al PHP a través de MedicalService
         await firstValueFrom(this.medicalService.saveVitals(vitalsData));
         
         return {
@@ -38,12 +40,14 @@ export class Health {
             data: {
                 pulso: vitalsData.heart_rate,
                 oxigeno: vitalsData.spo2,
-                horasSueno: vitalsData.sleep_hours
+                horasSueno: vitalsData.sleep_hours,
+                steps: vitalsData.steps,       // Retornamos al flujo de la app
+                calories: vitalsData.calories
             }
         };
     } catch (error) {
         console.error('Error sincronizando:', error);
-        return { success: false, data: { pulso: 0, oxigeno: 0, horasSueno: 0 } };
+        return { success: false, data: { pulso: 0, oxigeno: 0, horasSueno: 0, steps: 0, calories: 0.0 } };
     }
 }
   async solicitarPermisosNativos() {

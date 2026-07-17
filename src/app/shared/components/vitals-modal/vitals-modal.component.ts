@@ -6,8 +6,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
-  closeOutline, heartOutline, thermometerOutline, speedometerOutline, 
-  syncOutline, medical, water, waterOutline, medicalOutline, moonOutline, alertCircleOutline } from 'ionicons/icons';
+  closeOutline, heartOutline, thermometerOutline, speedometerOutline, walkOutline, flameOutline,
+  syncOutline, medical, water, waterOutline, medicalOutline, moonOutline, alertCircleOutline 
+} from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
@@ -31,13 +32,17 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   isLoading = true;
 
   private readonly medicalService = inject(MedicalService);
-  private readonly healthService = inject(Health); // 👈 Inyectamos el puente nativo
+  private readonly healthService = inject(Health);
   private readonly modalCtrl = inject(ModalController);
   private readonly userService = inject(User);
   private updateTimer: any;
 
   constructor() {
-    addIcons({syncOutline,closeOutline,heartOutline,waterOutline,moonOutline,alertCircleOutline,medicalOutline,speedometerOutline,medical,water,thermometerOutline});
+    addIcons({
+      syncOutline, closeOutline, heartOutline, waterOutline, moonOutline, 
+      alertCircleOutline, medicalOutline, speedometerOutline, medical, water, 
+      thermometerOutline, walkOutline, flameOutline
+    });
   }
 
   ngOnInit() {
@@ -60,7 +65,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
     this.medicalService.getLatestVitals(this.phone).subscribe({
       next: (res: any) => {
         if (res && res.success && res.data) {
-          this.vitals = res.data; // Aquí ya viene heart_rate, spo2 y sleep_hours
+          this.vitals = res.data; // Recibe de anaasis.php todo el conjunto, incluyendo steps y calories
         }
         this.isLoading = false;
       },
@@ -73,49 +78,61 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   /**
    * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
    */
- async forzarSincronizacionManual() {
-  this.isLoading = true;
-  const profile = this.userService.getProfile();
-  if (!profile) return;
+  async forzarSincronizacionManual() {
+    this.isLoading = true;
+    const profile = this.userService.getProfile();
+    if (!profile) return;
 
-  try {
-    await this.healthService.solicitarPermisosNativos();
-    const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
+    try {
+      await this.healthService.solicitarPermisosNativos();
+      const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
 
-    if (res.success) {  
-      const hr = res.data.pulso || 0;
-      const ox = res.data.oxigeno || 0;
-      const sh = res.data.horasSueno || 0;
+      if (res.success) {  
+        // 🛠️ Forzamos un casting temporal a 'any' para que TS no choque con la interfaz vieja de HealthService
+        const dataActividad = res.data as any;
+        const hr = res.data.pulso || 0;
+        const ox = res.data.oxigeno || 0;
+        const sh = res.data.horasSueno || 0;
+        const st = dataActividad.pasos || 0;       // 👟 Ahora se resolverá sin error
+        const cal = dataActividad.calorias || 0.0;  // 🔥 Ahora se resolverá sin error
 
-      this.vitals = {
-        heart_rate: hr,
-        spo2: ox,
-        sleep_hours: sh
-      };
+        this.vitals = {
+          heart_rate: hr,
+          spo2: ox,
+          sleep_hours: sh,
+          steps: st,
+          calories: cal,
+          temperature: this.vitals?.temperature || 0 // Conservamos la última temperatura mapeada
+        };
 
-      // 🎙️ Construimos el mensaje de voz amigable e inteligente
-      let mensajeVoz = "Sincronización completada. ";
-      
-      // Pulso y Oxígeno
-      mensajeVoz += hr > 0 ? `Tu pulso es de ${hr} latidos. ` : "No detecté tu pulso. ";
-      mensajeVoz += ox > 0 ? `Tu oxígeno está al ${ox} por ciento. ` : "No detecté tu oxígeno. ";
-      
-      // 💤 Lógica de Sueño (Nueva)
-      if (Number(sh) > 0) {
-        mensajeVoz += `Y has dormido ${sh} horas.`;
-      } else {
-        mensajeVoz += "Aún no cuento con registros de sueño recientes para mostrar; asegúrate de haber usado tu pulsera al dormir.";
+        // 🎙️ Reporte inteligente de voz de ANAasis
+        let mensajeVoz = "Sincronización completada. ";
+        
+        mensajeVoz += hr > 0 ? `Tu pulso es de ${hr} latidos. ` : "No detecté tu pulso. ";
+        mensajeVoz += ox > 0 ? `Tu oxígeno está al ${ox} por ciento. ` : "No detecté tu oxígeno. ";
+        
+        if (Number(sh) > 0) {
+          mensajeVoz += `Has dormido ${sh} horas. `;
+        }
+        
+        // Reportar métricas de actividad física
+        if (st > 0) {
+          mensajeVoz += `Hoy llevas acumulados ${st} pasos `;
+        }
+        if (cal > 0) {
+          mensajeVoz += `y has quemado aproximadamente ${Math.round(cal)} kilocalorías.`;
+        }
+
+        this.speak(mensajeVoz);
+        this.cargarSignos(); 
       }
-
-      this.speak(mensajeVoz);
-      this.cargarSignos(); 
+      this.isLoading = false;
+    } catch (e) {
+      this.isLoading = false;
+      this.speak("Disculpa, no pude conectar con tu pulsera. Asegúrate de tenerla bien ajustada.");
     }
-    this.isLoading = false;
-  } catch (e) {
-    this.isLoading = false;
-    this.speak("Disculpa, no pude conectar con tu pulsera. Asegúrate de tenerla bien ajustada.");
   }
-}
+
   async speak(text: string) {
     try {
       await TextToSpeech.stop();
