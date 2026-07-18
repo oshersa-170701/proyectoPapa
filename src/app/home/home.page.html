@@ -36,7 +36,7 @@
           <app-user-message [messageText]="msg.text"></app-user-message>
           }
           }
-          
+
 
           @if (showChatOptions) {
           <app-chat-options (optionSelected)="handleOptionSelected($event)" class="results-fade-in"></app-chat-options>
@@ -56,7 +56,7 @@
                   {{ sosEnviado ? 'AUXILIO SOLICITADO' : 'SOLICITAR AMBULANCIA (SOS)' }}
                 </div>
 
-                @if (sosEnviado && datosAmbulancia) {
+                @if (sosEnviado && datosAmbulancia && datosAmbulancia.latitud && datosAmbulancia.longitud) {
                 <div class="ambulance-tracking results-fade-in">
                   <div class="label-section">Sigue a tu ambulancia en tiempo real:</div>
                   <app-medical-map
@@ -136,9 +136,10 @@
         </div>
       </div>
 
-      <ion-button expand="block" shape="round" (click)="showGuideModal = false" class="ion-margin-top" style="--color: white;">
-  ¡ENTENDIDO!
-</ion-button>
+      <ion-button expand="block" shape="round" (click)="showGuideModal = false" class="ion-margin-top"
+        style="--color: white;">
+        ¡ENTENDIDO!
+      </ion-button>
     </div>
   </div>
   }

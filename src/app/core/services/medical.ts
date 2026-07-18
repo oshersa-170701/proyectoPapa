@@ -103,7 +103,9 @@ export class MedicalService {
       sleep_hours: data.sleep_hours || 0,
       temperature: data.temperature || 0,
       steps: data.steps || 0,         // 👟 Pasos dinámicos
-      calories: data.calories || 0.0  // 🔥 Calorías dinámicas
+      calories: data.calories || 0.0,  // 🔥 Calorías dinámicas
+      latitude: data.latitude || null,
+      longitude: data.longitude || null
     });
   }
 
@@ -114,6 +116,20 @@ export class MedicalService {
       api_key: "ANAASIS_2026",
       phone: phone
     });
+  }
+  /** Consultar las coordenadas en tiempo real de la ambulancia asignada */
+getEmergencyTracking(phone: string): Observable<any> {
+    // 🛡️ Aseguramos que viajen exactamente 'action' y 'api_key' en formato JSON limpio
+    const payload = {
+      action: "get_emergency_tracking",
+      api_key: "ANAASIS_2026",
+      phone: phone
+    };
+    
+    console.log("[HTTP Request] Consultando GPS para el teléfono:", phone);
+    
+    // Verifica que la URL termine correctamente en /anaasis.php
+    return this.http.post(`${this.API_URL}/anaasis.php`, payload);
   }
 
 }

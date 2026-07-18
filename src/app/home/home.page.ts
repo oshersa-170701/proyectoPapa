@@ -1,10 +1,16 @@
 import { ChangeDetectorRef, Component, Input, NgZone, EnvironmentInjector } from '@angular/core';
 import {
-  IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController, IonButton } from '@ionic/angular/standalone';
+  IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController, IonButton
+} from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline, chevronForward, call, closeCircle, arrowBackOutline, navigateCircle, informationCircleOutline, sparkles, closeOutline } from 'ionicons/icons';
+import {
+  medical, chatbubbleEllipses, mic, star, business, locationOutline, personOutline,
+  chevronForward, call, closeCircle, arrowBackOutline, navigateCircle, informationCircleOutline,
+  sparkles, closeOutline,
+  checkmarkCircle
+} from 'ionicons/icons';
 import { UserMessageComponent } from '../shared/components/user-message/user-message.component';
 import { BotMessageComponent } from '../shared/components/bot-message/bot-message.component';
 import { ChatOptionsComponent } from "../shared/components/chat-options/chat-options.component";
@@ -42,7 +48,7 @@ import { RegistrarTemperaturaComponent } from '../shared/components/registrar-te
 export class HomePage {
   showHospitals = false;
   showDoctors = false;
-showGuideModal = false;
+  showGuideModal = false;
   isLoading = false; // Nueva variable de control
   // Arreglos que se llenarán con la API
   listadoHospitales: any[] = [];
@@ -67,7 +73,11 @@ showGuideModal = false;
     public environmentInjector: EnvironmentInjector
   ) {
     // Añadí los iconos que usan tus listas para que no den error
-    addIcons({call,closeCircle,arrowBackOutline,sparkles,closeOutline,mic,informationCircleOutline,navigateCircle,medical,chatbubbleEllipses,star,business,locationOutline,personOutline,chevronForward});
+    addIcons({
+      call, closeCircle, arrowBackOutline, sparkles, closeOutline, mic,
+      informationCircleOutline, navigateCircle, medical, chatbubbleEllipses, star, business,
+      locationOutline, personOutline, chevronForward, checkmarkCircle
+    });
     this.initSpeechRecognition();
     this.setupBackButton(); // 📍 Llamamos a la configuración
   }
@@ -130,35 +140,103 @@ showGuideModal = false;
     this.showChatOptions = false;
     this.cdr.detectChanges();
     // 🚀 Lógica de Ayuda / Guía mejorada
-   if (userText.includes('guía') || userText.includes('guíame') || userText.includes('comandos')) {
-  this.limpiarPantalla(); // Limpiamos rastro de mapas/listas
-  this.showGuideModal = true; // 🚀 ACTIVAMOS LA VENTANITA
-  
-  const comandosVoz = `Claro , he abierto mi guía de funciones en tu pantalla. Puedes consultar médicos, hospitales, tus signos o incluso preguntarme sobre alguna enfermedad.`;
-  this.speak(comandosVoz, true);
-  
-  this.isLoading = false;
-  this.cdr.detectChanges();
-  return;
-}
+    if (userText.includes('guía') || userText.includes('guíame') || userText.includes('comandos')) {
+      this.limpiarPantalla(); // Limpiamos rastro de mapas/listas
+      this.showGuideModal = true; // 🚀 ACTIVAMOS LA VENTANITA
+
+      const comandosVoz = `Claro , he abierto mi guía de funciones en tu pantalla. Puedes consultar médicos, hospitales, tus signos o incluso preguntarme sobre alguna enfermedad.`;
+      this.speak(comandosVoz, true);
+
+      this.isLoading = false;
+      this.cdr.detectChanges();
+      return;
+    }
 
     // 🧹 Limpiamos antes de procesar nueva búsqueda de médicos/hospitales
     if (userText.includes('médico') || userText.includes('hospital') || userText.includes('doctor')) {
       this.limpiarPantalla();
     }
 
- 
+
     // 🚨 1. DETECCIÓN LOCAL DE EMERGENCIA (Para respuesta instantánea)
     const esEmergenciaLocal = userText.includes('emergencia') || userText.includes('ayuda') || userText.includes('auxilio') || userText.includes('sos');
 
     if (esEmergenciaLocal) {
-      this.isEmergencyActive = true;
-      this.chatMessages.push({ role: 'bot', text: '⚠️ ¡EMERGENCIA DETECTADA! Activando protocolos y localizando hospitales cercanos...' });
-      this.handleOptionSelected('hospitals');
-      this.speak("He detectado una emergencia. Localizando ayuda inmediata.", true);
-      this.isLoading = false;
-      this.cdr.detectChanges();
-      return; // Detenemos aquí para modo rescate
+      this.zone.run(async () => {
+        this.isEmergencyActive = true; // 🔴 ACTIVA EL PANEL DE EMERGENCIA DEL HTML
+        this.showHospitals = true;     // 🗺️ Activa la bandera para renderizar el mapa
+        this.showDoctors = false;
+        this.showChatOptions = false;
+        this.isLoading = true;
+
+        this.chatMessages.push({ role: 'bot', text: '⚠️ ¡EMERGENCIA DETECTADA! Activando protocolos de auxilio y localizando hospitales cercanos...' });
+        this.speak("He detectado una emergencia. Localizando ayuda inmediata.", true);
+        this.cdr.detectChanges();
+
+        // Localizamos coordenadas rápidas de respaldo
+        let lat = 17.0796;
+        let lng = -96.7535;
+
+        // Recuperamos el perfil dinámico real del usuario activo
+        const profile = this.userService.getProfile();
+        const phone = profile ? profile.phone : null;
+        const name = profile ? profile.name : 'Usuario Anónimo';
+
+        try {
+          const coordinates = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true, // Mayor precisión obligatoria para almacenar coordenadas reales
+            timeout: 7000
+          });
+          this.miUbicacionActual = {
+            lat: coordinates.coords.latitude,
+            lng: coordinates.coords.longitude
+          };
+          lat = this.miUbicacionActual.lat;
+          lng = this.miUbicacionActual.lng;
+        } catch (e) {
+          console.warn("Usando respaldo de ubicación para renderizar mapa de emergencia");
+        }
+
+        // 🚀 DISPARADOR AUTOMÁTICO SOS: Si el usuario está logueado, mandamos las coordenadas vivas a la BD
+        if (phone) {
+          const emergencyPayload = {
+            phone: phone,
+            name: name,
+            heart_rate: this.ultimoPulsoGuardado || 0,
+            spo2: this.ultimoOxigenoGuardado || 0,
+            sleep_hours: this.ultimaHoraSueno || 0,
+            latitude: lat,
+            longitude: lng
+          };
+
+          // Registramos de forma atómica en app_vitals_direct
+          this.medicalService.saveVitals(emergencyPayload).subscribe({
+            next: (res) => console.log("[Disparador SOS] Coordenadas de emergencia almacenadas con éxito en la BD"),
+            error: (err) => console.error("[Disparador SOS] Error al registrar coordenadas automáticas", err)
+          });
+        } else {
+          console.warn("[Disparador SOS] No se enviaron coordenadas a la BD porque no hay un perfil activo.");
+        }
+
+        // Ejecuta directo la búsqueda de hospitales reales al mapa sin limpiar las banderas de SOS
+        this.overpassService.getNearbyHospitals(lat, lng).subscribe({
+          next: (hospitales) => {
+            this.zone.run(() => {
+              this.listadoHospitales = hospitales.sort((a: any, b: any) => {
+                const distA = Math.sqrt(Math.pow(a.lat - lat, 2) + Math.pow(a.lng - lng, 2));
+                const distB = Math.sqrt(Math.pow(b.lat - lat, 2) + Math.pow(b.lng - lng, 2));
+                return distA - distB;
+              });
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            });
+          },
+          error: () => {
+            this.zone.run(() => { this.isLoading = false; });
+          }
+        });
+      });
+      return; // Detiene el flujo de forma exitosa
     }
 
     // 🏥 2. DETECCIÓN LOCAL DE HOSPITALES
@@ -305,7 +383,7 @@ showGuideModal = false;
 
       return;
     }
-   // 🌡️ 10. DETECCIÓN DE REGISTRO DE TEMPERATURA POR VOZ
+    // 🌡️ 10. DETECCIÓN DE REGISTRO DE TEMPERATURA POR VOZ
     if (userText.includes('registrar mi temperatura') || userText.includes('temperatura') || userText.includes('registrar temperatura')) {
       const profile = this.userService.getProfile();
 
@@ -565,59 +643,116 @@ showGuideModal = false;
     });
     await toast.present();
   }
+  private trackingInterval: any = null;
+
   async solicitarAmbulancia() {
+    // 🛡️ PASO 1: Validación estricta de Identidad en Producción
+    const profile = this.userService.getProfile();
+
+    if (!profile || !profile.phone) {
+      this.presentToast("Necesitas iniciar sesión para que la central de ambulancias pueda identificar tu llamada.");
+      const msgError = "No he podido localizar tu perfil de usuario en el teléfono. Por favor, inicia sesión para poder solicitar una ambulancia real.";
+      this.chatMessages.push({ role: 'bot', text: msgError });
+      await this.speak(msgError, true);
+      this.cdr.detectChanges();
+      return; // Detiene el flujo de inmediato antes de activar el GPS o gastar datos
+    }
+
+    // Si pasamos la validación, extraemos el teléfono dinámico real del usuario
+    const phone = profile.phone;
+
     this.isLoading = true;
     this.cdr.detectChanges();
 
     try {
+      // 🛰️ PASO 2: Obtención de Coordenadas de GPS Reales
       const coordinates = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000
       });
 
-      const lat = coordinates.coords.latitude;
-      const lng = coordinates.coords.longitude;
-      const infoPaciente = "Alerta SOS desde App ANAasis - Paciente crítico";
+      const latUsuario = coordinates.coords.latitude;
+      const lngUsuario = coordinates.coords.longitude;
+      this.miUbicacionActual = { lat: latUsuario, lng: lngUsuario };
 
-      this.medicalService.enviarAlertaAmbulancia(lat, lng, infoPaciente).subscribe({
+      const infoPaciente = `Alerta SOS desde App ANAasis - Paciente crítico (${profile.name || 'Usuario'})`;
+
+      // 🚨 PASO 3: Envío del reporte al proxy con datos reales de producción
+      this.medicalService.enviarAlertaAmbulancia(latUsuario, lngUsuario, infoPaciente).subscribe({
         next: async (res: any) => {
           this.isLoading = false;
-          if (res.status === 'ok') {
-            this.sosEnviado = true; // ✅ Cambia el botón a verde/check
-            this.datosAmbulancia = res.ambulancia; // 🚑 Guardamos ubicación de la ambulancia
+          this.sosEnviado = true; // Cambia el botón a enviado en la interfaz
 
-            const mensajeExito = `¡Confirmado! La ${res.ambulancia.codigo} ya viene hacia ti. Está a ${res.distancia_km} km.`;
-            this.chatMessages.push({ role: 'bot', text: mensajeExito });
+          const mensajeEspera = `¡Alerta enviada a la central médica! Mantén la calma, ${profile.name || 'Usuario'}. Estoy esperando a que el despachador asigne una unidad a tu posición.`;
+          this.chatMessages.push({ role: 'bot', text: mensajeEspera });
+          await this.speak(mensajeEspera, true);
+          this.cdr.detectChanges();
 
-            await this.speak(mensajeExito, true);
-            this.cdr.detectChanges();
-          }
+          // 🚨 PASO 4: MOTOR DE ESCUCHA GPS EN TIEMPO REAL (Short Polling Dinámico)
+          if (this.trackingInterval) clearInterval(this.trackingInterval);
+
+          this.trackingInterval = setInterval(() => {
+            // Usamos el teléfono verídico del usuario logueado en la iteración
+            this.medicalService.getEmergencyTracking(phone).subscribe({
+              next: (trackRes: any) => {
+                if (trackRes && trackRes.success && trackRes.assigned) {
+                  this.zone.run(() => {
+                    // Si es el primer segundo en que se detecta la ambulancia enlazada en la BD
+                    if (!this.datosAmbulancia) {
+                      this.speak(`¡Unidad localizada! La ambulancia ${trackRes.ambulancia.codigo} va en camino hacia ti.`);
+                    }
+
+                    // Inyectamos las coordenadas vivas de la ambulancia al mapa
+                    this.datosAmbulancia = {
+                      codigo: trackRes.ambulancia.codigo,
+                      latitud: Number(trackRes.ambulancia.latitud),
+                      longitud: Number(trackRes.ambulancia.longitud)
+                    };
+
+                    console.log(`[RealTime GPS] Ubicación verídica de la unidad ${trackRes.ambulancia.codigo}:`, this.datosAmbulancia);
+                    this.cdr.detectChanges(); // Repinta el marcador en tiempo real en la pantalla
+                  });
+                }
+              },
+              error: (err) => {
+                console.error("[RealTime GPS] Fallo en HTTP Polling:", JSON.stringify(err));
+                // Si viene un mensaje o estatus detallado lo expondrá en el LogCat
+                if (err.status) {
+                  console.error(`[RealTime GPS] Código de Estado del servidor: ${err.status}`);
+                }
+              }
+            });
+          }, 4000); // Consulta dinámicamente cada 4 segundos
         },
-        error: () => {
+        error: (err) => {
           this.isLoading = false;
-          this.presentToast("Error al solicitar auxilio. Intenta de nuevo.");
+          this.presentToast("Error de red al conectar con el servidor SOS.");
+          this.cdr.detectChanges();
         }
       });
     } catch (e) {
       this.isLoading = false;
       this.presentToast("Activa tu GPS para enviar la alerta.");
+      this.cdr.detectChanges();
     }
   }
   sosEnviado = false; // Controla si el botón cambia a verde
   datosAmbulancia: any = null; // Guarda la info que re
   cancelarEmergencia() {
-    this.isEmergencyActive = false; // Cierra el bloque de emergencia
-    this.sosEnviado = false;        // Resetea el botón de auxilio
-    this.datosAmbulancia = null;    // Oculta el mapa de seguimiento
+    // Apagamos las llamadas al servidor de inmediato
+    if (this.trackingInterval) {
+      clearInterval(this.trackingInterval);
+      this.trackingInterval = null;
+    }
 
-    // ✅ El cambio clave: Ocultamos el mapa de hospitales al cancelar
+    this.isEmergencyActive = false;
+    this.sosEnviado = false;
+    this.datosAmbulancia = null;
     this.showHospitals = false;
 
-    // Añadimos un mensaje de cierre al chat
-    const mensajeCierre = "Entendido, he cancelado la alerta. ¿Puedo ayudarte con alguna otra consulta médica? ";
+    const mensajeCierre = "Entendido, he cancelado la emergencia y cerrado el canal de rastreo GPS.";
     this.chatMessages.push({ role: 'bot', text: mensajeCierre });
     this.speak(mensajeCierre);
-
     this.cdr.detectChanges();
   }
   async openProfile() {
@@ -732,7 +867,7 @@ showGuideModal = false;
   ultimoPulsoGuardado: number = 0;
   ultimoOxigenoGuardado: number = 0;
   ultimaHoraSueno: number = 0; // 👈 Asegúrate que diga : number
- async motorDeMonitoreoRealTime() {
+  async motorDeMonitoreoRealTime() {
     const profile = this.userService.getProfile();
     if (!profile) return;
 
@@ -760,18 +895,18 @@ showGuideModal = false;
     try {
       // 🚀 CAMBIO CRÍTICO: Cambiamos 'TotalCaloriesBurned' por 'ActiveCaloriesBurned'
       await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'], 
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'],
         write: []
       });
     } catch (e) {
       console.error("Error pidiendo permisos iniciales:", e);
     }
   }
-async abrirPermisosADerecha() {
+  async abrirPermisosADerecha() {
     try {
       // 🚀 Cambiamos también aquí para mantener la consistencia
       await (HealthConnect as any).requestHealthPermissions({
-        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'], 
+        read: ['HeartRateSeries', 'OxygenSaturation', 'SleepSession', 'Steps', 'ActiveCaloriesBurned'],
         write: []
       });
     } catch (e) {
@@ -780,18 +915,18 @@ async abrirPermisosADerecha() {
       });
     }
   }
-limpiarPantalla() {
-  this.zone.run(() => {
-    this.showHospitals = false;
-    this.showDoctors = false;
-    this.showChatOptions = false;
-    this.listadoHospitales = [];
-    this.listadoDoctores = [];
-    this.isEmergencyActive = false;
-    this.cdr.detectChanges(); // 👈 Vital para que el mapa desaparezca
-  });
-}
-async openTemperaturaModal() {
+  limpiarPantalla() {
+    this.zone.run(() => {
+      this.showHospitals = false;
+      this.showDoctors = false;
+      this.showChatOptions = false;
+      this.listadoHospitales = [];
+      this.listadoDoctores = [];
+      this.isEmergencyActive = false;
+      this.cdr.detectChanges(); // 👈 Vital para que el mapa desaparezca
+    });
+  }
+  async openTemperaturaModal() {
     this.zone.run(async () => {
       // 1. Creamos el modal con las opciones nativas de Ionic estándar
       const modal = await this.modalCtrl.create({
