@@ -1,8 +1,10 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar color="primary">
-    <ion-title class="medical-title">Registrar Temperatura</ion-title>
+  <ion-toolbar class="toolbar-azul-premium">
+    <!-- 🚀 Título cambiado a clase blanca -->
+    <ion-title class="medical-title-white">Registrar Temperatura</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cerrarModal()" [disabled]="cargando">
+      <!-- 🚀 Botón de cerrar cambiado a clase blanca -->
+      <ion-button (click)="cerrarModal()" [disabled]="cargando" class="btn-cerrar-blanco">
         <ion-icon slot="icon-only" name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -24,12 +26,11 @@
         <span class="unit">°C</span>
       </div>
 
-      <!-- Input de Ionic Estilizado dentro de la Tarjeta -->
-      <ion-item lines="inset" class="ion-margin-top input-medico">
+      <!-- Input de Ionic Estilizado -->
+      <ion-item lines="none" class="input-medico">
         <ion-label position="stacked">Temperatura del Paciente</ion-label>
         <ion-input 
           type="number" 
-         
           min="30" 
           max="45" 
           step="0.1"
@@ -39,7 +40,7 @@
       </ion-item>
     </div>
 
-    <!-- Indicador de Carga / Spinner Clínico -->
+    <!-- Indicador de Carga -->
     @if (cargando) {
       <div class="loading-state">
         <ion-spinner name="crescent" class="spinner-animate"></ion-spinner>
@@ -48,24 +49,16 @@
       </div>
     }
 
-    <!-- Botones de Acción -->
+    <!-- Botón de Acción Estilizado -->
     @if (!cargando) {
-      <div class="ion-margin-top">
+      <div class="contenedor-acciones">
         <ion-button 
           expand="block" 
           color="success"
-          class="medical-btn"
+          class="medical-btn-premium"
           (click)="guardarTemperatura()">
-          <ion-icon slot="start" name="save-outline" color="light"></ion-icon>
-          Guardar Registro
-        </ion-button>
-        
-        <ion-button 
-          expand="block" 
-          fill="clear" 
-          color="medium"
-          (click)="cerrarModal()">
-          Cancelar
+          <ion-icon slot="start" name="save-outline" class="icono-blanco"></ion-icon>
+          <span class="texto-blanco">Guardar Registro</span>
         </ion-button>
       </div>
     }

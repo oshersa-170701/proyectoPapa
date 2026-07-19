@@ -1,11 +1,13 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar color="success">
+  <!-- 🚀 Aplicamos la clase del fondo azul premium -->
+  <ion-toolbar class="toolbar-azul-premium">
     <ion-title class="medical-title">Mis Signos Vitales</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="forzarSincronizacionManual()" [disabled]="isLoading">
+      <ion-button (click)="forzarSincronizacionManual()" class="btn-actualizar-blanco" [disabled]="isLoading">
         <ion-icon name="sync-outline" [class.spinner-animate]="isLoading"></ion-icon>
       </ion-button>
-      <ion-button (click)="dismiss()" color="danger" fill="clear">
+      <!-- 🚀 Cambiado: Botón de cerrar con color blanco explícito para contrastar -->
+      <ion-button (click)="dismiss()" class="btn-cerrar-blanco" fill="clear">
         <ion-icon name="close-outline"></ion-icon>
       </ion-button>
     </ion-buttons>

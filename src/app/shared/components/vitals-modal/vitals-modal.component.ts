@@ -74,8 +74,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  /**
+/**
    * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
    */
   async forzarSincronizacionManual() {
@@ -88,51 +87,51 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
       const res = await this.healthService.sincronizarConHealthConnect(profile.phone, profile.name);
 
       if (res.success) {  
-        // 🛠️ Forzamos un casting temporal a 'any' para que TS no choque con la interfaz vieja de HealthService
         const dataActividad = res.data as any;
-        const hr = res.data.pulso || 0;
-        const ox = res.data.oxigeno || 0;
-        const sh = res.data.horasSueno || 0;
-        const st = dataActividad.pasos || 0;       // 👟 Ahora se resolverá sin error
-        const cal = dataActividad.calorias || 0.0;  // 🔥 Ahora se resolverá sin error
+        const hr = Math.round(Number(res.data.pulso || 0));
+        const ox = Math.round(Number(res.data.oxigeno || 0));
+        const sh = Number(res.data.horasSueno || 0);
+        const st = Math.round(Number(dataActividad.steps || dataActividad.pasos || 0)); 
+        const cal = Number(dataActividad.calories || dataActividad.calorias || 0.0);
+        const temp = Number(this.vitals?.temperature || 0);
 
         this.vitals = {
           heart_rate: hr,
           spo2: ox,
-          sleep_hours: sh,
+          sleep_hours: sh.toFixed(1),
           steps: st,
           calories: cal,
-          temperature: this.vitals?.temperature || 0 // Conservamos la última temperatura mapeada
+          temperature: temp
         };
 
-        // 🎙️ Reporte inteligente de voz de ANAasis
-        let mensajeVoz = "Sincronización completada. ";
+        // 🎙️ FRAGMENTACIÓN ESTRATÉGICA DE AUDIO (Evita la saturación del búfer en Android)
+        const bloquesDeTexto: string[] = [
+          "Sincronización completada con éxito.",
+          hr > 0 ? `Tu frecuencia cardíaca es de ${hr} latidos por minuto.` : "No detecté pulsaciones en tu frecuencia cardíaca.",
+          ox > 0 ? `Tu saturación de oxígeno está al ${ox} por ciento.` : "No localizé mediciones de oxígeno en sangre.",
+          sh > 0 ? `En tu registro de sueño, capturé un descanso de ${sh.toFixed(1)} horas.` : "Aún no cuento con horas de sueño registradas hoy.",
+          temp > 0 ? `Tu temperatura corporal es de ${temp} grados celsius.` : "No hay un registro de temperatura corporal reciente.",
+          st > 0 ? `Hoy llevas acumulados un total de ${st} pasos diarios.` : "No detecté caminata o pasos acumulados hoy.",
+          cal > 0 ? `Esto equivale a un consumo de ${Math.round(cal)} kilocalorías quemadas.` : "Tus calorías quemadas se mantienen en cero por el momento."
+        ];
+
+        console.log("[ANAasis TTS] Iniciando lectura por bloques lógicos de salud...");
         
-        mensajeVoz += hr > 0 ? `Tu pulso es de ${hr} latidos. ` : "No detecté tu pulso. ";
-        mensajeVoz += ox > 0 ? `Tu oxígeno está al ${ox} por ciento. ` : "No detecté tu oxígeno. ";
-        
-        if (Number(sh) > 0) {
-          mensajeVoz += `Has dormido ${sh} horas. `;
-        }
-        
-        // Reportar métricas de actividad física
-        if (st > 0) {
-          mensajeVoz += `Hoy llevas acumulados ${st} pasos `;
-        }
-        if (cal > 0) {
-          mensajeVoz += `y has quemado aproximadamente ${Math.round(cal)} kilocalorías.`;
+        // 🔄 Reproducción secuencial obligatoria usando await para cada frase
+        for (const frase of bloquesDeTexto) {
+          await this.speak(frase);
         }
 
-        this.speak(mensajeVoz);
+        // 💥 CLAVE: Refrescamos los signos en la interfaz HASTA QUE TERMINE de hablar todo
         this.cargarSignos(); 
       }
       this.isLoading = false;
     } catch (e) {
       this.isLoading = false;
-      this.speak("Disculpa, no pude conectar con tu pulsera. Asegúrate de tenerla bien ajustada.");
+      console.error("[Vitals Modal] Fallo en sincronización manual:", e);
+      await this.speak("Disculpa, no pude conectar con tu pulsera. Asegúrate de tenerla bien ajustada.");
     }
   }
-
   async speak(text: string) {
     try {
       await TextToSpeech.stop();

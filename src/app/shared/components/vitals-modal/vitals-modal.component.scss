@@ -1,9 +1,11 @@
 // Variables de color médicas
 :host {
   --med-red: #ff3b30;
-  --med-blue: #007aff;
+  --med-blue: rgb(51, 85, 170);
   --med-purple: #5856d6;
   --med-green: #34c759;
+  --med-orange: #ff9500; 
+  --med-sky-blue: #31a5ff; // 🛰️ ¡Inyectada con éxito para hacer match con tu Perfil!
   --med-bg-card: #ffffff;
   --med-text-primary: #1c1c1e;
   --med-text-secondary: #8e8e93;
@@ -14,19 +16,41 @@
   --background: #f4f7f6; // Un gris-azulado muy suave, clínico
 }
 
-// Título del encabezado en blanco
+// 🚀 Forzamos el fondo azul premium en el encabezado sin importar el Modo Oscuro
+.toolbar-azul-premium {
+  --background: var(--med-sky-blue) !important;
+  --border-color: transparent;
+  
+  // Forzar que los botones de acción hereden color blanco puro
+  ion-buttons ion-button {
+    --color: #ffffff !important;
+  }
+}
+
+// Título del encabezado en blanco cristalino
 .medical-title {
   font-weight: 700;
   letter-spacing: -0.5px;
   font-size: 1.3rem;
-  color: white !important;
+  color: #ffffff !important;
 }
 
-// Botones del encabezado en blanco
-ion-buttons ion-button {
-  --color: white !important;
+ion-button.btn-cerrar-blanco {
+  --color: var(--med-red) !important;
+  color: var(--med-red) !important;
+  font-size: 1.6rem;
+
+  // Asegura que el icono interno también se pinte forzadamente de rojo
+  ion-icon {
+    color: var(--med-red) !important;
+  }
 }
 
+// Botón de actualizar (Sincronización) se mantiene en blanco premium
+.btn-actualizar-blanco {
+  --color: #ffffff !important;
+  font-size: 1.6rem;
+}
 .vitals-container {
   display: flex;
   flex-direction: column;
@@ -169,29 +193,51 @@ ion-buttons ion-button {
 
 // CALORÍAS (Naranja/Púrpura Fitness)
 .vital-card-calories {
-  border-left: 5px solid #ff9500;
-  .card-header ion-icon { color: #ff9500; }
+  // Fondo sutil con degradado naranja suave
+  background: linear-gradient(145deg, #ffffff, #fffaf0);
+  border: 1px solid rgba(255, 149, 0, 0.2);
+
+  .card-header {
+    // 🚀 Corregido: Ahora lee perfectamente la variable naranja
+    ion-icon { 
+      color: var(--med-orange) !important; 
+      font-size: 2.5rem;
+      filter: drop-shadow(0 2px 6px rgba(255, 149, 0, 0.3)); // Sombra naranja traslúcida limpia
+    }
+    h3 { color: var(--med-orange); } 
+  }
+  
+  .card-body .value {
+    color: var(--med-orange); 
+  }
 }
+  // TEMPERATURA (Diseño Premium Azul Clínico con Fondo Distinguible)
   .vital-card-temperature {
-    // Fondo sutil con degradado rojo
-    background: linear-gradient(145deg, #ffffff, #fff5f5);
-    border: 1px solid rgba(48, 189, 255, 0.1);
+    // 🚀 Ajustado: Usamos un tono azul clínico más vivo (#e6efff) para que el degradado sea 100% visible
+    background: linear-gradient(145deg, #ffffff, #e6efff);
+    border: 1px solid rgba(51, 85, 170, 0.4); // Borde un poco más visible para contener el color
 
     .card-header {
-      // Icono de gota grande y rojo
       ion-icon { 
-        color: var(--med-blue); 
+        color: var(--med-blue) !important; 
         font-size: 2.5rem;
-        filter: drop-shadow(0 2px 4px rgba(48, 189, 255, 0.2));
+        filter: drop-shadow(0 2px 6px rgba(51, 85, 170, 0.3));
       }
-      h3 { color: rgb(51, 85, 170); } // Texto del título ligeramente rojizo
+      h3 { 
+        color: var(--med-blue); 
+      }
     }
     
-    .card-body .value {
-      color: rgb(34, 75, 187); // Valor numérico en rojo oscuro
+    .card-body {
+      .value {
+        color: var(--med-blue);
+      }
+      .unit {
+        color: rgba(51, 85, 170, 0.8);
+        font-weight: 700; // Un toque de grosor para que resalte
+      }
     }
   }
-
   .last-update {
     font-size: 0.85rem;
     color: var(--med-text-secondary);

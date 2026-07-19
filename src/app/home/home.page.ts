@@ -345,8 +345,7 @@ export class HomePage {
       this.cdr.detectChanges();
       return;
     }
-    // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ (Para mostrar el modal de signos con datos reales)
-    // Dentro de sendMessageToAI(text: string)
+    // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ (Optimizado para lectura completa en Producción)
     if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
       const profile = this.userService.getProfile();
 
@@ -361,22 +360,44 @@ export class HomePage {
       const txtBot = 'Claro un momento, estoy consultando tu pulsera ahora mismo...';
       this.chatMessages.push({ role: 'bot', text: txtBot });
 
-      // 🔊 Esperamos a que ANAasis termine de hablar antes de seguir
+      // 🔊 Esperamos el aviso inicial de ANAasis
       this.speak(txtBot, true).then(() => {
-        // ⏱️ Un pequeño respiro de 500ms tras hablar para que no sea brusco
         setTimeout(() => {
-          this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then((res: any) => {
+          this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then(async (res: any) => {
+            
+            // Levantamos el modal en pantalla inmediatamente para sincronizar la vista gráfica
             this.zone.run(() => {
-              if (res && res.success) {
-                const pulso = res.data.pulso || 0;
-                const ox = res.data.oxigeno || 0;
-                const resumenVoz = `Sincronización lista. Tu pulso es de ${pulso} latidos y tu oxígeno está al ${ox} por ciento.`;
-                this.speak(resumenVoz);
-              }
               this.openVitalsModal(profile.phone);
               this.isLoading = false;
               this.cdr.detectChanges();
             });
+
+            // 🎙️ Si la lectura nativa fue exitosa, ejecutamos la fragmentación secuencial desde el Home
+            if (res && res.success) {
+              const dataActividad = res.data as any;
+              const hr = Math.round(Number(res.data.pulso || 0));
+              const ox = Math.round(Number(res.data.oxigeno || 0));
+              const sh = Number(res.data.horasSueno || 0);
+              const st = Math.round(Number(dataActividad.steps || dataActividad.pasos || 0)); 
+              const cal = Number(dataActividad.calories || dataActividad.calorias || 0.0);
+              const temp = Number(this.ultimoPulsoGuardado ? this.ultimoOxigenoGuardado : 0); // Respaldo temporal de estado
+
+              const bloquesDeTexto: string[] = [
+                "Sincronización completada con éxito.",
+                hr > 0 ? `Tu frecuencia cardíaca es de ${hr} latidos por minuto.` : "No detecté pulsaciones en tu frecuencia cardíaca.",
+                ox > 0 ? `Tu saturación de oxígeno está al ${ox} por ciento.` : "No localizé mediciones de oxígeno en sangre.",
+                sh > 0 ? `En tu registro de sueño, capturé un descanso de ${sh.toFixed(1)} horas.` : "Aún no cuento con horas de sueño registradas hoy.",
+                st > 0 ? `Hoy llevas un acumulado de ${st} pasos diarios.` : "No detecté caminata o pasos acumulados hoy.",
+                cal > 0 ? `Esto equivale a un consumo de ${Math.round(cal)} kilocalorías quemadas.` : "Tus calorías quemadas se mantienen en cero por el momento."
+              ];
+
+              console.log("[ANAasis Home TTS] Iniciando reporte por voz completo por comando...");
+              
+              // Reproducción asíncrona secuencial encadenada
+              for (const frase of bloquesDeTexto) {
+                await this.speak(frase);
+              }
+            }
           });
         }, 500);
       });
@@ -926,23 +947,19 @@ export class HomePage {
       this.cdr.detectChanges(); // 👈 Vital para que el mapa desaparezca
     });
   }
-  async openTemperaturaModal() {
+ async openTemperaturaModal() {
     this.zone.run(async () => {
-      // 1. Creamos el modal con las opciones nativas de Ionic estándar
       const modal = await this.modalCtrl.create({
         component: RegistrarTemperaturaComponent,
         mode: 'ios',
         backdropDismiss: true,
-        breakpoints: [0, 0.5],
-        initialBreakpoint: 0.5,
+        // 🚀 Ajustado: Subimos de 0.5 a 0.65 para dar más espacio vertical
+        breakpoints: [0, 0.65],
+        initialBreakpoint: 0.65,
         handle: true
       });
 
-      // 2. Asignamos de forma dinámica el inyector del entorno de la HomePage 
-      // para que resuelva los Providers Standalone sin errores de TypeScript
       (modal as any).environmentInjector = this.environmentInjector;
-
-      // 3. Lo presentamos en pantalla de forma nativa
       await modal.present();
     });
   }

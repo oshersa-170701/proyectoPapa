@@ -3,24 +3,34 @@
   --med-blue: #007aff;
   --med-purple: #5856d6;
   --med-green: #34c759;
+  --med-sky-blue: #31a5ff; // 🚀 El tono azul vivo de tu expediente digital
   --med-bg-card: #ffffff;
   --med-text-primary: #1c1c1e;
   --med-text-secondary: #8e8e93;
 }
 
 .medical-bg {
-  --background: #f4f7f6; // Gris-azulado suave clínico
+  --background: #f4f7f6; 
 }
 
-.medical-title {
+// 🚀 Nueva clase para forzar el fondo azul premium en el encabezado sin importar el Modo Oscuro
+.toolbar-azul-premium {
+  --background: var(--med-sky-blue) !important;
+  --border-color: transparent;
+}
+
+// Título clínico en color blanco puro brillante
+.medical-title-white {
   font-weight: 700;
   letter-spacing: -0.5px;
-  font-size: 1.3rem;
-  color: white !important;
+  font-size: 1.2rem;
+  color: #ffffff !important;
 }
 
-ion-buttons ion-button {
-  --color: white !important;
+// 🚀 La X de cerrar forzada a color Blanco para que combine perfectamente
+.btn-cerrar-blanco {
+  --color: #ff0000 !important;
+  font-size: 1.6rem;
 }
 
 .vitals-container {
@@ -33,32 +43,26 @@ ion-buttons ion-button {
     background: var(--med-bg-card);
     border-radius: 24px;
     padding: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid rgba(0,0,0,0.03);
-
-    &:active {
-      transform: scale(0.98);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
+    border: 1px solid rgba(0,0,0,0.02);
 
     .card-header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 15px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f5f5f5;
       padding-bottom: 10px;
 
       ion-icon {
-        font-size: 2rem;
+        font-size: 2.3rem;
       }
 
       h3 {
         margin: 0;
-        font-size: 1rem;
+        font-size: 0.95rem;
         color: var(--med-text-secondary);
         font-weight: 600;
         text-transform: uppercase;
@@ -70,81 +74,105 @@ ion-buttons ion-button {
       display: flex;
       align-items: baseline;
       justify-content: center;
-      padding: 15px 0 5px 0;
+      padding: 10px 0;
 
       .value {
         margin: 0;
-        font-size: 4rem;
+        font-size: 4.5rem;
         font-weight: 800;
-        color: var(--med-text-primary);
         letter-spacing: -2px;
         line-height: 1;
       }
 
       .unit {
-        font-size: 1.2rem;
-        color: var(--med-text-secondary);
-        font-weight: 500;
-        margin-left: 8px;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-left: 6px;
       }
     }
   }
 
-  // Personalización para Tarjeta de Temperatura (Borde Verde Salud)
+  // Tarjeta envolvente verde premium
+  // 🚀 CAMBIADO A AZUL: Tarjeta envolvente de Monitoreo Corporal
   .vital-card-temp {
-    border-left: 5px solid var(--med-green);
-    .card-header ion-icon { color: var(--med-green); }
+    // Fondo con el degradado azul clínico sutil unificado
+    background: linear-gradient(145deg, #ffffff, #e6efff);
+    border: 1px solid rgba(51, 85, 170, 0.4); 
+
+    .card-header {
+      ion-icon { 
+        color: var(--med-blue) !important; 
+        filter: drop-shadow(0 2px 6px rgba(51, 85, 170, 0.3));
+      }
+      h3 { color: var(--med-blue); }
+    }
+
+    .card-body {
+      .value { color: var(--med-blue); }
+      .unit { color: rgba(51, 85, 170, 0.8); font-weight: 700; }
+    }
   }
 
-  // Estilización del Item Input para integrarse a la tarjeta
   .input-medico {
-    --background: #f9fbfb;
-    --border-radius: 12px;
+    --background: #ffffff;
+    --border-radius: 14px;
     margin-top: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 4px 8px;
     
     ion-label {
       font-weight: 600;
       color: var(--med-text-secondary);
+      font-size: 0.9rem;
     }
     
     ion-input {
-      font-size: 1.1rem;
-      font-weight: 500;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--med-text-primary);
     }
   }
 }
 
-// Estados de carga e indicaciones
+.contenedor-acciones {
+  margin-top: 20px;
+  padding-bottom: 20px; 
+}
+
+.medical-btn-premium {
+  --border-radius: 16px;
+  --box-shadow: 0 6px 20px rgba(52, 199, 89, 0.25);
+  height: 54px;
+  margin: 0;
+  
+  .icono-blanco {
+    color: #ffffff !important;
+    font-size: 1.4rem;
+  }
+
+  .texto-blanco {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+  }
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 20px;
   color: var(--med-text-secondary);
-  text-align: center;
-
+  
   h3 {
     color: var(--med-text-primary);
     font-weight: 600;
-    margin-top: 16px;
-    font-size: 1.2rem;
-  }
-
-  p {
-    margin: 6px 0 0 0;
-    font-size: 0.9rem;
+    margin-top: 12px;
   }
 }
 
-.medical-btn {
-  --border-radius: 12px;
-  --box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
-  font-weight: 600;
-  height: 48px;
-}
-
-// Animación del spinner
 .spinner-animate {
   animation: rotation 1s infinite linear;
 }
