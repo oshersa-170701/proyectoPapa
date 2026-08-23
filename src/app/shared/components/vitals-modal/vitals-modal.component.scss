@@ -48,8 +48,14 @@ ion-button.btn-cerrar-blanco {
 
 // Botón de actualizar (Sincronización) se mantiene en blanco premium
 .btn-actualizar-blanco {
-  --color: #ffffff !important;
+  --color: var(--med-bg-card) !important;
+  color: var(--med-bg-card) !important;
   font-size: 1.6rem;
+
+  // Asegura que el icono interno también se pinte forzadamente de rojo
+  ion-icon {
+    color: var(--med-bg-card) !important;
+  }
 }
 .vitals-container {
   display: flex;

@@ -345,7 +345,7 @@ export class HomePage {
       this.cdr.detectChanges();
       return;
     }
-    // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ (Optimizado para lectura completa en Producción)
+   // 8. DETECCIÓN DE SIGNOS VITALES POR VOZ
     if (userText.includes('signos') || userText.includes('presión') || userText.includes('ritmo cardiaco') || userText.includes('cómo estoy')) {
       const profile = this.userService.getProfile();
 
@@ -360,46 +360,16 @@ export class HomePage {
       const txtBot = 'Claro un momento, estoy consultando tu pulsera ahora mismo...';
       this.chatMessages.push({ role: 'bot', text: txtBot });
 
-      // 🔊 Esperamos el aviso inicial de ANAasis
+      // 🔊 Hablamos la bienvenida e inmediatamente abrimos el modal para delegar la lectura
       this.speak(txtBot, true).then(() => {
         setTimeout(() => {
-          this.healthService.sincronizarConHealthConnect(profile.phone, profile.name).then(async (res: any) => {
-            
-            // Levantamos el modal en pantalla inmediatamente para sincronizar la vista gráfica
-            this.zone.run(() => {
-              this.openVitalsModal(profile.phone);
-              this.isLoading = false;
-              this.cdr.detectChanges();
-            });
-
-            // 🎙️ Si la lectura nativa fue exitosa, ejecutamos la fragmentación secuencial desde el Home
-            if (res && res.success) {
-              const dataActividad = res.data as any;
-              const hr = Math.round(Number(res.data.pulso || 0));
-              const ox = Math.round(Number(res.data.oxigeno || 0));
-              const sh = Number(res.data.horasSueno || 0);
-              const st = Math.round(Number(dataActividad.steps || dataActividad.pasos || 0)); 
-              const cal = Number(dataActividad.calories || dataActividad.calorias || 0.0);
-              const temp = Number(this.ultimoPulsoGuardado ? this.ultimoOxigenoGuardado : 0); // Respaldo temporal de estado
-
-              const bloquesDeTexto: string[] = [
-                "Sincronización completada con éxito.",
-                hr > 0 ? `Tu frecuencia cardíaca es de ${hr} latidos por minuto.` : "No detecté pulsaciones en tu frecuencia cardíaca.",
-                ox > 0 ? `Tu saturación de oxígeno está al ${ox} por ciento.` : "No localizé mediciones de oxígeno en sangre.",
-                sh > 0 ? `En tu registro de sueño, capturé un descanso de ${sh.toFixed(1)} horas.` : "Aún no cuento con horas de sueño registradas hoy.",
-                st > 0 ? `Hoy llevas un acumulado de ${st} pasos diarios.` : "No detecté caminata o pasos acumulados hoy.",
-                cal > 0 ? `Esto equivale a un consumo de ${Math.round(cal)} kilocalorías quemadas.` : "Tus calorías quemadas se mantienen en cero por el momento."
-              ];
-
-              console.log("[ANAasis Home TTS] Iniciando reporte por voz completo por comando...");
-              
-              // Reproducción asíncrona secuencial encadenada
-              for (const frase of bloquesDeTexto) {
-                await this.speak(frase);
-              }
-            }
+          this.zone.run(() => {
+            // Abrimos el modal. El modal iniciará su forzarSincronizacionManual() o cargarSignos()
+            this.openVitalsModal(profile.phone);
+            this.isLoading = false;
+            this.cdr.detectChanges();
           });
-        }, 500);
+        }, 300);
       });
 
       return;
@@ -416,7 +386,7 @@ export class HomePage {
         return;
       }
 
-      const txtTemperatura = 'Claro, abriendo el registro de tu temperatura corporal actual...';
+      const txtTemperatura = 'Claro, abriendo el registro de tu temperatura corporal anteriormente registrada...';
       this.chatMessages.push({ role: 'bot', text: txtTemperatura });
       this.speak(txtTemperatura, true);
       this.isLoading = false;
@@ -571,20 +541,44 @@ export class HomePage {
       }
     });
   }
-  async speak(text: string, isManual: boolean = false): Promise<void> {
+ async speak(text: string, isManual: boolean = false): Promise<void> {
     if (this.isMutedGlobal && !isManual) return Promise.resolve();
 
     try {
       await TextToSpeech.stop();
-      return await TextToSpeech.speak({
+
+      // 🚀 Paso 1: Escanear las voces instaladas en el celular de forma nativa
+      const { voices } = await TextToSpeech.getSupportedVoices();
+      
+      // 🚀 Paso 2: Buscar el ÍNDICE de una voz premium de México
+      // Recorremos con findIndex para obtener la posición numérica exacta en el arreglo
+      let indiceVoz = voices.findIndex(v => 
+        v.lang === 'es-MX' && (v.voiceURI?.toLowerCase().includes('network') || v.name?.toLowerCase().includes('network'))
+      );
+
+      // Si no encuentra una neuronal por internet, buscamos el índice de cualquier voz en español de México
+      if (indiceVoz === -1) {
+        indiceVoz = voices.findIndex(v => v.lang === 'es-MX');
+      }
+
+      // 🚀 Paso 3: Construir las opciones respetando el tipado estricto de TTSOptions
+      const opcionesConfig: any = {
         text: text,
         lang: 'es-MX',
-        rate: 1.0,
-        pitch: 1.0,
+        rate: 1.05,  // Velocidad óptima para fluidez humana 💫
+        pitch: 1.1, // Tono amable y suave para ANAasis 🌸
         volume: 1.0,
-        category: 'ambient',
-      });
+        category: 'ambient'
+      };
+
+      // Si localizamos un índice válido (mayor o igual a 0), se lo asignamos numéricamente
+      if (indiceVoz !== -1) {
+        opcionesConfig.voice = indiceVoz; // Ahora sí pasamos un 'number', TypeScript estará feliz
+      }
+
+      return await TextToSpeech.speak(opcionesConfig);
     } catch (error) {
+      console.error("[ANAasis Voice] Error en el tipado o hardware de voz:", error);
       return Promise.resolve();
     }
   }

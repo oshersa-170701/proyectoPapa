@@ -46,8 +46,10 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.cargarSignos();
-    // Refrescamos cada 5 segundos para ver los cambios del motor del Home
+    // Al abrir el modal por comando o clic, forzamos la sincronización completa que lee todo por bloques
+    this.forzarSincronizacionManual();
+
+    // Refrescamos cada 5 segundos de forma silenciosa para ver actualizaciones en segundo plano
     this.updateTimer = setInterval(() => {
       this.cargarSignos();
     }, 5000);
@@ -77,6 +79,9 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
 /**
    * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
    */
+  /**
+   * 🚀 ACCIÓN NATIVA: Fuerza al sensor a leer AHORA MISMO
+   */
   async forzarSincronizacionManual() {
     this.isLoading = true;
     const profile = this.userService.getProfile();
@@ -93,7 +98,9 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
         const sh = Number(res.data.horasSueno || 0);
         const st = Math.round(Number(dataActividad.steps || dataActividad.pasos || 0)); 
         const cal = Number(dataActividad.calories || dataActividad.calorias || 0.0);
-        const temp = Number(this.vitals?.temperature || 0);
+        
+        // 🚀 CORREGIDO: Leemos res.data.temperature directamente de la BD
+        const temp = Number(res.data.temperature || this.vitals?.temperature || 0);
 
         this.vitals = {
           heart_rate: hr,
@@ -101,10 +108,10 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
           sleep_hours: sh.toFixed(1),
           steps: st,
           calories: cal,
-          temperature: temp
+          temperature: temp // 🌡️ Ahora preserva el 40.0°C real
         };
 
-        // 🎙️ FRAGMENTACIÓN ESTRATÉGICA DE AUDIO (Evita la saturación del búfer en Android)
+        // 🎙️ FRAGMENTACIÓN ESTRATÉGICA DE AUDIO
         const bloquesDeTexto: string[] = [
           "Sincronización completada con éxito.",
           hr > 0 ? `Tu frecuencia cardíaca es de ${hr} latidos por minuto.` : "No detecté pulsaciones en tu frecuencia cardíaca.",
@@ -117,12 +124,12 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
 
         console.log("[ANAasis TTS] Iniciando lectura por bloques lógicos de salud...");
         
-        // 🔄 Reproducción secuencial obligatoria usando await para cada frase
+        // 🔄 Reproducción secuencial obligatoria
         for (const frase of bloquesDeTexto) {
           await this.speak(frase);
         }
 
-        // 💥 CLAVE: Refrescamos los signos en la interfaz HASTA QUE TERMINE de hablar todo
+        // Refrescamos la vista local
         this.cargarSignos(); 
       }
       this.isLoading = false;
@@ -139,7 +146,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
         text: text,
         lang: 'es-MX',
         rate: 1.0,
-        pitch: 1.0,
+        pitch: 1.1, // Tono amable y suave para ANAasis 🌸
         volume: 1.0,
         category: 'ambient',
       });
