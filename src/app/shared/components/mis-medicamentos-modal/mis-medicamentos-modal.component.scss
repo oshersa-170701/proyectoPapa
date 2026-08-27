@@ -1,0 +1,15 @@
+.error-msg {
+  color: var(--ion-color-danger);
+  text-align: center;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+ion-item h2 {
+  font-weight: 600;
+}
+
+ion-item p {
+  color: var(--ion-color-medium);
+  margin-bottom: 6px;
+}

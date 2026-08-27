@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Mis medicamentos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  @if (isLoading) {
+  <div class="ion-text-center">
+    <ion-spinner name="dots"></ion-spinner>
+  </div>
+  }
+
+  @if (errorMsg) {
+  <p class="error-msg">{{ errorMsg }}</p>
+  }
+
+  @if (!isLoading && medicamentos.length === 0 && !errorMsg) {
+  <p class="ion-text-center">
+    No tienes medicamentos recetados por el momento.
+  </p>
+  }
+
+  @if (!isLoading && medicamentos.length > 0) {
+  <ion-list>
+    @for (med of medicamentos; track med.source_id) {
+    <ion-item lines="full">
+      <ion-icon name="medical-outline" slot="start" color="primary"></ion-icon>
+
+      <ion-label class="ion-text-wrap">
+        <h2>{{ med.nombre }}</h2>
+        <p>{{ med.detalle }}</p>
+
+        @if (med.reminder_active) {
+        <ion-select
+          [(ngModel)]="med.reminder_frequency_hours"
+          (ionChange)="onFrecuenciaChange(med)"
+          interface="popover"
+          placeholder="¿Cada cuánto?">
+          
+          @for (op of opcionesFrecuencia; track op.value) {
+          <ion-select-option [value]="op.value">
+            {{ op.label }}
+          </ion-select-option>
+          }
+
+        </ion-select>
+        }
+      </ion-label>
+
+      <ion-toggle
+        slot="end"
+        [checked]="med.reminder_active"
+        [disabled]="med.saving"
+        (ionChange)="onToggleChange(med, $event.detail.checked)">
+      </ion-toggle>
+    </ion-item>
+    }
+  </ion-list>
+  }
+
+</ion-content>

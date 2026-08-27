@@ -33,6 +33,7 @@ import { HealthConnect } from 'capacitor-health-connect';
 import { NativeSettings, AndroidSettings } from 'capacitor-native-settings';
 import { Health } from '../core/services/health';
 import { RegistrarTemperaturaComponent } from '../shared/components/registrar-temperatura/registrar-temperatura.component';
+import { MisMedicamentosModalComponent } from '../shared/components/mis-medicamentos-modal/mis-medicamentos-modal.component';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -395,6 +396,25 @@ export class HomePage {
       this.openTemperaturaModal();
       this.cdr.detectChanges();
       return; // Detenemos el flujo para que no se envíe a la IA externa
+    }
+    // 💊 11. DETECCIÓN DE MEDICAMENTOS POR VOZ
+    if (userText.includes('medicamento') || userText.includes('receta') || userText.includes('tratamiento')) {
+      const userJson = localStorage.getItem('anaasis_user_data');
+
+      if (!userJson) {
+        const msg = "Necesitas iniciar sesión para revisar tu lista de medicamentos y recetas.";
+        this.chatMessages.push({ role: 'bot', text: msg });
+        this.speak(msg, true);
+      } else {
+        const txtMedicamentos = 'Claro, abriendo tu lista de medicamentos y tratamientos activos...';
+        this.chatMessages.push({ role: 'bot', text: txtMedicamentos });
+        this.speak(txtMedicamentos, true);
+        this.openMisMedicamentos(); // 🚀 Lanza el modal
+      }
+
+      this.isLoading = false;
+      this.cdr.detectChanges();
+      return; 
     }
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
     // FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)
@@ -954,6 +974,19 @@ export class HomePage {
       });
 
       (modal as any).environmentInjector = this.environmentInjector;
+      await modal.present();
+    });
+  }
+  async openMisMedicamentos() {
+    this.zone.run(async () => {
+      const modal = await this.modalCtrl.create({
+        component: MisMedicamentosModalComponent,
+        mode: 'ios',
+        backdropDismiss: true,
+        breakpoints: [0, 0.7, 0.9],
+        initialBreakpoint: 0.7,
+        handle: false
+      });
       await modal.present();
     });
   }
