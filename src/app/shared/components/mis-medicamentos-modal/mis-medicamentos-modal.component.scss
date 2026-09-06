@@ -1,15 +1,227 @@
-.error-msg {
-  color: var(--ion-color-danger);
+:host {
+  --med-red: #ff3b30;
+  --med-blue: #007aff;
+  --med-sky-blue: #31a5ff;
+  --med-green: #34c759;
+  --med-bg-card: #ffffff;
+  --med-text-primary: #1c1c1e;
+  --med-text-secondary: #8e8e93;
+}
+
+.medical-bg {
+  --background: #f4f7f6;
+}
+
+// Encabezado Azul Premium
+.toolbar-azul-premium {
+  --background: var(--med-sky-blue) !important;
+  --border-color: transparent;
+}
+
+.medical-title-white {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 1.2rem;
+  color: #ffffff !important;
+}
+
+// Botón de cerrar rojo
+.btn-cerrar-rojo {
+  --color: var(--med-red) !important;
+  font-size: 1.6rem;
+}
+
+// Contenedor de Medicamentos
+.meds-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 6px 0 20px 0;
+}
+
+// Tarjeta de Medicamento
+.med-card {
+  background: var(--med-bg-card);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+
+  &.reminder-active {
+    border-color: rgba(49, 165, 255, 0.35);
+    background: linear-gradient(145deg, #ffffff, #f4f9ff);
+  }
+
+  .med-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .med-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(49, 165, 255, 0.1);
+    color: var(--med-sky-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 1.5rem;
+    }
+  }
+
+  .med-info {
+    flex: 1;
+
+    .med-name {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--med-text-primary);
+      line-height: 1.2;
+    }
+
+    .med-detail {
+      margin: 4px 0 0 0;
+      font-size: 0.85rem;
+      color: var(--med-text-secondary);
+      font-weight: 500;
+    }
+  }
+
+  .med-toggle {
+    margin: 0;
+    --track-background-checked: var(--med-green);
+  }
+}
+
+// Caja de Recordatorio Interactivo
+.reminder-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(49, 165, 255, 0.2);
+
+  .reminder-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--med-sky-blue);
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+
+  .frequency-select {
+    --placeholder-color: var(--med-sky-blue);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--med-sky-blue);
+    padding: 0;
+    min-height: auto;
+  }
+}
+
+// Estados (Cargando, Vacío, Error)
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin: 12px 0;
-  font-size: 14px;
+  padding: 40px 20px;
+  color: var(--med-text-secondary);
+
+  .state-icon {
+    font-size: 3.5rem;
+    color: var(--med-sky-blue);
+    margin-bottom: 12px;
+
+    &.error-icon {
+      color: var(--med-red);
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--med-text-primary);
+  }
+
+  p {
+    margin: 8px 0 16px 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .state-text {
+    margin-top: 12px;
+    font-size: 0.95rem;
+  }
+
+  &.error-card, &.empty-card {
+    background: #ffffff;
+    border-radius: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
 }
 
-ion-item h2 {
+.retry-btn {
+  --border-radius: 12px;
   font-weight: 600;
+  margin-top: 8px;
+}
+.retry-btn {
+  --border-radius: 12px;
+  --color: #ffffff !important; // Fuerza el color de texto a nivel Ionic
+  font-weight: 700;
+  margin-top: 8px;
+
+  .texto-blanco {
+    color: #ffffff !important;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+}
+.retry-btn {
+  --border-radius: 12px;
+  --color: #ffffff !important;
+  font-weight: 700;
+  margin-top: 8px;
+
+  ion-icon {
+    font-size: 1.2rem;
+    color: #ffffff !important;
+  }
+
+  .texto-blanco {
+    color: #ffffff !important;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
 }
 
-ion-item p {
-  color: var(--ion-color-medium);
-  margin-bottom: 6px;
+.spinner-animate {
+  animation: rotation 1s infinite linear;
+}
+
+@keyframes rotation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(350deg); }
 }

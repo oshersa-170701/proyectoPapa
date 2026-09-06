@@ -6,7 +6,7 @@ import {
   IonSpinner, IonList, IonItem, IonLabel, IonToggle, IonSelect, IonSelectOption, ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, medicalOutline, alarmOutline } from 'ionicons/icons';
+import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 
@@ -48,7 +48,7 @@ export class MisMedicamentosModalComponent implements OnInit {
   private readonly modalCtrl = inject(ModalController);
 
   constructor() {
-    addIcons({ closeOutline, medicalOutline, alarmOutline });
+    addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline});
   }
 
   ngOnInit() {
@@ -58,14 +58,17 @@ export class MisMedicamentosModalComponent implements OnInit {
   dismiss() {
     this.modalCtrl.dismiss();
   }
-
-  cargarMedicamentos() {
+cargarMedicamentos() {
     const profile = this.userService.getProfile();
     if (!profile?.patient_id) {
       this.errorMsg = 'No encontré tu expediente de paciente.';
       this.isLoading = false;
       return;
     }
+
+    // 🚀 Activamos el indicador de carga y limpiamos el error anterior
+    this.isLoading = true;
+    this.errorMsg = '';
 
     this.medicalService.getPrescriptions(profile.patient_id).subscribe({
       next: (res: any) => {

@@ -1,68 +1,100 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>Mis medicamentos</ion-title>
+  <ion-toolbar class="toolbar-azul-premium">
+    <ion-title class="medical-title-white">Mis Medicamentos</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">
+      <ion-button (click)="dismiss()" class="btn-cerrar-rojo">
         <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-
-  @if (isLoading) {
-  <div class="ion-text-center">
-    <ion-spinner name="dots"></ion-spinner>
+<ion-content class="medical-bg ion-padding">
+  
+ <!-- Estado de Carga -->
+@if (isLoading) {
+  <div class="state-container">
+    <ion-spinner name="crescent" color="primary" class="spinner-animate"></ion-spinner>
+    <p class="state-text">Consultando recetas médicas...</p>
   </div>
-  }
+}
 
-  @if (errorMsg) {
-  <p class="error-msg">{{ errorMsg }}</p>
-  }
+<!-- Estado de Error -->
+@if (!isLoading && errorMsg) {
+  <div class="state-container error-card">
+    <ion-icon name="alert-circle-outline" class="state-icon error-icon"></ion-icon>
+    <h3>Atención</h3>
+    <p>{{ errorMsg }}</p>
+    <ion-button 
+      fill="solid" 
+      color="primary" 
+      class="retry-btn" 
+      [disabled]="isLoading" 
+      (click)="cargarMedicamentos()">
+      <ion-icon slot="start" name="sync-outline" [class.spinner-animate]="isLoading"></ion-icon>
+      <span class="texto-blanco">Reintentar</span>
+    </ion-button>
+  </div>
+}
 
+  <!-- Estado Vacío -->
   @if (!isLoading && medicamentos.length === 0 && !errorMsg) {
-  <p class="ion-text-center">
-    No tienes medicamentos recetados por el momento.
-  </p>
+    <div class="state-container empty-card">
+      <ion-icon name="medical-outline" class="state-icon"></ion-icon>
+      <h3>Sin recetas activas</h3>
+      <p>No tienes medicamentos prescritos por el momento.</p>
+    </div>
   }
 
+  <!-- Listado de Medicamentos -->
   @if (!isLoading && medicamentos.length > 0) {
-  <ion-list>
-    @for (med of medicamentos; track med.source_id) {
-    <ion-item lines="full">
-      <ion-icon name="medical-outline" slot="start" color="primary"></ion-icon>
-
-      <ion-label class="ion-text-wrap">
-        <h2>{{ med.nombre }}</h2>
-        <p>{{ med.detalle }}</p>
-
-        @if (med.reminder_active) {
-        <ion-select
-          [(ngModel)]="med.reminder_frequency_hours"
-          (ionChange)="onFrecuenciaChange(med)"
-          interface="popover"
-          placeholder="¿Cada cuánto?">
+    <div class="meds-container">
+      @for (med of medicamentos; track med.source_id) {
+        <div class="med-card" [class.reminder-active]="med.reminder_active">
           
-          @for (op of opcionesFrecuencia; track op.value) {
-          <ion-select-option [value]="op.value">
-            {{ op.label }}
-          </ion-select-option>
+          <!-- Encabezado de la Tarjeta -->
+          <div class="med-header">
+            <div class="med-icon-wrapper">
+              <ion-icon name="medical-outline"></ion-icon>
+            </div>
+            <div class="med-info">
+              <h2 class="med-name">{{ med.nombre }}</h2>
+              <p class="med-detail">{{ med.detalle || 'Dosis según indicación médica' }}</p>
+            </div>
+            <ion-toggle
+              [checked]="med.reminder_active"
+              [disabled]="med.saving"
+              (ionChange)="onToggleChange(med, $event.detail.checked)"
+              color="success"
+              class="med-toggle">
+            </ion-toggle>
+          </div>
+
+          <!-- Selector de Frecuencia (Solo si está activo el recordatorio) -->
+          @if (med.reminder_active) {
+            <div class="reminder-box">
+              <div class="reminder-label">
+                <ion-icon name="alarm-outline"></ion-icon>
+                <span>Recordatorio cada:</span>
+              </div>
+              <ion-select
+                [(ngModel)]="med.reminder_frequency_hours"
+                (ionChange)="onFrecuenciaChange(med)"
+                interface="popover"
+                class="frequency-select"
+                placeholder="Seleccionar">
+                @for (op of opcionesFrecuencia; track op.value) {
+                  <ion-select-option [value]="op.value">
+                    {{ op.label }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </div>
           }
 
-        </ion-select>
-        }
-      </ion-label>
-
-      <ion-toggle
-        slot="end"
-        [checked]="med.reminder_active"
-        [disabled]="med.saving"
-        (ionChange)="onToggleChange(med, $event.detail.checked)">
-      </ion-toggle>
-    </ion-item>
-    }
-  </ion-list>
+        </div>
+      }
+    </div>
   }
 
 </ion-content>

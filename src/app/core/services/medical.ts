@@ -133,13 +133,14 @@ getEmergencyTracking(phone: string): Observable<any> {
   }
 
   /** Obtener las prescripciones (consulta + hospitalización) del paciente */
-  getPrescriptions(patientId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/anaasis.php`, {
+ getPrescriptions(patientId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis_v2.php`, {
       action: "get_prescriptions",
       api_key: "ANAASIS_2026",
       patient_id: patientId
     });
   }
+ 
 
   /** El paciente activa/desactiva y elige la frecuencia del recordatorio de un medicamento */
   setMedicationReminder(data: {
