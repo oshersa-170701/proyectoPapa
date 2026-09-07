@@ -174,8 +174,8 @@
     "semantic_hash": "6ddd3738167e3f57e96599be29d84220"
   },
   "android/app/capacitor.build.gradle": {
-    "mtime": 1788740521.6982796,
-    "seen": 1788741036.2855737,
+    "mtime": 1788742103.2414157,
+    "seen": 1788742342.1576982,
     "ast_hash": "5f8333df8429c35f82e2a40b14e16e00",
     "semantic_hash": "5f8333df8429c35f82e2a40b14e16e00"
   },
@@ -204,8 +204,8 @@
     "semantic_hash": "bacca7826378b80106a6e567c43f8f36"
   },
   "android/capacitor.settings.gradle": {
-    "mtime": 1788740521.6977205,
-    "seen": 1788741036.2855892,
+    "mtime": 1788742103.2404163,
+    "seen": 1788742342.1588962,
     "ast_hash": "b5bbdbd0661769cc3b7817d6ded71a24",
     "semantic_hash": "b5bbdbd0661769cc3b7817d6ded71a24"
   },
@@ -354,10 +354,10 @@
     "semantic_hash": "94f0222d936567fcb18df69218067dc7"
   },
   "src/app/home/home.page.ts": {
-    "mtime": 1788740021.6593094,
-    "seen": 1788741036.2856677,
-    "ast_hash": "691ac0e6cd8ecd2e208e0b2e58662a3e",
-    "semantic_hash": "691ac0e6cd8ecd2e208e0b2e58662a3e"
+    "mtime": 1788741506.9751744,
+    "seen": 1788742342.1661053,
+    "ast_hash": "9ab819ede31eed9da6a3946ccd88b0cc",
+    "semantic_hash": "9ab819ede31eed9da6a3946ccd88b0cc"
   },
   "src/app/shared/components/anaconnect-modal/anaconnect-modal.component.ts": {
     "mtime": 1788740015.4313705,
@@ -574,5 +574,125 @@
     "seen": 1788741036.2857811,
     "ast_hash": "eba856676b131673479428bd6cd902a5",
     "semantic_hash": "eba856676b131673479428bd6cd902a5"
+  },
+  "README.md": {
+    "mtime": 1774721840.5932286,
+    "seen": 1788742342.1768677,
+    "ast_hash": "03ddacbc630791bb82ba3b3ee04425b1",
+    "semantic_hash": "03ddacbc630791bb82ba3b3ee04425b1"
+  },
+  "anaasis-health-plugin/CONTRIBUTING.md": {
+    "mtime": 1765900815.0,
+    "seen": 1788742342.1768718,
+    "ast_hash": "0ea415def64538a68819bd1a0a866f0b",
+    "semantic_hash": "0ea415def64538a68819bd1a0a866f0b"
+  },
+  "anaasis-health-plugin/README.md": {
+    "mtime": 1778295816.3281798,
+    "seen": 1788742342.1768744,
+    "ast_hash": "6e51c2d541b25b3d349eaf47da3e3b48",
+    "semantic_hash": "6e51c2d541b25b3d349eaf47da3e3b48"
+  },
+  "src/app/app.component.html": {
+    "mtime": 1777255230.2592497,
+    "seen": 1788742342.176877,
+    "ast_hash": "ec4d9b62e08469c15ccc114353b3385f",
+    "semantic_hash": "ec4d9b62e08469c15ccc114353b3385f"
+  },
+  "src/app/home/home.page.html": {
+    "mtime": 1787883463.5331225,
+    "seen": 1788742342.1768792,
+    "ast_hash": "050a0705b846fd8b6c812c5780ebe894",
+    "semantic_hash": "050a0705b846fd8b6c812c5780ebe894"
+  },
+  "src/app/shared/components/anaconnect-modal/anaconnect-modal.component.html": {
+    "mtime": 1788741477.6565418,
+    "seen": 1788742342.1768813,
+    "ast_hash": "235b292fc964a1c0184852b9546fb1ca",
+    "semantic_hash": "235b292fc964a1c0184852b9546fb1ca"
+  },
+  "src/app/shared/components/bot-message/bot-message.component.html": {
+    "mtime": 1778341353.5476418,
+    "seen": 1788742342.1768842,
+    "ast_hash": "1afe6814e3e1b9760282fec571afa039",
+    "semantic_hash": "1afe6814e3e1b9760282fec571afa039"
+  },
+  "src/app/shared/components/chat-options/chat-options.component.html": {
+    "mtime": 1774728192.793091,
+    "seen": 1788742342.1768863,
+    "ast_hash": "0f1a6578be8e45f82046f88612bfbbae",
+    "semantic_hash": "0f1a6578be8e45f82046f88612bfbbae"
+  },
+  "src/app/shared/components/doctor-list/doctor-list.component.html": {
+    "mtime": 1778381362.9078128,
+    "seen": 1788742342.1768882,
+    "ast_hash": "e1ef558e0f783860d56f54cf7352ded8",
+    "semantic_hash": "e1ef558e0f783860d56f54cf7352ded8"
+  },
+  "src/app/shared/components/hospital-list/hospital-list.component.html": {
+    "mtime": 1778381835.7470348,
+    "seen": 1788742342.1768901,
+    "ast_hash": "56c16dad0f027297d95cc2fb900d99b3",
+    "semantic_hash": "56c16dad0f027297d95cc2fb900d99b3"
+  },
+  "src/app/shared/components/login-modal/login-modal.component.html": {
+    "mtime": 1778339420.0514414,
+    "seen": 1788742342.1768928,
+    "ast_hash": "b45081eba511bf0ea8d7400644415bbf",
+    "semantic_hash": "b45081eba511bf0ea8d7400644415bbf"
+  },
+  "src/app/shared/components/medical-map/medical-map.component.html": {
+    "mtime": 1774731967.5297017,
+    "seen": 1788742342.1768944,
+    "ast_hash": "67aaaeb4c5f6171255a8ce1ad2f0a8c3",
+    "semantic_hash": "67aaaeb4c5f6171255a8ce1ad2f0a8c3"
+  },
+  "src/app/shared/components/mis-medicamentos-modal/mis-medicamentos-modal.component.html": {
+    "mtime": 1788737907.4674356,
+    "seen": 1788742342.1768966,
+    "ast_hash": "0cd4a89bd41a8f510ae5e45527928546",
+    "semantic_hash": "0cd4a89bd41a8f510ae5e45527928546"
+  },
+  "src/app/shared/components/register-modal/register-modal.component.html": {
+    "mtime": 1778339489.8787377,
+    "seen": 1788742342.176899,
+    "ast_hash": "6cdba0db39333567714b7a499c5bbdb4",
+    "semantic_hash": "6cdba0db39333567714b7a499c5bbdb4"
+  },
+  "src/app/shared/components/registrar-temperatura/registrar-temperatura.component.html": {
+    "mtime": 1784428181.9593027,
+    "seen": 1788742342.1769013,
+    "ast_hash": "73e15a16ae4c7251c66144638e3fcf0f",
+    "semantic_hash": "73e15a16ae4c7251c66144638e3fcf0f"
+  },
+  "src/app/shared/components/user-appointments/user-appointments.component.html": {
+    "mtime": 1778448103.4579675,
+    "seen": 1788742342.1769035,
+    "ast_hash": "e083d05d0604f4414be39648e8558a31",
+    "semantic_hash": "e083d05d0604f4414be39648e8558a31"
+  },
+  "src/app/shared/components/user-message/user-message.component.html": {
+    "mtime": 1778340354.8339221,
+    "seen": 1788742342.1769054,
+    "ast_hash": "3f0e54022cf012a69db5aa8ea053290b",
+    "semantic_hash": "3f0e54022cf012a69db5aa8ea053290b"
+  },
+  "src/app/shared/components/user-profile/user-profile.component.html": {
+    "mtime": 1778339504.225802,
+    "seen": 1788742342.1769075,
+    "ast_hash": "405771a7d79d7e8aef8820396d770cbe",
+    "semantic_hash": "405771a7d79d7e8aef8820396d770cbe"
+  },
+  "src/app/shared/components/vitals-modal/vitals-modal.component.html": {
+    "mtime": 1784572123.9024,
+    "seen": 1788742342.1769092,
+    "ast_hash": "ee6c8396be8f756aad08b9a550e71540",
+    "semantic_hash": "ee6c8396be8f756aad08b9a550e71540"
+  },
+  "src/index.html": {
+    "mtime": 1774749508.769704,
+    "seen": 1788742342.1769114,
+    "ast_hash": "415435f4aab79c7528e9c046006501bf",
+    "semantic_hash": "415435f4aab79c7528e9c046006501bf"
   }
 }

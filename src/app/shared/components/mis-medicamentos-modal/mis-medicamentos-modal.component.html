@@ -10,7 +10,14 @@
 </ion-header>
 
 <ion-content class="medical-bg ion-padding">
-  
+
+  <div class="anaconnect-bar">
+    <ion-button expand="block" fill="outline" color="primary" (click)="abrirAnaConnect()">
+      <ion-icon slot="start" name="home-outline"></ion-icon>
+      Conectar bocina Google Home
+    </ion-button>
+  </div>
+
  <!-- Estado de Carga -->
 @if (isLoading) {
   <div class="state-container">

@@ -21,7 +21,9 @@ import { MedicalService } from '../core/services/medical';
 import { Geolocation } from '@capacitor/geolocation';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { App } from '@capacitor/app';
+import { Anaconnect } from '../core/services/anaconnect';
 import { Overpass } from '../core/services/overpass';
 import { UserProfileComponent } from '../shared/components/user-profile/user-profile.component';
 import { UserAppointmentsComponent } from '../shared/components/user-appointments/user-appointments.component';
@@ -71,6 +73,7 @@ export class HomePage {
     private modalCtrl: ModalController,
     private userService: User,
     private healthService: Health,
+    private anaconnectService: Anaconnect,
     public environmentInjector: EnvironmentInjector
   ) {
     // Añadí los iconos que usan tus listas para que no den error
@@ -897,6 +900,8 @@ export class HomePage {
     try { await (HealthConnect as any).SplashScreen.hide(); } catch (e) { }
     await this.verificarPermisosHealth();
     this.motorDeMonitoreoRealTime();
+    this.iniciarMotorDeRecordatorios();
+    this.escucharNotificacionesDeMedicamentos();
   }
 
   ultimoPulsoGuardado: number = 0;
@@ -989,5 +994,77 @@ export class HomePage {
       });
       await modal.present();
     });
+  }
+
+  // 💊🔊 NIVEL 2: mientras la app está abierta, revisa cada 15s si hay
+  // anuncios de medicamentos pendientes (los generó reminder_cron.php) y los habla.
+  private motorRecordatoriosInterval: any = null;
+
+  iniciarMotorDeRecordatorios() {
+    if (this.motorRecordatoriosInterval) {
+      clearInterval(this.motorRecordatoriosInterval);
+    }
+
+    this.motorRecordatoriosInterval = setInterval(() => {
+      const profile = this.userService.getProfile();
+      if (!profile?.phone) return;
+
+      this.medicalService.getPendingAnnouncements(profile.phone).subscribe({
+        next: (res: any) => {
+          if (!res?.success || !res.data?.length) return;
+
+          this.zone.run(async () => {
+            for (const anuncio of res.data) {
+              await this.speak(anuncio.text, true);
+              this.anunciarEnBocina(profile.phone, anuncio.text);
+
+              this.medicalService.ackAnnouncement(anuncio.id).subscribe({
+                error: (err) => console.error('[Recordatorios] Error confirmando anuncio:', err)
+              });
+            }
+          });
+        },
+        error: (err) => console.error(`[Recordatorios] Error consultando anuncios pendientes: status=${err?.status} message=${err?.message} body=${JSON.stringify(err?.error)}`)
+      });
+    }, 15000);
+  }
+
+  // Si el paciente tiene una bocina Google Home emparejada, también le castea el audio (best-effort)
+  private anunciarEnBocina(phone: string, texto: string) {
+    this.medicalService.getGoogleHomeDevice(phone).subscribe({
+      next: (res: any) => {
+        const bocina = res?.data;
+        if (!res?.success || !bocina?.cast_id) return;
+
+        this.medicalService.generateTts(texto).subscribe({
+          next: async (ttsRes: any) => {
+            if (!ttsRes?.success || !ttsRes.audio_url) return;
+            try {
+              await this.anaconnectService.speak(bocina.cast_id, ttsRes.audio_url);
+            } catch (e) {
+              console.warn('[AnaConnect] No se pudo reproducir en la bocina (¿sigue en la misma red WiFi?):', e);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  // 💊📳 NIVEL 1: si mientras la app está abierta dispara una alarma nativa
+  // programada por ReminderScheduler, además la anunciamos por voz de inmediato.
+  escucharNotificacionesDeMedicamentos() {
+    LocalNotifications.addListener('localNotificationReceived', (notification) => {
+      this.zone.run(() => this.reaccionarANotificacionMedicamento(notification));
+    });
+  }
+
+  private reaccionarANotificacionMedicamento(notification: any) {
+    const medicamento = notification?.extra?.medicamento;
+    if (!medicamento) return;
+
+    const mensaje = `Es momento de tomar tu medicamento: ${medicamento}`;
+    this.chatMessages.push({ role: 'bot', text: mensaje });
+    this.speak(mensaje, true);
+    this.cdr.detectChanges();
   }
 }

@@ -1,0 +1,578 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1788741014.5799885,
+    "seen": 1788741036.2854612,
+    "ast_hash": "8d0b8cd2cddeeba6ace4d2fd1e77577b",
+    "semantic_hash": "8d0b8cd2cddeeba6ace4d2fd1e77577b"
+  },
+  ".eslintrc.json": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2854738,
+    "ast_hash": "92a4221340109c9421fdb2b9321d5029",
+    "semantic_hash": "92a4221340109c9421fdb2b9321d5029"
+  },
+  ".vscode/extensions.json": {
+    "mtime": 1774721737.9763956,
+    "seen": 1788741036.2854793,
+    "ast_hash": "be6e3d258a12fd4214abd140175b91ca",
+    "semantic_hash": "be6e3d258a12fd4214abd140175b91ca"
+  },
+  ".vscode/settings.json": {
+    "mtime": 1787883463.5157902,
+    "seen": 1788741036.2854826,
+    "ast_hash": "cba93b6cafea3025171f9ec29fe4fc06",
+    "semantic_hash": "cba93b6cafea3025171f9ec29fe4fc06"
+  },
+  "anaasis-connect-plugin/android/build.gradle": {
+    "mtime": 1788740294.659345,
+    "seen": 1788741036.2854857,
+    "ast_hash": "5e8ff655a63afb298197fa1a6d7e9e3e",
+    "semantic_hash": "5e8ff655a63afb298197fa1a6d7e9e3e"
+  },
+  "anaasis-connect-plugin/android/src/main/java/com/anaasis/plugins/connect/ANAasisConnectPlugin.kt": {
+    "mtime": 1788740337.581811,
+    "seen": 1788741036.2854888,
+    "ast_hash": "c1396bb9dedc01fb9bf5fb096684de5f",
+    "semantic_hash": "c1396bb9dedc01fb9bf5fb096684de5f"
+  },
+  "anaasis-connect-plugin/android/src/main/java/com/anaasis/plugins/connect/CastOptionsProvider.kt": {
+    "mtime": 1788740314.8712955,
+    "seen": 1788741036.2854922,
+    "ast_hash": "eebe257760c274717a9aedabf1102806",
+    "semantic_hash": "eebe257760c274717a9aedabf1102806"
+  },
+  "anaasis-connect-plugin/package.json": {
+    "mtime": 1788740256.0448332,
+    "seen": 1788741036.2854948,
+    "ast_hash": "efb07f1a1abeaa5064ad0d3c67f6e072",
+    "semantic_hash": "efb07f1a1abeaa5064ad0d3c67f6e072"
+  },
+  "anaasis-connect-plugin/rollup.config.mjs": {
+    "mtime": 1788740267.4256196,
+    "seen": 1788741036.2854977,
+    "ast_hash": "ffd4c8ab17b0e3ab50f3e1a3ed47701a",
+    "semantic_hash": "ffd4c8ab17b0e3ab50f3e1a3ed47701a"
+  },
+  "anaasis-connect-plugin/src/definitions.ts": {
+    "mtime": 1788740273.7004528,
+    "seen": 1788741036.2855008,
+    "ast_hash": "be1a4ab8eb003aa0734f45b9b6b4836a",
+    "semantic_hash": "be1a4ab8eb003aa0734f45b9b6b4836a"
+  },
+  "anaasis-connect-plugin/src/index.ts": {
+    "mtime": 1788740278.720964,
+    "seen": 1788741036.2855034,
+    "ast_hash": "b40e031bf6019cd371490ee19697be43",
+    "semantic_hash": "b40e031bf6019cd371490ee19697be43"
+  },
+  "anaasis-connect-plugin/src/web.ts": {
+    "mtime": 1788740284.9743276,
+    "seen": 1788741036.2855065,
+    "ast_hash": "08faf6aca4f8685b3b3dd87d2099b5d4",
+    "semantic_hash": "08faf6aca4f8685b3b3dd87d2099b5d4"
+  },
+  "anaasis-connect-plugin/tsconfig.json": {
+    "mtime": 1788740261.7527046,
+    "seen": 1788741036.2855096,
+    "ast_hash": "1c95b63b8e7fa27eb15e7a9313a3814b",
+    "semantic_hash": "1c95b63b8e7fa27eb15e7a9313a3814b"
+  },
+  "anaasis-health-plugin/Package.swift": {
+    "mtime": 1778286086.789647,
+    "seen": 1788741036.2855124,
+    "ast_hash": "bbf385d3a5d32a3a2a1f0b72da52fdaa",
+    "semantic_hash": "bbf385d3a5d32a3a2a1f0b72da52fdaa"
+  },
+  "anaasis-health-plugin/android/build.gradle": {
+    "mtime": 1778304781.230596,
+    "seen": 1788741036.2855155,
+    "ast_hash": "354fe7e02994c8ddead19fc5cd9d759a",
+    "semantic_hash": "354fe7e02994c8ddead19fc5cd9d759a"
+  },
+  "anaasis-health-plugin/android/gradlew": {
+    "mtime": 1766058562.0,
+    "seen": 1788741036.2855182,
+    "ast_hash": "794669d78aef1dd5c7d889ef618b311a",
+    "semantic_hash": "794669d78aef1dd5c7d889ef618b311a"
+  },
+  "anaasis-health-plugin/android/settings.gradle": {
+    "mtime": 1765900815.0,
+    "seen": 1788741036.2855213,
+    "ast_hash": "80d0e89684c7a051b64b73b4b770e400",
+    "semantic_hash": "80d0e89684c7a051b64b73b4b770e400"
+  },
+  "anaasis-health-plugin/android/src/main/java/com/anaasis/plugins/health/ANAasisHealthPlugin.kt": {
+    "mtime": 1784313932.624256,
+    "seen": 1788741036.2855244,
+    "ast_hash": "7d76e96f98815cd6e932bdcf8fd77d6a",
+    "semantic_hash": "7d76e96f98815cd6e932bdcf8fd77d6a"
+  },
+  "anaasis-health-plugin/android/src/test/java/com/getcapacitor/ExampleUnitTest.java": {
+    "mtime": 1765900815.0,
+    "seen": 1788741036.2855277,
+    "ast_hash": "0bb8d35265f011eb4bd0e663326acb45",
+    "semantic_hash": "0bb8d35265f011eb4bd0e663326acb45"
+  },
+  "anaasis-health-plugin/ios/Sources/ANAasisHealthPlugin/ANAasisHealth.swift": {
+    "mtime": 1778286086.789647,
+    "seen": 1788741036.285533,
+    "ast_hash": "ef625f436c0883c44c157cd7d01ffffc",
+    "semantic_hash": "ef625f436c0883c44c157cd7d01ffffc"
+  },
+  "anaasis-health-plugin/ios/Sources/ANAasisHealthPlugin/ANAasisHealthPlugin.swift": {
+    "mtime": 1778286086.790647,
+    "seen": 1788741036.2855368,
+    "ast_hash": "6cd0d54888f7485394c4e89b6ebe7d07",
+    "semantic_hash": "6cd0d54888f7485394c4e89b6ebe7d07"
+  },
+  "anaasis-health-plugin/ios/Tests/ANAasisHealthPluginTests/ANAasisHealthTests.swift": {
+    "mtime": 1778286086.789647,
+    "seen": 1788741036.2855408,
+    "ast_hash": "e1eae725fdb148391124387fe2adc8e5",
+    "semantic_hash": "e1eae725fdb148391124387fe2adc8e5"
+  },
+  "anaasis-health-plugin/package.json": {
+    "mtime": 1778286086.790647,
+    "seen": 1788741036.285546,
+    "ast_hash": "be649181c29ce0d6d667a67ed3463367",
+    "semantic_hash": "be649181c29ce0d6d667a67ed3463367"
+  },
+  "anaasis-health-plugin/rollup.config.mjs": {
+    "mtime": 1778286086.790647,
+    "seen": 1788741036.2855499,
+    "ast_hash": "de3c4b4545eec156934b4fd8f80473a0",
+    "semantic_hash": "de3c4b4545eec156934b4fd8f80473a0"
+  },
+  "anaasis-health-plugin/src/definitions.ts": {
+    "mtime": 1778300086.1764438,
+    "seen": 1788741036.2855535,
+    "ast_hash": "af24d1b23d93f45ce292acd28965ed32",
+    "semantic_hash": "af24d1b23d93f45ce292acd28965ed32"
+  },
+  "anaasis-health-plugin/src/index.ts": {
+    "mtime": 1778286086.789647,
+    "seen": 1788741036.285557,
+    "ast_hash": "736b54b6eec9ead498a97da44d6ed1fa",
+    "semantic_hash": "736b54b6eec9ead498a97da44d6ed1fa"
+  },
+  "anaasis-health-plugin/src/web.ts": {
+    "mtime": 1778286087.7906463,
+    "seen": 1788741036.2855606,
+    "ast_hash": "b0d8737c109e74c1d8933f829d27a642",
+    "semantic_hash": "b0d8737c109e74c1d8933f829d27a642"
+  },
+  "anaasis-health-plugin/tsconfig.json": {
+    "mtime": 1765900815.0,
+    "seen": 1788741036.2855644,
+    "ast_hash": "1c95b63b8e7fa27eb15e7a9313a3814b",
+    "semantic_hash": "1c95b63b8e7fa27eb15e7a9313a3814b"
+  },
+  "android/app/build.gradle": {
+    "mtime": 1787886089.8670785,
+    "seen": 1788741036.285569,
+    "ast_hash": "6ddd3738167e3f57e96599be29d84220",
+    "semantic_hash": "6ddd3738167e3f57e96599be29d84220"
+  },
+  "android/app/capacitor.build.gradle": {
+    "mtime": 1788740521.6982796,
+    "seen": 1788741036.2855737,
+    "ast_hash": "5f8333df8429c35f82e2a40b14e16e00",
+    "semantic_hash": "5f8333df8429c35f82e2a40b14e16e00"
+  },
+  "android/app/release/output-metadata.json": {
+    "mtime": 1785211334.8133154,
+    "seen": 1788741036.2855778,
+    "ast_hash": "114fa67dfde9ab217b0b79130f5d43f7",
+    "semantic_hash": "114fa67dfde9ab217b0b79130f5d43f7"
+  },
+  "android/app/src/main/java/com/anaasis/vitals/daniel/MainActivity.java": {
+    "mtime": 1778095118.2299297,
+    "seen": 1788741036.2855806,
+    "ast_hash": "3f661e7bcf837b8143b1f2abcd5a38b6",
+    "semantic_hash": "3f661e7bcf837b8143b1f2abcd5a38b6"
+  },
+  "android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java": {
+    "mtime": 1774458162.0,
+    "seen": 1788741036.2855837,
+    "ast_hash": "e91b4501c14da821682fa5c26a16d616",
+    "semantic_hash": "e91b4501c14da821682fa5c26a16d616"
+  },
+  "android/build.gradle": {
+    "mtime": 1778361521.439694,
+    "seen": 1788741036.2855864,
+    "ast_hash": "bacca7826378b80106a6e567c43f8f36",
+    "semantic_hash": "bacca7826378b80106a6e567c43f8f36"
+  },
+  "android/capacitor.settings.gradle": {
+    "mtime": 1788740521.6977205,
+    "seen": 1788741036.2855892,
+    "ast_hash": "b5bbdbd0661769cc3b7817d6ded71a24",
+    "semantic_hash": "b5bbdbd0661769cc3b7817d6ded71a24"
+  },
+  "android/gradlew": {
+    "mtime": 1774458162.0,
+    "seen": 1788741036.2855923,
+    "ast_hash": "794669d78aef1dd5c7d889ef618b311a",
+    "semantic_hash": "794669d78aef1dd5c7d889ef618b311a"
+  },
+  "android/settings.gradle": {
+    "mtime": 1774458162.0,
+    "seen": 1788741036.2855957,
+    "ast_hash": "f6cd925b3f859e23c3d819fe2459e0e4",
+    "semantic_hash": "f6cd925b3f859e23c3d819fe2459e0e4"
+  },
+  "android/variables.gradle": {
+    "mtime": 1777933744.2892218,
+    "seen": 1788741036.2855988,
+    "ast_hash": "6fbff9cf1058188a0e8da439fbc6e272",
+    "semantic_hash": "6fbff9cf1058188a0e8da439fbc6e272"
+  },
+  "angular.json": {
+    "mtime": 1778262387.8114452,
+    "seen": 1788741036.2856019,
+    "ast_hash": "24ee98cee2cc8e3790be31ea829e3a28",
+    "semantic_hash": "24ee98cee2cc8e3790be31ea829e3a28"
+  },
+  "capacitor.config.ts": {
+    "mtime": 1778379365.2043796,
+    "seen": 1788741036.285605,
+    "ast_hash": "e2922b03763f2ec6d1c5938494e4c7af",
+    "semantic_hash": "e2922b03763f2ec6d1c5938494e4c7af"
+  },
+  "ionic.config.json": {
+    "mtime": 1774718082.1386552,
+    "seen": 1788741036.285608,
+    "ast_hash": "7008ee593d2f7f5a2b3ecb2d96c8ec13",
+    "semantic_hash": "7008ee593d2f7f5a2b3ecb2d96c8ec13"
+  },
+  "karma.conf.js": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.285611,
+    "ast_hash": "d8990b50036be77bf6230964f8d6c380",
+    "semantic_hash": "d8990b50036be77bf6230964f8d6c380"
+  },
+  "package.json": {
+    "mtime": 1788740357.5068836,
+    "seen": 1788741036.2856138,
+    "ast_hash": "bf7655d9c09802eaced71dff06596bc0",
+    "semantic_hash": "bf7655d9c09802eaced71dff06596bc0"
+  },
+  "src/app/app.component.spec.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2856188,
+    "ast_hash": "0a477dee3759af8f958109bcc30c2425",
+    "semantic_hash": "0a477dee3759af8f958109bcc30c2425"
+  },
+  "src/app/app.component.ts": {
+    "mtime": 1777264284.087221,
+    "seen": 1788741036.2856214,
+    "ast_hash": "b7f154fd66301d68d7610416eb920b75",
+    "semantic_hash": "b7f154fd66301d68d7610416eb920b75"
+  },
+  "src/app/app.routes.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2856247,
+    "ast_hash": "a15daeab9b2e8c1f8dcdfb234eaf4247",
+    "semantic_hash": "a15daeab9b2e8c1f8dcdfb234eaf4247"
+  },
+  "src/app/core/pipes/filter-pipe.spec.ts": {
+    "mtime": 1774746545.0040312,
+    "seen": 1788741036.2856278,
+    "ast_hash": "416c6fb28527b7a5961842080c3d1475",
+    "semantic_hash": "416c6fb28527b7a5961842080c3d1475"
+  },
+  "src/app/core/pipes/filter-pipe.ts": {
+    "mtime": 1776215028.7704515,
+    "seen": 1788741036.2856307,
+    "ast_hash": "c66bac24972627a2b17ad9a537dbe6bf",
+    "semantic_hash": "c66bac24972627a2b17ad9a537dbe6bf"
+  },
+  "src/app/core/services/anaconnect.ts": {
+    "mtime": 1788740461.2360382,
+    "seen": 1788741036.2856343,
+    "ast_hash": "a03b02ad22e08226916362220d6ef77b",
+    "semantic_hash": "a03b02ad22e08226916362220d6ef77b"
+  },
+  "src/app/core/services/health.spec.ts": {
+    "mtime": 1778288280.0843782,
+    "seen": 1788741036.2856371,
+    "ast_hash": "422f701dc57f496f0b82ddb965761fc4",
+    "semantic_hash": "422f701dc57f496f0b82ddb965761fc4"
+  },
+  "src/app/core/services/health.ts": {
+    "mtime": 1784572854.3585377,
+    "seen": 1788741036.2856402,
+    "ast_hash": "fa5d89d1a5bac1a3ead9e405dbfd003d",
+    "semantic_hash": "fa5d89d1a5bac1a3ead9e405dbfd003d"
+  },
+  "src/app/core/services/medical.spec.ts": {
+    "mtime": 1774739890.7706199,
+    "seen": 1788741036.2856433,
+    "ast_hash": "9e2de7f19f68525176f54b590e2b7523",
+    "semantic_hash": "9e2de7f19f68525176f54b590e2b7523"
+  },
+  "src/app/core/services/medical.ts": {
+    "mtime": 1788737820.3952625,
+    "seen": 1788741036.2856464,
+    "ast_hash": "858a267019ebfef3c7e7a24c4da9ec97",
+    "semantic_hash": "858a267019ebfef3c7e7a24c4da9ec97"
+  },
+  "src/app/core/services/overpass.spec.ts": {
+    "mtime": 1774797702.3820143,
+    "seen": 1788741036.2856493,
+    "ast_hash": "cff6b44399be5022ae0bb2c935f2099b",
+    "semantic_hash": "cff6b44399be5022ae0bb2c935f2099b"
+  },
+  "src/app/core/services/overpass.ts": {
+    "mtime": 1774802045.9467237,
+    "seen": 1788741036.2856522,
+    "ast_hash": "8118ed17317391ac3e05f3bd5675232d",
+    "semantic_hash": "8118ed17317391ac3e05f3bd5675232d"
+  },
+  "src/app/core/services/reminder-scheduler.ts": {
+    "mtime": 1788737832.5668964,
+    "seen": 1788741036.2856553,
+    "ast_hash": "b77baae14aea8928d8305596c2a97e09",
+    "semantic_hash": "b77baae14aea8928d8305596c2a97e09"
+  },
+  "src/app/core/services/user.spec.ts": {
+    "mtime": 1777079573.5336635,
+    "seen": 1788741036.2856586,
+    "ast_hash": "8616db371cb9ed10cd1318c00d8840a9",
+    "semantic_hash": "8616db371cb9ed10cd1318c00d8840a9"
+  },
+  "src/app/core/services/user.ts": {
+    "mtime": 1778024444.7177105,
+    "seen": 1788741036.2856617,
+    "ast_hash": "9915d7549fd3681f1b1ceddff7fbfaeb",
+    "semantic_hash": "9915d7549fd3681f1b1ceddff7fbfaeb"
+  },
+  "src/app/home/home.page.spec.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2856646,
+    "ast_hash": "94f0222d936567fcb18df69218067dc7",
+    "semantic_hash": "94f0222d936567fcb18df69218067dc7"
+  },
+  "src/app/home/home.page.ts": {
+    "mtime": 1788740021.6593094,
+    "seen": 1788741036.2856677,
+    "ast_hash": "691ac0e6cd8ecd2e208e0b2e58662a3e",
+    "semantic_hash": "691ac0e6cd8ecd2e208e0b2e58662a3e"
+  },
+  "src/app/shared/components/anaconnect-modal/anaconnect-modal.component.ts": {
+    "mtime": 1788740015.4313705,
+    "seen": 1788741036.2856708,
+    "ast_hash": "18dead4b4d644825e4552377ba41805d",
+    "semantic_hash": "18dead4b4d644825e4552377ba41805d"
+  },
+  "src/app/shared/components/bot-message/bot-message.component.spec.ts": {
+    "mtime": 1774726212.3022518,
+    "seen": 1788741036.2856734,
+    "ast_hash": "f212b4f41b0860d0d1707a661d399c9a",
+    "semantic_hash": "f212b4f41b0860d0d1707a661d399c9a"
+  },
+  "src/app/shared/components/bot-message/bot-message.component.ts": {
+    "mtime": 1778341480.3473186,
+    "seen": 1788741036.2856765,
+    "ast_hash": "af7049b98dc43a49f5fde1c94034cb29",
+    "semantic_hash": "af7049b98dc43a49f5fde1c94034cb29"
+  },
+  "src/app/shared/components/chat-options/chat-options.component.spec.ts": {
+    "mtime": 1774728176.912377,
+    "seen": 1788741036.2856796,
+    "ast_hash": "67b7ce6c788634ecdfa6d77005312e0b",
+    "semantic_hash": "67b7ce6c788634ecdfa6d77005312e0b"
+  },
+  "src/app/shared/components/chat-options/chat-options.component.ts": {
+    "mtime": 1774728280.8170962,
+    "seen": 1788741036.2856824,
+    "ast_hash": "d160493cb3fa4fac6042269037a0dd61",
+    "semantic_hash": "d160493cb3fa4fac6042269037a0dd61"
+  },
+  "src/app/shared/components/doctor-list/doctor-list.component.spec.ts": {
+    "mtime": 1774728832.0194306,
+    "seen": 1788741036.2856853,
+    "ast_hash": "e3a3cc7b470b5d69f92ae57af9791c87",
+    "semantic_hash": "e3a3cc7b470b5d69f92ae57af9791c87"
+  },
+  "src/app/shared/components/doctor-list/doctor-list.component.ts": {
+    "mtime": 1778451283.5848,
+    "seen": 1788741036.2856882,
+    "ast_hash": "5e3233f2604f62b7309a0fdd75bd7e1b",
+    "semantic_hash": "5e3233f2604f62b7309a0fdd75bd7e1b"
+  },
+  "src/app/shared/components/hospital-list/hospital-list.component.spec.ts": {
+    "mtime": 1774728819.1719766,
+    "seen": 1788741036.2856908,
+    "ast_hash": "fc0597884f6a17b73a4e4093a7b03476",
+    "semantic_hash": "fc0597884f6a17b73a4e4093a7b03476"
+  },
+  "src/app/shared/components/hospital-list/hospital-list.component.ts": {
+    "mtime": 1778381836.8721294,
+    "seen": 1788741036.285694,
+    "ast_hash": "7f7204f775b76ab9878955dc2fb15979",
+    "semantic_hash": "7f7204f775b76ab9878955dc2fb15979"
+  },
+  "src/app/shared/components/login-modal/login-modal.component.spec.ts": {
+    "mtime": 1777833914.410949,
+    "seen": 1788741036.2856967,
+    "ast_hash": "b28a98ea9be0fc2c79864842bfd81fb4",
+    "semantic_hash": "b28a98ea9be0fc2c79864842bfd81fb4"
+  },
+  "src/app/shared/components/login-modal/login-modal.component.ts": {
+    "mtime": 1778338953.4096437,
+    "seen": 1788741036.2856996,
+    "ast_hash": "cde0e394feb9a6cbd9a94b9097938397",
+    "semantic_hash": "cde0e394feb9a6cbd9a94b9097938397"
+  },
+  "src/app/shared/components/medical-map/medical-map.component.spec.ts": {
+    "mtime": 1774729787.496743,
+    "seen": 1788741036.285703,
+    "ast_hash": "58f6a68ff117c7c7a415de91777c6b23",
+    "semantic_hash": "58f6a68ff117c7c7a415de91777c6b23"
+  },
+  "src/app/shared/components/medical-map/medical-map.component.ts": {
+    "mtime": 1774815422.1176405,
+    "seen": 1788741036.285706,
+    "ast_hash": "c2e54b868839cf7c812dcf0a36f8ee7d",
+    "semantic_hash": "c2e54b868839cf7c812dcf0a36f8ee7d"
+  },
+  "src/app/shared/components/mis-medicamentos-modal/mis-medicamentos-modal.component.spec.ts": {
+    "mtime": 1787883463.5400043,
+    "seen": 1788741036.2857091,
+    "ast_hash": "a248bfdac56b7286969f87312ad0e81a",
+    "semantic_hash": "a248bfdac56b7286969f87312ad0e81a"
+  },
+  "src/app/shared/components/mis-medicamentos-modal/mis-medicamentos-modal.component.ts": {
+    "mtime": 1788737902.5724192,
+    "seen": 1788741036.2857122,
+    "ast_hash": "cb29b1c923434d81619821406c020ed7",
+    "semantic_hash": "cb29b1c923434d81619821406c020ed7"
+  },
+  "src/app/shared/components/register-modal/register-modal.component.spec.ts": {
+    "mtime": 1777256616.8712094,
+    "seen": 1788741036.2857153,
+    "ast_hash": "08698f67172b0c3aaba3a62c29572805",
+    "semantic_hash": "08698f67172b0c3aaba3a62c29572805"
+  },
+  "src/app/shared/components/register-modal/register-modal.component.ts": {
+    "mtime": 1778338278.7728224,
+    "seen": 1788741036.2857184,
+    "ast_hash": "70d8a730847bfb8e5840793a2355d43c",
+    "semantic_hash": "70d8a730847bfb8e5840793a2355d43c"
+  },
+  "src/app/shared/components/registrar-temperatura/registrar-temperatura.component.spec.ts": {
+    "mtime": 1784225008.8445637,
+    "seen": 1788741036.2857213,
+    "ast_hash": "23c93dfecb46ba0e8ab756b9a41464c1",
+    "semantic_hash": "23c93dfecb46ba0e8ab756b9a41464c1"
+  },
+  "src/app/shared/components/registrar-temperatura/registrar-temperatura.component.ts": {
+    "mtime": 1784307045.240784,
+    "seen": 1788741036.2857246,
+    "ast_hash": "6f9f7261e040aae00b77623461efeae0",
+    "semantic_hash": "6f9f7261e040aae00b77623461efeae0"
+  },
+  "src/app/shared/components/user-appointments/user-appointments.component.spec.ts": {
+    "mtime": 1777257013.7417836,
+    "seen": 1788741036.2857292,
+    "ast_hash": "bf72825eb9a4e58d0709526c9299e0c4",
+    "semantic_hash": "bf72825eb9a4e58d0709526c9299e0c4"
+  },
+  "src/app/shared/components/user-appointments/user-appointments.component.ts": {
+    "mtime": 1778448317.4995327,
+    "seen": 1788741036.285734,
+    "ast_hash": "481e5ad390d78cd41ecf1b8e8a78a81e",
+    "semantic_hash": "481e5ad390d78cd41ecf1b8e8a78a81e"
+  },
+  "src/app/shared/components/user-message/user-message.component.spec.ts": {
+    "mtime": 1774726205.2993326,
+    "seen": 1788741036.2857375,
+    "ast_hash": "732cb52277acba35165f8927aa318b65",
+    "semantic_hash": "732cb52277acba35165f8927aa318b65"
+  },
+  "src/app/shared/components/user-message/user-message.component.ts": {
+    "mtime": 1774763039.6574335,
+    "seen": 1788741036.2857409,
+    "ast_hash": "a2b2b5b4c1a73cd21a980ed8dc995250",
+    "semantic_hash": "a2b2b5b4c1a73cd21a980ed8dc995250"
+  },
+  "src/app/shared/components/user-profile/user-profile.component.spec.ts": {
+    "mtime": 1777256856.9238732,
+    "seen": 1788741036.285744,
+    "ast_hash": "f1c84574e6904f58261c5c8657ec618a",
+    "semantic_hash": "f1c84574e6904f58261c5c8657ec618a"
+  },
+  "src/app/shared/components/user-profile/user-profile.component.ts": {
+    "mtime": 1778337786.10188,
+    "seen": 1788741036.2857466,
+    "ast_hash": "07fa41ed4331f7368b4a8a0e7de728e5",
+    "semantic_hash": "07fa41ed4331f7368b4a8a0e7de728e5"
+  },
+  "src/app/shared/components/vitals-modal/vitals-modal.component.spec.ts": {
+    "mtime": 1777921060.743637,
+    "seen": 1788741036.2857494,
+    "ast_hash": "d8b5e11451ed3bb5c486647f4db9b3e0",
+    "semantic_hash": "d8b5e11451ed3bb5c486647f4db9b3e0"
+  },
+  "src/app/shared/components/vitals-modal/vitals-modal.component.ts": {
+    "mtime": 1784571492.8269825,
+    "seen": 1788741036.2857552,
+    "ast_hash": "d4ad4582f6901b1ca84fb2d419965b95",
+    "semantic_hash": "d4ad4582f6901b1ca84fb2d419965b95"
+  },
+  "src/environments/environment.prod.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857583,
+    "ast_hash": "6de221395114600b523995704b7d1caa",
+    "semantic_hash": "6de221395114600b523995704b7d1caa"
+  },
+  "src/environments/environment.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.285761,
+    "ast_hash": "c141562af7e49205b518b4910a92fb5e",
+    "semantic_hash": "c141562af7e49205b518b4910a92fb5e"
+  },
+  "src/main.ts": {
+    "mtime": 1777669910.0678706,
+    "seen": 1788741036.2857637,
+    "ast_hash": "a4a1a12e454ad513c0707e74e55680b6",
+    "semantic_hash": "a4a1a12e454ad513c0707e74e55680b6"
+  },
+  "src/polyfills.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857666,
+    "ast_hash": "ab174a7fc1c636de236a456e1d208cee",
+    "semantic_hash": "ab174a7fc1c636de236a456e1d208cee"
+  },
+  "src/test.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857695,
+    "ast_hash": "f664a62d7273005985fa1c3b53dc249c",
+    "semantic_hash": "f664a62d7273005985fa1c3b53dc249c"
+  },
+  "src/zone-flags.ts": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857723,
+    "ast_hash": "f9f30408d427d1fda86558d69dd34ee6",
+    "semantic_hash": "f9f30408d427d1fda86558d69dd34ee6"
+  },
+  "tsconfig.app.json": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857754,
+    "ast_hash": "c135ccd0dd2e92226c3bd66d832b43a2",
+    "semantic_hash": "c135ccd0dd2e92226c3bd66d832b43a2"
+  },
+  "tsconfig.json": {
+    "mtime": 1778263187.440048,
+    "seen": 1788741036.2857785,
+    "ast_hash": "b71b7a55aefad88b8cf70d9a480dd2bc",
+    "semantic_hash": "b71b7a55aefad88b8cf70d9a480dd2bc"
+  },
+  "tsconfig.spec.json": {
+    "mtime": 1763157064.0,
+    "seen": 1788741036.2857811,
+    "ast_hash": "eba856676b131673479428bd6cd902a5",
+    "semantic_hash": "eba856676b131673479428bd6cd902a5"
+  }
+}

@@ -5,10 +5,13 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
   IonSpinner, IonList, IonItem, IonLabel, IonToggle, IonSelect, IonSelectOption, ModalController
 } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline } from 'ionicons/icons';
+import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline, homeOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
+import { ReminderScheduler } from 'src/app/core/services/reminder-scheduler';
+import { AnaconnectModalComponent } from 'src/app/shared/components/anaconnect-modal/anaconnect-modal.component';
 
 interface MedicamentoUI {
   source_table: 'prescriptions' | 'hospital_medication_orders';
@@ -46,9 +49,11 @@ export class MisMedicamentosModalComponent implements OnInit {
   private readonly medicalService = inject(MedicalService);
   private readonly userService = inject(User);
   private readonly modalCtrl = inject(ModalController);
+  private readonly toastController = inject(ToastController);
+  private readonly reminderScheduler = inject(ReminderScheduler);
 
   constructor() {
-    addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline});
+    addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline,homeOutline});
   }
 
   ngOnInit() {
@@ -132,10 +137,24 @@ cargarMedicamentos() {
       active: med.reminder_active ? 1 : 0,
       frequency_hours: med.reminder_frequency_hours
     }).subscribe({
-      next: (res: any) => {
+      next: async (res: any) => {
         med.saving = false;
         if (!res?.success) {
           this.errorMsg = res?.error || 'No se pudo guardar el recordatorio.';
+          return;
+        }
+
+        if (med.reminder_active) {
+          await this.reminderScheduler.programarRecordatorio({
+            source_table: med.source_table,
+            source_id: med.source_id,
+            nombre: med.nombre,
+            frequency_hours: med.reminder_frequency_hours
+          });
+          await this.presentToast(`Recordatorio activado: ${med.nombre} cada ${med.reminder_frequency_hours}h`);
+        } else {
+          await this.reminderScheduler.cancelarRecordatorio(med);
+          await this.presentToast(`Recordatorio desactivado: ${med.nombre}`);
         }
       },
       error: () => {
@@ -143,5 +162,27 @@ cargarMedicamentos() {
         this.errorMsg = 'Error de conexión al guardar el recordatorio.';
       }
     });
+  }
+
+  private async presentToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2500,
+      position: 'bottom',
+      color: 'dark'
+    });
+    await toast.present();
+  }
+
+  async abrirAnaConnect() {
+    const modal = await this.modalCtrl.create({
+      component: AnaconnectModalComponent,
+      mode: 'ios',
+      backdropDismiss: true,
+      breakpoints: [0, 0.6, 0.9],
+      initialBreakpoint: 0.6,
+      handle: false
+    });
+    await modal.present();
   }
 }

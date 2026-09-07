@@ -156,4 +156,51 @@ getEmergencyTracking(phone: string): Observable<any> {
     });
   }
 
+  /** Guarda (o borra, si vienen vacíos) la bocina Google Home emparejada del paciente */
+  saveGoogleHomeDevice(phone: string, deviceName: string | null, castId: string | null): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "save_google_home_device",
+      api_key: "ANAASIS_2026",
+      phone: phone,
+      device_name: deviceName,
+      cast_id: castId
+    });
+  }
+
+  /** Obtiene la bocina Google Home emparejada del paciente */
+  getGoogleHomeDevice(phone: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "get_google_home_device",
+      api_key: "ANAASIS_2026",
+      phone: phone
+    });
+  }
+
+  /** Genera un audio TTS en el servidor (Google Cloud TTS) y regresa su URL pública */
+  generateTts(text: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "generate_tts",
+      api_key: "ANAASIS_2026",
+      text: text
+    });
+  }
+
+  /** Cola de anuncios de medicamentos pendientes de reproducir en este paciente */
+  getPendingAnnouncements(phone: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "get_pending_announcements",
+      api_key: "ANAASIS_2026",
+      phone: phone
+    });
+  }
+
+  /** Confirma que un anuncio de medicamento ya fue reproducido */
+  ackAnnouncement(id: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: "ack_announcement",
+      api_key: "ANAASIS_2026",
+      id: id
+    });
+  }
+
 }

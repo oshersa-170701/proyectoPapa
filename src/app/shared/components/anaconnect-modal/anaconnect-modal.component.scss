@@ -1,0 +1,111 @@
+:host {
+  --ana-blue: #007aff;
+  --ana-sky-blue: #31a5ff;
+  --ana-red: #ff3b30;
+  --ana-green: #34c759;
+  --ana-text-primary: #1c1c1e;
+  --ana-text-secondary: #8e8e93;
+}
+
+.anaconnect-bg {
+  --background: #f4f7f6;
+}
+
+.toolbar-azul-premium {
+  --background: var(--ana-sky-blue) !important;
+  --border-color: transparent;
+}
+
+.medical-title-white {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 1.2rem;
+  color: #ffffff !important;
+}
+
+.btn-cerrar-rojo {
+  --color: var(--ana-red) !important;
+  font-size: 1.6rem;
+}
+
+.intro-text {
+  color: var(--ana-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 4px 0 16px 0;
+}
+
+.bocina-actual {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(145deg, #ffffff, #f4f9ff);
+  border: 1px solid rgba(49, 165, 255, 0.35);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 14px;
+
+  ion-icon {
+    font-size: 1.8rem;
+    color: var(--ana-sky-blue);
+  }
+
+  .bocina-info {
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ana-text-primary);
+    }
+
+    p {
+      margin: 2px 0 0 0;
+      font-size: 0.8rem;
+      color: var(--ana-text-secondary);
+    }
+  }
+}
+
+ion-button {
+  --border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.btn-buscar-blanco {
+  --color: #ffffff;
+
+  &::part(native) {
+    color: #ffffff !important;
+  }
+
+  ion-icon {
+    color: #ffffff !important;
+  }
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  color: var(--ana-text-secondary);
+
+  .state-text {
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+.error-text {
+  text-align: center;
+  color: var(--ana-text-secondary);
+  font-size: 0.9rem;
+  padding: 8px 0;
+}
+
+.device-list {
+  background: transparent;
+  border-radius: 14px;
+  overflow: hidden;
+}

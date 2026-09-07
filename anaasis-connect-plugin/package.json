@@ -1,0 +1,44 @@
+{
+  "name": "anaasis-connect-plugin",
+  "version": "0.0.1",
+  "description": "Plugin nativo de ANAasis para descubrir bocinas Google Home/Nest en la red WiFi local y reproducirles audio via Google Cast",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "android/src/main/",
+    "android/build.gradle",
+    "dist/"
+  ],
+  "author": "Oswaldo Hernandez",
+  "license": "MIT",
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "native",
+    "cast",
+    "google-home"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc && rollup -c rollup.config.mjs",
+    "clean": "rimraf ./dist",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "rimraf": "^6.1.0",
+    "rollup": "^4.53.2",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@capacitor/core": ">=6.0.0"
+  },
+  "capacitor": {
+    "android": {
+      "src": "android"
+    }
+  }
+}

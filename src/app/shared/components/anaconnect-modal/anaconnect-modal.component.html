@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-azul-premium">
+    <ion-title class="medical-title-white">AnaConnect</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="btn-cerrar-rojo">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="anaconnect-bg ion-padding">
+
+  <p class="intro-text">
+    Empareja una bocina Google Home para que también anuncie en voz alta tus recordatorios de medicamentos.
+  </p>
+
+  @if (bocinaEmparejada) {
+    <div class="bocina-actual">
+      <ion-icon name="home-outline"></ion-icon>
+      <div class="bocina-info">
+        <h3>{{ bocinaEmparejada.device_name }}</h3>
+        <p>Bocina emparejada</p>
+      </div>
+    </div>
+
+    <ion-button expand="block" fill="outline" color="primary" [disabled]="probando" (click)="probarBocina()">
+      <ion-icon slot="start" name="volume-high-outline"></ion-icon>
+      {{ probando ? 'Reproduciendo...' : 'Probar bocina' }}
+    </ion-button>
+
+    <ion-button expand="block" fill="clear" color="danger" (click)="olvidarBocina()">
+      <ion-icon slot="start" name="trash-outline"></ion-icon>
+      Desvincular bocina
+    </ion-button>
+  }
+
+  <ion-button expand="block" fill="solid" color="primary" class="btn-buscar-blanco" [disabled]="buscando" (click)="buscarBocinas()">
+    <ion-icon slot="start" name="wifi-outline"></ion-icon>
+    {{ buscando ? 'Buscando...' : 'Buscar bocinas en mi WiFi' }}
+  </ion-button>
+
+  @if (buscando) {
+    <div class="state-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="state-text">Escaneando tu red WiFi...</p>
+    </div>
+  }
+
+  @if (!buscando && errorMsg) {
+    <p class="error-text">{{ errorMsg }}</p>
+  }
+
+  @if (!buscando && dispositivos.length > 0) {
+    <ion-list class="device-list">
+      @for (device of dispositivos; track device.id) {
+        <ion-item button (click)="emparejar(device)">
+          <ion-icon name="home-outline" slot="start"></ion-icon>
+          <ion-label>{{ device.name }}</ion-label>
+          @if (bocinaEmparejada?.cast_id === device.id) {
+            <ion-icon name="checkmark-circle" color="success" slot="end"></ion-icon>
+          }
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+</ion-content>

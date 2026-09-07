@@ -34,6 +34,7 @@
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "6.0.2",
     "@ionic/angular": "^8.0.0",
+    "anaasis-connect-plugin": "file:anaasis-connect-plugin",
     "anaasis-health-plugin": "file:anaasis-health-plugin",
     "capacitor-health-connect": "^0.7.0",
     "capacitor-native-settings": "^6.0.1",
