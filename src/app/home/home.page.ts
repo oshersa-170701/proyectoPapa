@@ -402,22 +402,56 @@ export class HomePage {
     }
     // 💊 11. DETECCIÓN DE MEDICAMENTOS POR VOZ
     if (userText.includes('medicamento') || userText.includes('receta') || userText.includes('tratamiento')) {
-      const userJson = localStorage.getItem('anaasis_user_data');
+      const profile = this.userService.getProfile();
 
-      if (!userJson) {
+      if (!profile?.patient_id) {
         const msg = "Necesitas iniciar sesión para revisar tu lista de medicamentos y recetas.";
         this.chatMessages.push({ role: 'bot', text: msg });
         this.speak(msg, true);
-      } else {
-        const txtMedicamentos = 'Claro, abriendo tu lista de medicamentos y tratamientos activos...';
-        this.chatMessages.push({ role: 'bot', text: txtMedicamentos });
-        this.speak(txtMedicamentos, true);
-        this.openMisMedicamentos(); // 🚀 Lanza el modal
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        return;
       }
 
-      this.isLoading = false;
-      this.cdr.detectChanges();
-      return; 
+      const txtMedicamentos = 'Claro, un momento, estoy consultando tus medicamentos con recordatorio activo...';
+      this.chatMessages.push({ role: 'bot', text: txtMedicamentos });
+      this.speak(txtMedicamentos, true);
+      this.openMisMedicamentos(); // 🚀 Lanza el modal de inmediato
+
+      this.medicalService.getPrescriptions(profile.patient_id).subscribe({
+        next: (res: any) => {
+          this.zone.run(() => {
+            const activos: string[] = [];
+
+            if (res?.success) {
+              const todas = [...(res.data?.consultation || []), ...(res.data?.hospitalization || [])];
+              for (const p of todas) {
+                if (p.reminder_active) {
+                  const nombre = p.nombre_comercial || p.nombre_generico || p.item || 'un medicamento';
+                  activos.push(p.reminder_frequency_hours ? `${nombre} cada ${p.reminder_frequency_hours} horas` : nombre);
+                }
+              }
+            }
+
+            const resumen = activos.length > 0
+              ? `Tienes recordatorio activo para: ${activos.join(', ')}.`
+              : 'Por ahora no tienes ningún recordatorio de medicamento activo.';
+
+            this.chatMessages.push({ role: 'bot', text: resumen });
+            this.speak(resumen);
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        },
+        error: () => {
+          this.zone.run(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        }
+      });
+
+      return;
     }
     // 8. DETECCIÓN DE SÍNTOMAS POR VOZ (Para respuestas médicas rápidas sin esperar a la IA)
     // FLUJO PARA CUALQUIER OTRO SÍNTOMA (OpenAI)

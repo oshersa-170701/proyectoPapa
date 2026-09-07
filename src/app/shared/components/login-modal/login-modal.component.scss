@@ -102,13 +102,19 @@
 .login-submit-btn {
   --height: 65px;
   --border-radius: 18px;
+  --color: #ffffff;
   font-weight: 800;
   font-size: 1.1rem;
   --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
   margin-top: 10px;
 
   &::part(native) {
+    color: #ffffff !important;
     transition: transform 0.2s ease;
+  }
+
+  ion-icon {
+    color: #ffffff !important;
   }
 
   &:active {

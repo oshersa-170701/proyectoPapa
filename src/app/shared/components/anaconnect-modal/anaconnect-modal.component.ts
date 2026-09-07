@@ -79,14 +79,24 @@ export class AnaconnectModalComponent implements OnInit {
 
     if (this.dispositivos.length === 0) {
       this.errorMsg = 'No se encontraron bocinas Google Home en tu red WiFi.';
-      await this.presentToast('No se encontró ninguna bocina cercana.');
-      TextToSpeech.speak({
-        text: 'No se encontró ninguna bocina cercana.',
-        lang: 'es-MX',
-        rate: 1.0,
-        volume: 1.0,
-        category: 'ambient'
-      }).catch(() => { });
+
+      try {
+        await this.presentToast('No se encontró ninguna bocina cercana.');
+      } catch (e) {
+        console.error('[AnaConnect] Error mostrando el toast de "sin bocinas":', e);
+      }
+
+      try {
+        await TextToSpeech.speak({
+          text: 'No se encontró ninguna bocina cercana.',
+          lang: 'es-MX',
+          rate: 1.0,
+          volume: 1.0,
+          category: 'ambient'
+        });
+      } catch (e) {
+        console.error('[AnaConnect] Error hablando "sin bocinas":', e);
+      }
     }
   }
 
