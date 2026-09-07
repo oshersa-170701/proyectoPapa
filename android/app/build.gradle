@@ -1,6 +1,19 @@
 // Archivo: android/app/build.gradle
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android' // 📍 AÑADE ESTA LÍNEA AQUÍ
+
+// 🔑 Credenciales del keystore de RELEASE. Viven en android/keystore.properties,
+// que NO se sube a git (a diferencia del keystore de debug). Así Android Studio
+// firma "producción" siempre con la misma llave sin pasar por el asistente manual.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasReleaseSigning = keystorePropertiesFile.exists()
+if (hasReleaseSigning) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else {
+    logger.warn("⚠️  android/keystore.properties no existe: el build de RELEASE quedará SIN FIRMAR. Pide el archivo a quien lo generó.")
+}
+
 android {
     namespace "com.anaasis.vitals.daniel" // Asegúrate que coincida con tu id de app
     compileSdk rootProject.ext.compileSdkVersion
@@ -24,11 +37,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
     }
 
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+        }
+        release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
         }
     }
 
