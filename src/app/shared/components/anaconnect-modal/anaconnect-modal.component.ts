@@ -5,6 +5,7 @@ import {
   IonSpinner, IonList, IonItem, IonLabel, ModalController
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { addIcons } from 'ionicons';
 import { closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
@@ -78,6 +79,14 @@ export class AnaconnectModalComponent implements OnInit {
 
     if (this.dispositivos.length === 0) {
       this.errorMsg = 'No se encontraron bocinas Google Home en tu red WiFi.';
+      await this.presentToast('No se encontró ninguna bocina cercana.');
+      TextToSpeech.speak({
+        text: 'No se encontró ninguna bocina cercana.',
+        lang: 'es-MX',
+        rate: 1.0,
+        volume: 1.0,
+        category: 'ambient'
+      }).catch(() => { });
     }
   }
 
