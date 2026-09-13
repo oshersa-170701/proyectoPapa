@@ -20,10 +20,10 @@ import { MedicalMapComponent } from "../shared/components/medical-map/medical-ma
 import { MedicalService } from '../core/services/medical';
 import { Geolocation } from '@capacitor/geolocation';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { App } from '@capacitor/app';
 import { Anaconnect } from '../core/services/anaconnect';
+import { Voice } from '../core/services/voice';
 import { Overpass } from '../core/services/overpass';
 import { UserProfileComponent } from '../shared/components/user-profile/user-profile.component';
 import { UserAppointmentsComponent } from '../shared/components/user-appointments/user-appointments.component';
@@ -74,6 +74,7 @@ export class HomePage {
     private userService: User,
     private healthService: Health,
     private anaconnectService: Anaconnect,
+    private voiceService: Voice,
     public environmentInjector: EnvironmentInjector
   ) {
     // Añadí los iconos que usan tus listas para que no den error
@@ -100,7 +101,7 @@ export class HomePage {
     //  LA CLAVE: Silenciamos al bot inmediatamente al tocar el micro
     try {
       //  No esperes al stop, lánzalo y sigue
-      TextToSpeech.stop().catch(() => { });
+      this.voiceService.detener().catch(() => { });
     } catch (e) {
       // console.warn("Nada que detener en TTS");
     }
@@ -137,7 +138,7 @@ export class HomePage {
     const userText = text.toLowerCase();
 
     // 2. EVITAR DUPLICIDAD (Silenciamos cualquier proceso de voz anterior)
-    TextToSpeech.stop().catch(() => { });
+    this.voiceService.detener().catch(() => { });
     this.limpiarPantalla(); // 👈 Esto asegura que mapas y listas se borren de inmediato
     this.chatMessages.push({ role: 'user', text: text });
     this.isLoading = true;
@@ -602,48 +603,18 @@ export class HomePage {
     if (this.isMutedGlobal && !isManual) return Promise.resolve();
 
     try {
-      await TextToSpeech.stop();
-
-      // 🚀 Paso 1: Escanear las voces instaladas en el celular de forma nativa
-      const { voices } = await TextToSpeech.getSupportedVoices();
-      
-      // 🚀 Paso 2: Buscar el ÍNDICE de una voz premium de México
-      // Recorremos con findIndex para obtener la posición numérica exacta en el arreglo
-      let indiceVoz = voices.findIndex(v => 
-        v.lang === 'es-MX' && (v.voiceURI?.toLowerCase().includes('network') || v.name?.toLowerCase().includes('network'))
-      );
-
-      // Si no encuentra una neuronal por internet, buscamos el índice de cualquier voz en español de México
-      if (indiceVoz === -1) {
-        indiceVoz = voices.findIndex(v => v.lang === 'es-MX');
-      }
-
-      // 🚀 Paso 3: Construir las opciones respetando el tipado estricto de TTSOptions
-      const opcionesConfig: any = {
-        text: text,
-        lang: 'es-MX',
-        rate: 1.05,  // Velocidad óptima para fluidez humana 💫
-        pitch: 1.1, // Tono amable y suave para ANAasis 🌸
-        volume: 1.0,
-        category: 'ambient'
-      };
-
-      // Si localizamos un índice válido (mayor o igual a 0), se lo asignamos numéricamente
-      if (indiceVoz !== -1) {
-        opcionesConfig.voice = indiceVoz; // Ahora sí pasamos un 'number', TypeScript estará feliz
-      }
-
-      return await TextToSpeech.speak(opcionesConfig);
+      // 🔊 Voz de Google (misma que suena en la bocina) mientras la app está abierta;
+      // si no hay internet, el servicio cae solo a la voz nativa del teléfono.
+      await this.voiceService.hablar(text);
     } catch (error) {
       console.error("[ANAasis Voice] Error en el tipado o hardware de voz:", error);
-      return Promise.resolve();
     }
   }
   isMutedGlobal = false;
   toggleAppMute() {
     this.isMutedGlobal = !this.isMutedGlobal;
     if (this.isMutedGlobal) {
-      TextToSpeech.stop(); // Si silenciamos, callamos todo
+      this.voiceService.detener(); // Si silenciamos, callamos todo
     }
   }
   // 1. Agrega la variable en tu clase HomePage
@@ -934,7 +905,6 @@ export class HomePage {
     try { await (HealthConnect as any).SplashScreen.hide(); } catch (e) { }
     await this.verificarPermisosHealth();
     this.motorDeMonitoreoRealTime();
-    this.iniciarMotorDeRecordatorios();
     this.escucharNotificacionesDeMedicamentos();
   }
 
@@ -1030,62 +1000,12 @@ export class HomePage {
     });
   }
 
-  // 💊🔊 NIVEL 2: mientras la app está abierta, revisa cada 15s si hay
-  // anuncios de medicamentos pendientes (los generó reminder_cron.php) y los habla.
-  private motorRecordatoriosInterval: any = null;
-
-  iniciarMotorDeRecordatorios() {
-    if (this.motorRecordatoriosInterval) {
-      clearInterval(this.motorRecordatoriosInterval);
-    }
-
-    this.motorRecordatoriosInterval = setInterval(() => {
-      const profile = this.userService.getProfile();
-      if (!profile?.phone) return;
-
-      this.medicalService.getPendingAnnouncements(profile.phone).subscribe({
-        next: (res: any) => {
-          if (!res?.success || !res.data?.length) return;
-
-          this.zone.run(async () => {
-            for (const anuncio of res.data) {
-              await this.speak(anuncio.text, true);
-              this.anunciarEnBocina(profile.phone, anuncio.text);
-
-              this.medicalService.ackAnnouncement(anuncio.id).subscribe({
-                error: (err) => console.error('[Recordatorios] Error confirmando anuncio:', err)
-              });
-            }
-          });
-        },
-        error: (err) => console.error(`[Recordatorios] Error consultando anuncios pendientes: status=${err?.status} message=${err?.message} body=${JSON.stringify(err?.error)}`)
-      });
-    }, 15000);
-  }
-
-  // Si el paciente tiene una bocina Google Home emparejada, también le castea el audio (best-effort)
-  private anunciarEnBocina(phone: string, texto: string) {
-    this.medicalService.getGoogleHomeDevice(phone).subscribe({
-      next: (res: any) => {
-        const bocina = res?.data;
-        if (!res?.success || !bocina?.cast_id) return;
-
-        this.medicalService.generateTts(texto).subscribe({
-          next: async (ttsRes: any) => {
-            if (!ttsRes?.success || !ttsRes.audio_url) return;
-            try {
-              await this.anaconnectService.speak(bocina.cast_id, ttsRes.audio_url);
-            } catch (e) {
-              console.warn('[AnaConnect] No se pudo reproducir en la bocina (¿sigue en la misma red WiFi?):', e);
-            }
-          }
-        });
-      }
-    });
-  }
-
-  // 💊📳 NIVEL 1: si mientras la app está abierta dispara una alarma nativa
-  // programada por ReminderScheduler, además la anunciamos por voz de inmediato.
+  // 💊📳 Cuando llega la notificación visual con la app abierta, solo la
+  // reflejamos en el chat. NO hablamos aquí: el recordatorio nativo en segundo plano
+  // (RecordatorioBroadcastReceiver, programado junto con esta misma notificación en
+  // ReminderScheduler) ya habla por el teléfono y castea a la bocina de forma
+  // confiable sin importar si la app está abierta o cerrada — hacerlo también aquí
+  // duplicaba la voz (se escuchaban las dos al mismo tiempo).
   escucharNotificacionesDeMedicamentos() {
     LocalNotifications.addListener('localNotificationReceived', (notification) => {
       this.zone.run(() => this.reaccionarANotificacionMedicamento(notification));
@@ -1098,7 +1018,6 @@ export class HomePage {
 
     const mensaje = `Es momento de tomar tu medicamento: ${medicamento}`;
     this.chatMessages.push({ role: 'bot', text: mensaje });
-    this.speak(mensaje, true);
     this.cdr.detectChanges();
   }
 }

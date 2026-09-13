@@ -139,6 +139,30 @@ ion-alert {
     text-align: center;
   }
 }
+/* 📍 Toast de éxito para AnaConnect (bocina emparejada) */
+.toast-exito-anaconnect {
+  --background: linear-gradient(135deg, #34c759, #2bab4a);
+  --color: #ffffff;
+  --button-color: #ffffff;
+  --border-radius: 14px;
+  --box-shadow: 0 10px 24px rgba(52, 199, 89, 0.35);
+  font-weight: 500;
+
+  &::part(header) {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  &::part(message) {
+    font-size: 0.85rem;
+    opacity: 0.95;
+  }
+
+  &::part(icon) {
+    color: #ffffff;
+    font-size: 1.4rem;
+  }
+}
 .medical-modal-fix {
   --height: 85%;
   --border-radius: 20px 20px 0 0;

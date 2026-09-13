@@ -6,7 +6,7 @@ import {
 import { addIcons } from 'ionicons';
 import { closeOutline, personCircle, callOutline, mailOutline, logOutOutline, personOutline, shieldCheckmarkOutline, chatbubblesOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
-import { TextToSpeech } from '@capacitor-community/text-to-speech'; 
+import { Voice } from '../../../core/services/voice';
 @Component({
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
@@ -20,7 +20,8 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 export class UserProfileComponent implements OnInit {
   private readonly modalCtrl = inject(ModalController);
   private readonly userService = inject(User);
-  
+  private readonly voice = inject(Voice);
+
   userProfile: any;
 
   constructor() {
@@ -46,12 +47,7 @@ export class UserProfileComponent implements OnInit {
 
   try {
     // 🔊 ANAasis se despide formalmente
-    await TextToSpeech.speak({
-      text: mensajeDespedida,
-      lang: 'es-MX',
-      rate: 1.0,
-      category: 'ambient'
-    });
+    await this.voice.hablar(mensajeDespedida);
   } catch (e) {
     console.warn("TTS no disponible");
   }
@@ -70,12 +66,7 @@ export class UserProfileComponent implements OnInit {
 }
 async speakStatus() {
   try {
-    await TextToSpeech.speak({
-      text: "Aún no estás registrado. Por favor, solicítame el registro para poder ayudarte a agendar una cita.",
-      lang: 'es-MX',
-      rate: 1.0,
-      category: 'ambient'
-    });
+    await this.voice.hablar("Aún no estás registrado. Por favor, solicítame el registro para poder ayudarte a agendar una cita.");
   } catch (e) {
     console.warn("TTS no disponible");
   }

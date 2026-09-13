@@ -11,10 +11,14 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchAutoHide: false, 
-      launchShowDuration: 10000, 
+      launchAutoHide: false,
+      launchShowDuration: 10000,
       backgroundColor: "#FFFFFF",
       androidScaleType: "CENTER_CROP"
+    },
+    LocalNotifications: {
+      smallIcon: "ic_stat_anaasis",
+      iconColor: "#00A0AB"
     },
   },
 };

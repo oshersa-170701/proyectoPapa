@@ -9,12 +9,28 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Recordatorios en segundo plano: hablar + castear aunque la app esté cerrada -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application>
 
         <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
         <meta-data
             android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
             android:value="com.anaasis.plugins.connect.CastOptionsProvider" />
+
+        <receiver
+            android:name="com.anaasis.plugins.connect.RecordatorioBroadcastReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.anaasis.plugins.connect.RecordatorioBootReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -8,7 +8,7 @@ import { star, chevronForward, personOutline, business, callOutline, logoWhatsap
 import { FormsModule } from '@angular/forms';
 import { FilterPipe } from 'src/app/core/pipes/filter-pipe';
 import { MedicalService } from 'src/app/core/services/medical';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Voice } from 'src/app/core/services/voice';
 // 1. Agrega ModalController a los imports de @ionic/angular/standalone si no está
 import { AlertController, ToastController, ModalController,ActionSheetController } from '@ionic/angular/standalone';
 // 2. Importa el componente del modal
@@ -32,6 +32,7 @@ export class DoctorListComponent {
      private readonly cdr: ChangeDetectorRef, private readonly modalCtrl: ModalController,
     private readonly userService: User,
     private actionSheetCtrl: ActionSheetController,
+    private readonly voice: Voice,
     ) {
    addIcons({
   personOutline, 
@@ -175,7 +176,7 @@ async selectSlot(slot: string, doctor: any) {
       if (citaDuplicada) {
         const aviso = `Parece que ya tienes una cita programada con el doctor ${doctor.name}.Primero debes cancelarla la cita programada antes de agendar una nueva.`;
         this.zone.run(() => {
-          TextToSpeech.speak({ text: aviso, lang: 'es-MX', rate: 1.0, category: 'ambient' });
+          this.voice.hablar(aviso);
           this.showToast2(aviso, 'danger'); 
         });
         return; 

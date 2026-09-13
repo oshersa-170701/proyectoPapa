@@ -203,4 +203,50 @@ class ANAasisConnectPlugin : Plugin() {
             call.reject("Error reproduciendo en la bocina: ${e.message}")
         }
     }
+
+    // 📍 Recordatorios en segundo plano: programa una alarma nativa (AlarmManager) que
+    // dispara aunque la app esté cerrada. Habla por el teléfono y, si castId no es nulo,
+    // también anuncia en la bocina Google Home (ver RecordatorioBroadcastReceiver).
+    @PluginMethod
+    fun scheduleBackgroundReminder(call: PluginCall) {
+        val requestCode = call.getInt("requestCode")
+        val texto = call.getString("texto")
+        val castId = call.getString("castId")
+        val hour = call.getInt("hour") ?: 8
+        val minute = call.getInt("minute") ?: 0
+        val intervalMinutes = call.getInt("intervalMinutes") ?: 0
+
+        if (requestCode == null || texto.isNullOrEmpty()) {
+            call.reject("requestCode y texto son requeridos")
+            return
+        }
+
+        try {
+            RecordatorioAlarmScheduler.programar(
+                context,
+                RecordatorioProgramado(requestCode, texto, castId, hour, minute, intervalMinutes)
+            )
+            call.resolve()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error programando recordatorio en segundo plano: ${e.message}")
+            call.reject("No se pudo programar el recordatorio en segundo plano: ${e.message}")
+        }
+    }
+
+    @PluginMethod
+    fun cancelBackgroundReminder(call: PluginCall) {
+        val requestCode = call.getInt("requestCode")
+        if (requestCode == null) {
+            call.reject("requestCode es requerido")
+            return
+        }
+
+        try {
+            RecordatorioAlarmScheduler.cancelar(context, requestCode)
+            call.resolve()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cancelando recordatorio en segundo plano: ${e.message}")
+            call.reject("No se pudo cancelar el recordatorio en segundo plano: ${e.message}")
+        }
+    }
 }

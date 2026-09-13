@@ -4,14 +4,15 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
   IonSpinner, IonList, IonItem, IonLabel, ModalController
 } from '@ionic/angular/standalone';
-import { ToastController, AlertController } from '@ionic/angular';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { ToastController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { addIcons } from 'ionicons';
-import { closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline } from 'ionicons/icons';
+import { closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { Anaconnect, CastDevice } from 'src/app/core/services/anaconnect';
 import { User } from 'src/app/core/services/user';
+import { Voice } from 'src/app/core/services/voice';
+import { ReminderScheduler } from 'src/app/core/services/reminder-scheduler';
 
 interface BocinaEmparejada {
   device_name: string;
@@ -42,10 +43,11 @@ export class AnaconnectModalComponent implements OnInit {
   private readonly userService = inject(User);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastController = inject(ToastController);
-  private readonly alertController = inject(AlertController);
+  private readonly voice = inject(Voice);
+  private readonly reminderScheduler = inject(ReminderScheduler);
 
   constructor() {
-    addIcons({ closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline });
+    addIcons({ closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline, checkmarkCircleOutline });
   }
 
   ngOnInit() {
@@ -58,6 +60,21 @@ export class AnaconnectModalComponent implements OnInit {
 
   private get phone(): string | null {
     return this.userService.getProfile()?.phone || null;
+  }
+
+  private get patientId(): number | null {
+    return this.userService.getProfile()?.patient_id || null;
+  }
+
+  // 📍 Sin esto, un recordatorio activado ANTES de emparejar/cambiar de bocina se
+  // quedaba apuntando a la bocina vieja (o a ninguna) hasta que el paciente volvía a
+  // tocar el switch de "Mis medicamentos". Lo hacemos "best effort" en segundo plano:
+  // si falla, no debe interrumpir el flujo de emparejado/desvinculado.
+  private resincronizarRecordatorios() {
+    const patientId = this.patientId;
+    if (!patientId) return;
+    this.reminderScheduler.resincronizarBocinaEnTodosLosRecordatorios(patientId)
+      .catch(e => console.error('[AnaConnect] Error re-sincronizando recordatorios:', e));
   }
 
   cargarBocinaActual() {
@@ -90,13 +107,7 @@ export class AnaconnectModalComponent implements OnInit {
       }
 
       try {
-        await TextToSpeech.speak({
-          text: 'No se encontró ninguna bocina cercana.',
-          lang: 'es-MX',
-          rate: 1.0,
-          volume: 1.0,
-          category: 'ambient'
-        });
+        await this.voice.hablar('No se encontró ninguna bocina cercana.');
       } catch (e) {
         console.error('[AnaConnect] Error hablando "sin bocinas":', e);
       }
@@ -119,14 +130,8 @@ export class AnaconnectModalComponent implements OnInit {
           // Confirmamos con sonido en la bocina ANTES de cerrar, para que el paciente
           // sepa de oído que sí quedó conectada (best-effort: si falla el audio, igual avisamos).
           await this.confirmarEmparejamientoConSonido(device);
-
-          const alert = await this.alertController.create({
-            header: 'Bocina emparejada',
-            message: `"${device.name}" quedó conectada correctamente.`,
-            buttons: ['OK']
-          });
-          await alert.present();
-          await alert.onDidDismiss();
+          await this.presentToastExito(`"${device.name}" quedó conectada correctamente.`);
+          this.resincronizarRecordatorios();
 
           this.modalCtrl.dismiss({ bocinaEmparejada: this.bocinaEmparejada });
         } else {
@@ -167,6 +172,7 @@ export class AnaconnectModalComponent implements OnInit {
       next: async () => {
         this.bocinaEmparejada = null;
         await this.presentToast('Bocina desvinculada.');
+        this.resincronizarRecordatorios();
       },
       error: async () => {
         await this.presentToast('Error de conexión al desvincular la bocina.');
@@ -211,6 +217,18 @@ export class AnaconnectModalComponent implements OnInit {
       duration: 2500,
       position: 'top', // 'bottom' quedaba tapado por la hoja del modal (breakpoints 0.6/0.9)
       color: 'dark'
+    });
+    await toast.present();
+  }
+
+  private async presentToastExito(mensaje: string) {
+    const toast = await this.toastController.create({
+      header: 'Bocina emparejada',
+      message: mensaje,
+      icon: 'checkmark-circle-outline',
+      duration: 3000,
+      position: 'top',
+      cssClass: 'toast-exito-anaconnect'
     });
     await toast.present();
   }

@@ -11,7 +11,7 @@ import {
 } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Voice } from 'src/app/core/services/voice';
 import { Health } from 'src/app/core/services/health';
 
 @Component({
@@ -35,6 +35,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   private readonly healthService = inject(Health);
   private readonly modalCtrl = inject(ModalController);
   private readonly userService = inject(User);
+  private readonly voice = inject(Voice);
   private updateTimer: any;
 
   constructor() {
@@ -141,15 +142,8 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   }
   async speak(text: string) {
     try {
-      await TextToSpeech.stop();
-      await TextToSpeech.speak({
-        text: text,
-        lang: 'es-MX',
-        rate: 1.0,
-        pitch: 1.1, // Tono amable y suave para ANAasis 🌸
-        volume: 1.0,
-        category: 'ambient',
-      });
+      await this.voice.detener();
+      await this.voice.hablar(text, { pitch: 1.1 });
     } catch (error) {
       console.error("Error en voz del modal:", error);
     }

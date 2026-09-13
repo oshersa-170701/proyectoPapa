@@ -16,6 +16,28 @@
       <ion-icon slot="start" name="home-outline"></ion-icon>
       Conectar bocina Google Home
     </ion-button>
+
+    @if (!cargandoBocina) {
+      @if (bocinaConectada) {
+        <div class="bocina-status bocina-status-conectada">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Conectada a 1 bocina: <strong>{{ bocinaConectada.device_name }}</strong></span>
+        </div>
+      } @else {
+        <div class="bocina-status bocina-status-desconectada">
+          <ion-icon name="home-outline"></ion-icon>
+          <span>Sin bocina conectada (0 bocinas)</span>
+          <ion-button
+            fill="clear"
+            size="small"
+            class="btn-reintentar-bocina"
+            [disabled]="verificandoBocina"
+            (click)="reintentarConexionBocina()">
+            <ion-icon slot="icon-only" name="sync-outline" [class.spinner-animate]="verificandoBocina"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    }
   </div>
 
  <!-- Estado de Carga -->

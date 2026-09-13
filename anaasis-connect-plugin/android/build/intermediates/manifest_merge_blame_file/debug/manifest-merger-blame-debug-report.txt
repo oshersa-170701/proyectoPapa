@@ -15,16 +15,47 @@
 10-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:7:5-79
 10-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:7:22-76
 11
-12    <application>
-12-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:9:5-14:19
-13
-14        <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
-15        <meta-data
-15-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:9-13:79
-16            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-16-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:12:13-93
-17            android:value="com.anaasis.plugins.connect.CastOptionsProvider" />
-17-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:13:13-76
-18    </application>
-19
-20</manifest>
+12    <!-- Recordatorios en segundo plano: hablar + castear aunque la app esté cerrada -->
+13    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+13-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:10:5-81
+13-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:10:22-78
+14    <uses-permission android:name="android.permission.WAKE_LOCK" />
+14-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:5-68
+14-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:22-65
+15
+16    <application>
+16-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:13:5-31:19
+17
+18        <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
+19        <meta-data
+19-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:15:9-17:79
+20            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+20-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:16:13-93
+21            android:value="com.anaasis.plugins.connect.CastOptionsProvider" />
+21-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:17:13-76
+22
+23        <receiver
+23-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:19:9-21:40
+24            android:name="com.anaasis.plugins.connect.RecordatorioBroadcastReceiver"
+24-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:20:13-85
+25            android:exported="false" />
+25-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:21:13-37
+26        <receiver
+26-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:23:9-30:20
+27            android:name="com.anaasis.plugins.connect.RecordatorioBootReceiver"
+27-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:24:13-80
+28            android:exported="false" >
+28-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:25:13-37
+29            <intent-filter>
+29-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:26:13-29:29
+30                <action android:name="android.intent.action.BOOT_COMPLETED" />
+30-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:17-79
+30-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:25-76
+31                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+31-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:17-82
+31-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:25-79
+32            </intent-filter>
+33        </receiver>
+34    </application>
+35
+36</manifest>

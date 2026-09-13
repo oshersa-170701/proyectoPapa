@@ -7,7 +7,7 @@ import {
 import { addIcons } from 'ionicons';
 import { closeOutline, callOutline, lockClosedOutline, mailOutline, keyOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Voice } from '../../../core/services/voice';
 @Component({
   selector: 'app-login-modal',
   templateUrl: './login-modal.component.html',
@@ -23,6 +23,7 @@ export class LoginModalComponent  {
   private readonly userService = inject(User);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
+  private readonly voice = inject(Voice);
 
   loginForm: FormGroup = this.fb.group({
   phone: ['', [Validators.required, Validators.minLength(10)]] // 📍 Email eliminado
@@ -51,12 +52,7 @@ onLogin() {
           const nombre = res.name || 'de nuevo';
           const mensajeBienvenida = `¡Qué alegría volver a verte, ${nombre}! He recuperado tu historial médico y tus citas. Estoy lista para seguir cuidándote.`;
 
-          await TextToSpeech.speak({
-            text: mensajeBienvenida,
-            lang: 'es-MX',
-            rate: 0.9, // Un poco más lento para que sea claro
-            category: 'ambient'
-          });
+          await this.voice.hablar(mensajeBienvenida, { rate: 0.9 });
 
           await this.presentToast(`¡Bienvenido, ${res.name}! `, 'success');
           

@@ -8,7 +8,7 @@ import { closeOutline, calendarOutline, timeOutline, personOutline, locationOutl
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { AlertController } from '@ionic/angular';
-import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { Voice } from 'src/app/core/services/voice';
 @Component({
   selector: 'app-user-appointments',
   templateUrl: './user-appointments.component.html',
@@ -28,6 +28,7 @@ export class UserAppointmentsComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef); // 📍 Inyectamos
   private readonly zone = inject(NgZone); // 📍 Inyectamos
   private readonly alertCtrl = inject(AlertController);
+  private readonly voice = inject(Voice);
   constructor() {
     addIcons({closeOutline,trashOutline,calendarClearOutline,calendarOutline,personOutline,timeOutline,locationOutline});
   }
@@ -113,12 +114,7 @@ cargarCitas() {
 // Función auxiliar para voz
 async speak(mensaje: string) {
   try {
-    await TextToSpeech.speak({
-      text: mensaje,
-      lang: 'es-MX',
-      rate: 1.0,
-      category: 'ambient'
-    });
+    await this.voice.hablar(mensaje);
   } catch (e) {
     console.warn("TTS no disponible");
   }

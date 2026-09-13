@@ -1,7 +1,7 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:2:1-16:12
-INJECTED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:2:1-16:12
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:2:1-33:12
+INJECTED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:2:1-33:12
 	package
 		INJECTED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml
 	xmlns:android
@@ -18,14 +18,44 @@ uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:7:5-79
 	android:name
 		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:7:22-76
-application
-ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:9:5-14:19
-meta-data#com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME
-ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:9-13:79
-	android:value
-		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:13:13-76
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:10:5-81
 	android:name
-		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:12:13-93
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:10:22-78
+uses-permission#android.permission.WAKE_LOCK
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:5-68
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:22-65
+application
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:13:5-31:19
+meta-data#com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:15:9-17:79
+	android:value
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:17:13-76
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:16:13-93
+receiver#com.anaasis.plugins.connect.RecordatorioBroadcastReceiver
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:19:9-21:40
+	android:exported
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:21:13-37
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:20:13-85
+receiver#com.anaasis.plugins.connect.RecordatorioBootReceiver
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:23:9-30:20
+	android:exported
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:25:13-37
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:24:13-80
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.QUICKBOOT_POWERON
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:26:13-29:29
+action#android.intent.action.BOOT_COMPLETED
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:17-79
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:25-76
+action#android.intent.action.QUICKBOOT_POWERON
+ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:17-82
+	android:name
+		ADDED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:25-79
 uses-sdk
 INJECTED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // 📍 necesario para [(ngModel)] del ion-select
+import { firstValueFrom } from 'rxjs';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
   IonSpinner, IonList, IonItem, IonLabel, IonToggle, IonSelect, IonSelectOption, ModalController
@@ -11,6 +12,7 @@ import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOut
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { ReminderScheduler } from 'src/app/core/services/reminder-scheduler';
+import { Anaconnect } from 'src/app/core/services/anaconnect';
 import { AnaconnectModalComponent } from 'src/app/shared/components/anaconnect-modal/anaconnect-modal.component';
 
 interface MedicamentoUI {
@@ -39,7 +41,12 @@ export class MisMedicamentosModalComponent implements OnInit {
   isLoading = true;
   errorMsg = '';
 
+  bocinaConectada: { device_name: string; cast_id?: string } | null = null;
+  cargandoBocina = true;
+  verificandoBocina = false;
+
   readonly opcionesFrecuencia = [
+    { value: 5 / 60, label: 'Cada 5 minutos (prueba)' },
     { value: 6, label: 'Cada 6 horas' },
     { value: 8, label: 'Cada 8 horas' },
     { value: 12, label: 'Cada 12 horas' },
@@ -52,6 +59,7 @@ export class MisMedicamentosModalComponent implements OnInit {
   private readonly toastController = inject(ToastController);
   private readonly alertController = inject(AlertController);
   private readonly reminderScheduler = inject(ReminderScheduler);
+  private readonly anaconnectService = inject(Anaconnect);
 
   constructor() {
     addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline,homeOutline});
@@ -59,6 +67,109 @@ export class MisMedicamentosModalComponent implements OnInit {
 
   ngOnInit() {
     this.cargarMedicamentos();
+    this.cargarBocinaConectada();
+  }
+
+  private cargarBocinaConectada() {
+    const phone = this.userService.getProfile()?.phone;
+    if (!phone) {
+      this.cargandoBocina = false;
+      return;
+    }
+
+    this.cargandoBocina = true;
+    this.medicalService.getGoogleHomeDevice(phone).subscribe({
+      next: async (res: any) => {
+        this.cargandoBocina = false;
+        const bocina = res?.success && res.data?.cast_id ? res.data : null;
+
+        if (!bocina) {
+          this.bocinaConectada = null;
+          return;
+        }
+
+        // Mostramos "conectada" de inmediato con el dato del servidor (para no hacer
+        // esperar al paciente ~4s solo para abrir la lista de medicamentos) y, en
+        // paralelo y en silencio, confirmamos que de verdad sea detectable ahora en la
+        // red — si no lo es, se corrige solo a rojo sin necesidad de tocar nada.
+        this.bocinaConectada = bocina;
+        this.verificarDeteccionReal(bocina, false);
+      },
+      error: () => {
+        this.cargandoBocina = false;
+        this.bocinaConectada = null;
+      }
+    });
+  }
+
+  // 📍 Botón "Reintentar" del indicador rojo: vuelve a preguntarle al servidor cuál
+  // bocina está emparejada y, si hay una, confirma con un escaneo Cast ACTIVO y fresco
+  // (discoverDevices) que de verdad esté prendida y respondiendo ahora mismo.
+  //
+  // Esto es distinto del bug de "No se encontró esa bocina" que arreglamos antes en
+  // ANAasisConnectPlugin.speak(): aquel fallaba porque reproducía audio usando una lista
+  // de rutas (router.routes) que Android ya había vaciado por quedarse varios segundos
+  // sin escanear activamente — es decir, fallaba por NO volver a escanear. Aquí sí
+  // hacemos un escaneo activo nuevo cada vez (4s, con CALLBACK_FLAG_PERFORM_ACTIVE_SCAN),
+  // así que un resultado negativo es confiable: si no aparece, es porque de verdad está
+  // apagada o fuera de la red, no por caché vencido.
+  async reintentarConexionBocina() {
+    if (this.verificandoBocina) return;
+    this.verificandoBocina = true;
+
+    const phone = this.userService.getProfile()?.phone;
+    if (!phone) {
+      this.verificandoBocina = false;
+      await this.presentToastBocinaDesconectada();
+      return;
+    }
+
+    try {
+      const res: any = await firstValueFrom(this.medicalService.getGoogleHomeDevice(phone));
+      const bocina = res?.success && res.data?.cast_id ? res.data : null;
+
+      if (!bocina) {
+        this.bocinaConectada = null;
+        await this.presentToastBocinaDesconectada();
+        return;
+      }
+
+      await this.verificarDeteccionReal(bocina, true);
+    } catch (e) {
+      console.error('[MisMedicamentos] Error reintentando conexión de bocina:', e);
+      this.bocinaConectada = null;
+      await this.presentToastBocinaDesconectada();
+    } finally {
+      this.verificandoBocina = false;
+    }
+  }
+
+  private async verificarDeteccionReal(bocina: { device_name: string; cast_id?: string }, avisarSiFalla: boolean) {
+    try {
+      const dispositivos = await this.anaconnectService.discoverDevices();
+      const detectada = dispositivos.some(d => d.id === bocina.cast_id);
+
+      if (detectada) {
+        this.bocinaConectada = bocina;
+      } else {
+        this.bocinaConectada = null;
+        if (avisarSiFalla) await this.presentToastBocinaDesconectada();
+      }
+    } catch (e) {
+      console.error('[MisMedicamentos] Error escaneando la red buscando la bocina:', e);
+      this.bocinaConectada = null;
+      if (avisarSiFalla) await this.presentToastBocinaDesconectada();
+    }
+  }
+
+  private async presentToastBocinaDesconectada() {
+    const toast = await this.toastController.create({
+      message: 'La bocina se encuentra desconectada y no fue posible volver a conectarla. Asegúrate de que esté encendida y en la misma red WiFi que tu teléfono.',
+      duration: 4000,
+      position: 'top',
+      cssClass: 'custom-toast-error'
+    });
+    await toast.present();
   }
 
   dismiss() {
@@ -84,13 +195,19 @@ cargarMedicamentos() {
           return;
         }
 
+        // 📍 Diagnóstico: si el switch/hora se ven apagados tras guardar, esto muestra
+        // exactamente qué valores de reminder_active/reminder_frequency_hours está
+        // devolviendo el servidor recién recargado (para saber si el problema es que no
+        // se guardó, o que sí se guardó pero no se está leyendo bien aquí).
+        console.log('[MisMedicamentos] getPrescriptions crudo:', JSON.stringify(res.data));
+
         const consulta = (res.data?.consultation || []).map((p: any) => ({
           source_table: 'prescriptions' as const,
           source_id: p.id,
           nombre: p.nombre_comercial || p.nombre_generico || p.item || 'Medicamento',
           detalle: p.dosage || p.notes || '',
           reminder_active: !!p.reminder_active,
-          reminder_frequency_hours: p.reminder_frequency_hours ? Number(p.reminder_frequency_hours) : null,
+          reminder_frequency_hours: this.normalizarFrecuencia(p.reminder_frequency_hours),
           saving: false
         }));
 
@@ -100,7 +217,7 @@ cargarMedicamentos() {
           nombre: h.nombre_comercial || h.nombre_generico || 'Medicamento',
           detalle: h.frequency || h.dose || '',
           reminder_active: !!h.reminder_active,
-          reminder_frequency_hours: h.reminder_frequency_hours ? Number(h.reminder_frequency_hours) : null,
+          reminder_frequency_hours: this.normalizarFrecuencia(h.reminder_frequency_hours),
           saving: false
         }));
 
@@ -111,6 +228,21 @@ cargarMedicamentos() {
         this.errorMsg = 'Error de conexión al consultar tus medicamentos.';
       }
     });
+  }
+
+  // 📍 El servidor guarda reminder_frequency_hours en una columna DECIMAL(6,4), así que
+  // "Cada 5 minutos" (5/60 = 0.08333333333333333... en JS) vuelve de la base de datos
+  // redondeado a "0.0833". Comparar esos dos números con === (como hacía el binding del
+  // <ion-select>) nunca es verdadero, así que el select se veía "sin hora seleccionada"
+  // aunque sí estuviera guardado. Aquí "enganchamos" el valor recibido a la opción
+  // conocida más cercana para que el select siempre encuentre su selección.
+  private normalizarFrecuencia(raw: any): number | null {
+    if (raw === null || raw === undefined || raw === '') return null;
+    const valor = Number(raw);
+    if (!Number.isFinite(valor)) return null;
+
+    const opcionCercana = this.opcionesFrecuencia.find(op => Math.abs(op.value - valor) < 0.01);
+    return opcionCercana ? opcionCercana.value : valor;
   }
 
   onToggleChange(med: MedicamentoUI, activo: boolean) {
@@ -202,5 +334,9 @@ cargarMedicamentos() {
       handle: false
     });
     await modal.present();
+    // 📍 Al cerrar (haya emparejado, desvinculado o solo mirado), refrescamos el
+    // indicador de bocina conectada para que nunca quede desactualizado.
+    await modal.onDidDismiss();
+    this.cargarBocinaConectada();
   }
 }

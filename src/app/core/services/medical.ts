@@ -185,22 +185,4 @@ getEmergencyTracking(phone: string): Observable<any> {
     });
   }
 
-  /** Cola de anuncios de medicamentos pendientes de reproducir en este paciente */
-  getPendingAnnouncements(phone: string): Observable<any> {
-    return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "get_pending_announcements",
-      api_key: "ANAASIS_2026",
-      phone: phone
-    });
-  }
-
-  /** Confirma que un anuncio de medicamento ya fue reproducido */
-  ackAnnouncement(id: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "ack_announcement",
-      api_key: "ANAASIS_2026",
-      id: id
-    });
-  }
-
 }

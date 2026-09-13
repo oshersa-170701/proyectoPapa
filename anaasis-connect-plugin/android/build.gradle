@@ -52,4 +52,8 @@ dependencies {
     implementation "androidx.mediarouter:mediarouter:1.7.0"
 
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+
+    // WorkManager: ejecuta el anuncio por Cast en segundo plano (necesita red) sin
+    // mantener la app/webview viva ni un servicio en primer plano.
+    implementation "androidx.work:work-runtime-ktx:2.9.1"
 }
