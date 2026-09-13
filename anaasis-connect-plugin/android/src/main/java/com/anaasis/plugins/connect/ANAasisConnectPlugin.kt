@@ -21,6 +21,7 @@ import com.google.android.gms.cast.framework.SessionManagerListener
 
 private const val TAG = "ANAasisConnect"
 private const val DURACION_ESCANEO_MS = 4000L
+private const val DURACION_REESCANEO_MS = 2500L
 
 @CapacitorPlugin(name = "ANAasisConnect")
 class ANAasisConnectPlugin : Plugin() {
@@ -115,40 +116,71 @@ class ANAasisConnectPlugin : Plugin() {
                 }
 
                 val router = mediaRouter ?: MediaRouter.getInstance(context)
-                val ruta = router.routes.firstOrNull { it.id == deviceId }
+                mediaRouter = router
 
-                if (ruta == null) {
-                    call.reject("No se encontró esa bocina, vuelve a buscarla desde la misma red WiFi")
+                // 📍 router.routes se vacía a los pocos segundos de terminar el escaneo activo
+                // (Android deja de reportar rutas Cast para ahorrar batería). Por eso "Probar
+                // bocina" fallaba con "No se encontró esa bocina" aunque discoverDevices() sí
+                // la había encontrado minutos antes. Usamos primero nuestro propio caché
+                // (rutasEncontradas, alimentado por el callback que dejamos siempre registrado);
+                // si tampoco la tiene, hacemos un mini-reescaneo activo antes de rendirnos.
+                val rutaConocida = rutasEncontradas[deviceId] ?: router.routes.firstOrNull { it.id == deviceId }
+
+                if (rutaConocida != null) {
+                    seleccionarYReproducir(rutaConocida, sessionManager, audioUrl, call)
                     return@runOnUiThread
                 }
 
-                val listener = object : SessionManagerListener<CastSession> {
-                    override fun onSessionStarted(session: CastSession, sessionId: String) {
-                        sessionManager.removeSessionManagerListener(this, CastSession::class.java)
-                        reproducirEnSesion(session, audioUrl, call)
+                CastContext.getSharedInstance(context)
+                router.removeCallback(routerCallback)
+                router.addCallback(getSelector(), routerCallback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN)
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    router.removeCallback(routerCallback)
+                    router.addCallback(getSelector(), routerCallback, 0)
+
+                    val ruta = rutasEncontradas[deviceId] ?: router.routes.firstOrNull { it.id == deviceId }
+                    if (ruta == null) {
+                        call.reject("No se encontró esa bocina, vuelve a buscarla desde la misma red WiFi")
+                    } else {
+                        seleccionarYReproducir(ruta, sessionManager, audioUrl, call)
                     }
-
-                    override fun onSessionStartFailed(session: CastSession, error: Int) {
-                        sessionManager.removeSessionManagerListener(this, CastSession::class.java)
-                        call.reject("No se pudo conectar a la bocina (código $error)")
-                    }
-
-                    override fun onSessionEnded(session: CastSession, error: Int) {}
-                    override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {}
-                    override fun onSessionResumeFailed(session: CastSession, error: Int) {}
-                    override fun onSessionSuspended(session: CastSession, reason: Int) {}
-                    override fun onSessionStarting(session: CastSession) {}
-                    override fun onSessionEnding(session: CastSession) {}
-                    override fun onSessionResuming(session: CastSession, sessionId: String) {}
-                }
-
-                sessionManager.addSessionManagerListener(listener, CastSession::class.java)
-                ruta.select()
+                }, DURACION_REESCANEO_MS)
             } catch (e: Exception) {
                 Log.e(TAG, "Error reproduciendo en la bocina: ${e.message}")
                 call.reject("Error reproduciendo en la bocina: ${e.message}")
             }
         }
+    }
+
+    private fun seleccionarYReproducir(
+        ruta: MediaRouter.RouteInfo,
+        sessionManager: com.google.android.gms.cast.framework.SessionManager,
+        audioUrl: String,
+        call: PluginCall
+    ) {
+        val listener = object : SessionManagerListener<CastSession> {
+            override fun onSessionStarted(session: CastSession, sessionId: String) {
+                sessionManager.removeSessionManagerListener(this, CastSession::class.java)
+                reproducirEnSesion(session, audioUrl, call)
+            }
+
+            override fun onSessionStartFailed(session: CastSession, error: Int) {
+                sessionManager.removeSessionManagerListener(this, CastSession::class.java)
+                call.reject("No se pudo conectar a la bocina (código $error)")
+            }
+
+            override fun onSessionEnded(session: CastSession, error: Int) {}
+            override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {}
+            override fun onSessionResumeFailed(session: CastSession, error: Int) {}
+            override fun onSessionSuspended(session: CastSession, reason: Int) {}
+            override fun onSessionStarting(session: CastSession) {}
+            override fun onSessionEnding(session: CastSession) {}
+            override fun onSessionResuming(session: CastSession, sessionId: String) {}
+        }
+
+        sessionManager.addSessionManagerListener(listener, CastSession::class.java)
+        ruta.select()
     }
 
     private fun reproducirEnSesion(session: CastSession, audioUrl: String, call: PluginCall) {
