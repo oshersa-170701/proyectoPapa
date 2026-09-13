@@ -4,8 +4,9 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
   IonSpinner, IonList, IonItem, IonLabel, ModalController
 } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular';
+import { ToastController, AlertController } from '@ionic/angular';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
+import { firstValueFrom } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
@@ -33,6 +34,7 @@ export class AnaconnectModalComponent implements OnInit {
   bocinaEmparejada: BocinaEmparejada | null = null;
   buscando = false;
   probando = false;
+  emparejando = false;
   errorMsg = '';
 
   private readonly medicalService = inject(MedicalService);
@@ -40,6 +42,7 @@ export class AnaconnectModalComponent implements OnInit {
   private readonly userService = inject(User);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastController = inject(ToastController);
+  private readonly alertController = inject(AlertController);
 
   constructor() {
     addIcons({ closeOutline, homeOutline, wifiOutline, checkmarkCircle, volumeHighOutline, trashOutline });
@@ -101,21 +104,60 @@ export class AnaconnectModalComponent implements OnInit {
   }
 
   emparejar(device: CastDevice) {
-    if (!this.phone) return;
+    if (!this.phone || this.emparejando) return;
+    this.emparejando = true;
+    console.log('[AnaConnect] Emparejando bocina:', JSON.stringify(device));
 
     this.medicalService.saveGoogleHomeDevice(this.phone, device.name, device.id).subscribe({
       next: async (res: any) => {
+        this.emparejando = false;
+        console.log('[AnaConnect] Respuesta de save_google_home_device:', JSON.stringify(res));
+
         if (res?.success) {
           this.bocinaEmparejada = { device_name: device.name, cast_id: device.id };
-          await this.presentToast(`Bocina "${device.name}" emparejada correctamente.`);
+
+          // Confirmamos con sonido en la bocina ANTES de cerrar, para que el paciente
+          // sepa de oído que sí quedó conectada (best-effort: si falla el audio, igual avisamos).
+          await this.confirmarEmparejamientoConSonido(device);
+
+          const alert = await this.alertController.create({
+            header: 'Bocina emparejada',
+            message: `"${device.name}" quedó conectada correctamente.`,
+            buttons: ['OK']
+          });
+          await alert.present();
+          await alert.onDidDismiss();
+
+          this.modalCtrl.dismiss({ bocinaEmparejada: this.bocinaEmparejada });
         } else {
           await this.presentToast('No se pudo emparejar la bocina.');
         }
       },
-      error: async () => {
+      error: async (err) => {
+        this.emparejando = false;
+        console.error('[AnaConnect] Error de conexión emparejando:', JSON.stringify(err));
         await this.presentToast('Error de conexión al emparejar la bocina.');
       }
     });
+  }
+
+  // 🔊 Le pide a la bocina recién emparejada que hable, para que el paciente
+  // confirme de oído que quedó bien conectada (sin esto, no había forma de saberlo).
+  private async confirmarEmparejamientoConSonido(device: CastDevice): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.medicalService.generateTts(`Hola, quedé conectada a ${device.name}.`));
+      console.log('[AnaConnect] Respuesta de generate_tts (confirmación de emparejado):', JSON.stringify(res));
+
+      if (!res?.success || !res.audio_url) {
+        console.warn('[AnaConnect] generate_tts no devolvió audio_url — revisa GOOGLE_TTS_API_KEY en el .env del servidor.');
+        return;
+      }
+
+      await this.anaconnectService.speak(device.id, res.audio_url);
+      console.log('[AnaConnect] Cast speak() confirmó sin lanzar error.');
+    } catch (e) {
+      console.error('[AnaConnect] La bocina se emparejó pero no se pudo confirmar con sonido:', JSON.stringify(e));
+    }
   }
 
   olvidarBocina() {
@@ -135,23 +177,29 @@ export class AnaconnectModalComponent implements OnInit {
   async probarBocina() {
     if (!this.bocinaEmparejada) return;
     this.probando = true;
+    console.log('[AnaConnect] Probando bocina:', JSON.stringify(this.bocinaEmparejada));
 
     this.medicalService.generateTts('Hola, esta es una prueba de ANAasis Connect').subscribe({
       next: async (res: any) => {
+        console.log('[AnaConnect] Respuesta de generate_tts (prueba):', JSON.stringify(res));
         try {
           if (res?.success && res.audio_url) {
             await this.anaconnectService.speak(this.bocinaEmparejada!.cast_id, res.audio_url);
+            console.log('[AnaConnect] Cast speak() de prueba confirmó sin lanzar error.');
           } else {
-            await this.presentToast('No se pudo generar el audio de prueba.');
+            console.warn('[AnaConnect] generate_tts no devolvió audio_url — revisa GOOGLE_TTS_API_KEY en el .env del servidor.');
+            await this.presentToast('No se pudo generar el audio de prueba. Revisa la GOOGLE_TTS_API_KEY del servidor.');
           }
         } catch (e) {
+          console.error('[AnaConnect] Error de Cast reproduciendo la prueba:', JSON.stringify(e));
           await this.presentToast('No se pudo reproducir en la bocina. ¿Sigue en la misma red WiFi?');
         } finally {
           this.probando = false;
         }
       },
-      error: async () => {
+      error: async (err) => {
         this.probando = false;
+        console.error('[AnaConnect] Error de conexión generando audio de prueba:', JSON.stringify(err));
         await this.presentToast('Error de conexión al generar el audio de prueba.');
       }
     });
@@ -161,7 +209,7 @@ export class AnaconnectModalComponent implements OnInit {
     const toast = await this.toastController.create({
       message: mensaje,
       duration: 2500,
-      position: 'bottom',
+      position: 'top', // 'bottom' quedaba tapado por la hoja del modal (breakpoints 0.6/0.9)
       color: 'dark'
     });
     await toast.present();

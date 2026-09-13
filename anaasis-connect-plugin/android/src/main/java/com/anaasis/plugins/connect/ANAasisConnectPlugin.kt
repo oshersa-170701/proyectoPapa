@@ -62,11 +62,18 @@ class ANAasisConnectPlugin : Plugin() {
                 val router = MediaRouter.getInstance(context)
                 mediaRouter = router
 
+                // Si venía de un escaneo anterior, quitamos el callback previo antes de re-registrar
+                router.removeCallback(routerCallback)
                 rutasEncontradas.clear()
                 router.addCallback(getSelector(), routerCallback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN)
 
                 Handler(Looper.getMainLooper()).postDelayed({
+                    // 🛠️ IMPORTANTE: NO quitamos el callback por completo, solo bajamos de
+                    // escaneo activo a pasivo. Si lo quitáramos del todo, MediaRouter deja de
+                    // reportar estas rutas en router.routes y speak()/emparejar() ya no las
+                    // encuentra después (por eso fallaba "No se encontró esa bocina").
                     router.removeCallback(routerCallback)
+                    router.addCallback(getSelector(), routerCallback, 0)
 
                     val devices = JSArray()
                     for (route in rutasEncontradas.values) {

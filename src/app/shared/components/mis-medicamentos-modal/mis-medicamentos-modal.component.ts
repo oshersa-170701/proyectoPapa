@@ -5,7 +5,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
   IonSpinner, IonList, IonItem, IonLabel, IonToggle, IonSelect, IonSelectOption, ModalController
 } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular';
+import { ToastController, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline, homeOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
@@ -50,6 +50,7 @@ export class MisMedicamentosModalComponent implements OnInit {
   private readonly userService = inject(User);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastController = inject(ToastController);
+  private readonly alertController = inject(AlertController);
   private readonly reminderScheduler = inject(ReminderScheduler);
 
   constructor() {
@@ -130,6 +131,7 @@ cargarMedicamentos() {
 
   private guardar(med: MedicamentoUI) {
     med.saving = true;
+    console.log('[MisMedicamentos] Guardando recordatorio:', med.source_table, med.source_id, 'active=', med.reminder_active, 'freq=', med.reminder_frequency_hours);
 
     this.medicalService.setMedicationReminder({
       source_table: med.source_table,
@@ -139,8 +141,11 @@ cargarMedicamentos() {
     }).subscribe({
       next: async (res: any) => {
         med.saving = false;
+        console.log('[MisMedicamentos] Respuesta del servidor a set_medication_reminder:', JSON.stringify(res));
+
         if (!res?.success) {
           this.errorMsg = res?.error || 'No se pudo guardar el recordatorio.';
+          await this.presentAlerta('Error', this.errorMsg);
           return;
         }
 
@@ -151,24 +156,37 @@ cargarMedicamentos() {
             nombre: med.nombre,
             frequency_hours: med.reminder_frequency_hours
           });
-          await this.presentToast(`Recordatorio activado: ${med.nombre} cada ${med.reminder_frequency_hours}h`);
+          await this.presentAlerta(
+            'Recordatorio activado',
+            `${med.nombre} — cada ${med.reminder_frequency_hours} horas.\n\nEsto queda guardado en el servidor: si al volver a abrir "Mis medicamentos" el switch aparece apagado de nuevo, avísame porque significa que el guardado en el servidor no se está reflejando.`
+          );
         } else {
           await this.reminderScheduler.cancelarRecordatorio(med);
-          await this.presentToast(`Recordatorio desactivado: ${med.nombre}`);
+          await this.presentAlerta('Recordatorio desactivado', `${med.nombre} ya no te recordará.`);
         }
       },
-      error: () => {
+      error: (err) => {
         med.saving = false;
+        console.error('[MisMedicamentos] Error de conexión guardando recordatorio:', JSON.stringify(err));
         this.errorMsg = 'Error de conexión al guardar el recordatorio.';
       }
     });
+  }
+
+  private async presentAlerta(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 
   private async presentToast(mensaje: string) {
     const toast = await this.toastController.create({
       message: mensaje,
       duration: 2500,
-      position: 'bottom',
+      position: 'top', // 'bottom' quedaba tapado por la hoja del modal (breakpoints 0.7/0.9)
       color: 'dark'
     });
     await toast.present();

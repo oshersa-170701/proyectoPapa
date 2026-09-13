@@ -54,10 +54,12 @@
   @if (!buscando && dispositivos.length > 0) {
     <ion-list class="device-list">
       @for (device of dispositivos; track device.id) {
-        <ion-item button (click)="emparejar(device)">
+        <ion-item button [disabled]="emparejando" (click)="emparejar(device)">
           <ion-icon name="home-outline" slot="start"></ion-icon>
           <ion-label>{{ device.name }}</ion-label>
-          @if (bocinaEmparejada?.cast_id === device.id) {
+          @if (emparejando) {
+            <ion-spinner name="crescent" color="primary" slot="end"></ion-spinner>
+          } @else if (bocinaEmparejada?.cast_id === device.id) {
             <ion-icon name="checkmark-circle" color="success" slot="end"></ion-icon>
           }
         </ion-item>
