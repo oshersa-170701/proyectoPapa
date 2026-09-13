@@ -23,39 +23,60 @@
 14-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:5-68
 14-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:11:22-65
 15
-16    <application>
-16-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:13:5-31:19
-17
-18        <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
-19        <meta-data
-19-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:15:9-17:79
-20            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-20-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:16:13-93
-21            android:value="com.anaasis.plugins.connect.CastOptionsProvider" />
-21-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:17:13-76
-22
-23        <receiver
-23-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:19:9-21:40
-24            android:name="com.anaasis.plugins.connect.RecordatorioBroadcastReceiver"
-24-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:20:13-85
-25            android:exported="false" />
-25-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:21:13-37
-26        <receiver
-26-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:23:9-30:20
-27            android:name="com.anaasis.plugins.connect.RecordatorioBootReceiver"
-27-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:24:13-80
-28            android:exported="false" >
-28-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:25:13-37
-29            <intent-filter>
-29-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:26:13-29:29
-30                <action android:name="android.intent.action.BOOT_COMPLETED" />
-30-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:17-79
-30-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:25-76
-31                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-31-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:17-82
-31-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:28:25-79
-32            </intent-filter>
-33        </receiver>
-34    </application>
-35
-36</manifest>
+16    <!--
+17         Servicio en primer plano que mantiene la bocina Google Home conectada mientras
+18         haya recordatorios activos, para no tener que reconectar (con su retraso) cada
+19         vez que suena un recordatorio
+20    -->
+21    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+21-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:16:5-77
+21-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:16:22-74
+22    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+22-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:17:5-94
+22-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:17:22-91
+23
+24    <application>
+24-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:19:5-42:19
+25
+26        <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
+27        <meta-data
+27-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:21:9-23:79
+28            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+28-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:22:13-93
+29            android:value="com.anaasis.plugins.connect.CastOptionsProvider" />
+29-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:23:13-76
+30
+31        <receiver
+31-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:25:9-27:40
+32            android:name="com.anaasis.plugins.connect.RecordatorioBroadcastReceiver"
+32-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:26:13-85
+33            android:exported="false" />
+33-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:27:13-37
+34        <receiver
+34-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:29:9-36:20
+35            android:name="com.anaasis.plugins.connect.RecordatorioBootReceiver"
+35-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:30:13-80
+36            android:exported="false" >
+36-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:31:13-37
+37            <intent-filter>
+37-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:32:13-35:29
+38                <action android:name="android.intent.action.BOOT_COMPLETED" />
+38-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:33:17-79
+38-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:33:25-76
+39                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+39-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:34:17-82
+39-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:34:25-79
+40            </intent-filter>
+41        </receiver>
+42
+43        <service
+43-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:38:9-41:63
+44            android:name="com.anaasis.plugins.connect.BocinaForegroundService"
+44-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:39:13-79
+45            android:exported="false"
+45-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:40:13-37
+46            android:foregroundServiceType="connectedDevice" />
+46-->D:\proyecto-papa\anaasis-connect-plugin\android\src\main\AndroidManifest.xml:41:13-60
+47    </application>
+48
+49</manifest>

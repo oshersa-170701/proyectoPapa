@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, NgZone, EnvironmentInjector } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, Input, NgZone, EnvironmentInjector, ViewChild } from '@angular/core';
 import {
   IonContent, IonFooter, IonGrid, IonRow, IonCol, IonIcon, IonSpinner, ModalController, IonButton
 } from '@ionic/angular/standalone';
@@ -36,6 +36,7 @@ import { NativeSettings, AndroidSettings } from 'capacitor-native-settings';
 import { Health } from '../core/services/health';
 import { RegistrarTemperaturaComponent } from '../shared/components/registrar-temperatura/registrar-temperatura.component';
 import { MisMedicamentosModalComponent } from '../shared/components/mis-medicamentos-modal/mis-medicamentos-modal.component';
+import { formatearFrecuencia } from '../core/utils/frecuencia.util';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -48,7 +49,10 @@ import { MisMedicamentosModalComponent } from '../shared/components/mis-medicame
   ],
 })
 
-export class HomePage {
+export class HomePage implements AfterViewChecked {
+  @ViewChild(IonContent) private content!: IonContent;
+  private ultimoConteoMensajes = 0;
+
   showHospitals = false;
   showDoctors = false;
   showGuideModal = false;
@@ -86,6 +90,25 @@ export class HomePage {
     this.initSpeechRecognition();
     this.setupBackButton(); // 📍 Llamamos a la configuración
   }
+
+  // 📍 Auto-scroll: antes el usuario tenía que bajar la pantalla a mano cada vez que
+  // llegaba una burbuja nueva (del bot o suya), lo que rompía el flujo de la
+  // conversación. ngAfterViewChecked() se dispara después de que Angular ya pintó la
+  // burbuja nueva en el DOM; comparamos contra el conteo anterior para bajar solo
+  // cuando de verdad se agregó un mensaje (no en cada detección de cambios).
+  ngAfterViewChecked() {
+    if (this.chatMessages.length !== this.ultimoConteoMensajes) {
+      this.ultimoConteoMensajes = this.chatMessages.length;
+      this.scrollToBottom();
+    }
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      this.content?.scrollToBottom(300);
+    }, 100);
+  }
+
   async initSpeechRecognition() {
     const available = await SpeechRecognition.available();
     console.log("Micrófono listo:", available);
@@ -429,7 +452,7 @@ export class HomePage {
               for (const p of todas) {
                 if (p.reminder_active) {
                   const nombre = p.nombre_comercial || p.nombre_generico || p.item || 'un medicamento';
-                  activos.push(p.reminder_frequency_hours ? `${nombre} cada ${p.reminder_frequency_hours} horas` : nombre);
+                  activos.push(p.reminder_frequency_hours ? `${nombre} cada ${formatearFrecuencia(p.reminder_frequency_hours)}` : nombre);
                 }
               }
             }

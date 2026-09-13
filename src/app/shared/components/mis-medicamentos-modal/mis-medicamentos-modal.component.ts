@@ -13,6 +13,7 @@ import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { ReminderScheduler } from 'src/app/core/services/reminder-scheduler';
 import { Anaconnect } from 'src/app/core/services/anaconnect';
+import { formatearFrecuencia } from 'src/app/core/utils/frecuencia.util';
 import { AnaconnectModalComponent } from 'src/app/shared/components/anaconnect-modal/anaconnect-modal.component';
 
 interface MedicamentoUI {
@@ -93,7 +94,8 @@ export class MisMedicamentosModalComponent implements OnInit {
         // paralelo y en silencio, confirmamos que de verdad sea detectable ahora en la
         // red — si no lo es, se corrige solo a rojo sin necesidad de tocar nada.
         this.bocinaConectada = bocina;
-        this.verificarDeteccionReal(bocina, false);
+        const detectada = await this.escanearBocina(bocina);
+        this.bocinaConectada = detectada ? bocina : null;
       },
       error: () => {
         this.cargandoBocina = false;
@@ -134,7 +136,9 @@ export class MisMedicamentosModalComponent implements OnInit {
         return;
       }
 
-      await this.verificarDeteccionReal(bocina, true);
+      const detectada = await this.escanearBocina(bocina);
+      this.bocinaConectada = detectada ? bocina : null;
+      if (!detectada) await this.presentToastBocinaDesconectada();
     } catch (e) {
       console.error('[MisMedicamentos] Error reintentando conexión de bocina:', e);
       this.bocinaConectada = null;
@@ -144,22 +148,32 @@ export class MisMedicamentosModalComponent implements OnInit {
     }
   }
 
-  private async verificarDeteccionReal(bocina: { device_name: string; cast_id?: string }, avisarSiFalla: boolean) {
-    try {
-      const dispositivos = await this.anaconnectService.discoverDevices();
-      const detectada = dispositivos.some(d => d.id === bocina.cast_id);
+  // 📍 El plugin nativo (ANAasisConnectPlugin.discoverDevices) usa un único mapa
+  // compartido para acumular las rutas Cast encontradas y lo limpia al arrancar cada
+  // escaneo. Si esta pantalla dispara DOS escaneos a la vez (la verificación silenciosa
+  // al abrir el modal + el botón "Reintentar" tocado casi al instante), el segundo
+  // escaneo borra a medio camino los resultados del primero y viceversa — por eso el
+  // botón a veces "sí conectaba" en la bocina pero la pantalla se quedaba cargando/roja,
+  // como si hubiera fallado. Aquí forzamos que ambos caminos compartan la MISMA promesa
+  // de escaneo en curso en vez de lanzar una segunda llamada nativa en paralelo.
+  private escaneoEnCurso: Promise<boolean> | null = null;
 
-      if (detectada) {
-        this.bocinaConectada = bocina;
-      } else {
-        this.bocinaConectada = null;
-        if (avisarSiFalla) await this.presentToastBocinaDesconectada();
+  private escanearBocina(bocina: { device_name: string; cast_id?: string }): Promise<boolean> {
+    if (this.escaneoEnCurso) return this.escaneoEnCurso;
+
+    this.escaneoEnCurso = (async () => {
+      try {
+        const dispositivos = await this.anaconnectService.discoverDevices();
+        return dispositivos.some(d => d.id === bocina.cast_id);
+      } catch (e) {
+        console.error('[MisMedicamentos] Error escaneando la red buscando la bocina:', e);
+        return false;
+      } finally {
+        this.escaneoEnCurso = null;
       }
-    } catch (e) {
-      console.error('[MisMedicamentos] Error escaneando la red buscando la bocina:', e);
-      this.bocinaConectada = null;
-      if (avisarSiFalla) await this.presentToastBocinaDesconectada();
-    }
+    })();
+
+    return this.escaneoEnCurso;
   }
 
   private async presentToastBocinaDesconectada() {
@@ -290,7 +304,7 @@ cargarMedicamentos() {
           });
           await this.presentAlerta(
             'Recordatorio activado',
-            `${med.nombre} — cada ${med.reminder_frequency_hours} horas.\n\nEsto queda guardado en el servidor: si al volver a abrir "Mis medicamentos" el switch aparece apagado de nuevo, avísame porque significa que el guardado en el servidor no se está reflejando.`
+            `${med.nombre} — cada ${formatearFrecuencia(med.reminder_frequency_hours)}.`
           );
         } else {
           await this.reminderScheduler.cancelarRecordatorio(med);

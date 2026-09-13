@@ -10,6 +10,12 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Servicio en primer plano que mantiene la bocina Google Home conectada mientras
+         haya recordatorios activos, para no tener que reconectar (con su retraso) cada
+         vez que suena un recordatorio -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
     <application>
         <!-- Requerido por el Cast SDK: le dice con qué "receiver app" castear (el Default Media Receiver de Google) -->
         <meta-data
@@ -28,6 +34,11 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name="com.anaasis.plugins.connect.BocinaForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 
 </manifest>

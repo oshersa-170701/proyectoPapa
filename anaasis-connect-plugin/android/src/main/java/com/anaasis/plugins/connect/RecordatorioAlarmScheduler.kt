@@ -32,6 +32,7 @@ object RecordatorioAlarmScheduler {
     fun programar(context: Context, recordatorio: RecordatorioProgramado) {
         guardarEnPrefs(context, recordatorio)
         armarAlarma(context, recordatorio)
+        actualizarServicioBocina(context)
     }
 
     fun cancelar(context: Context, requestCode: Int) {
@@ -39,11 +40,25 @@ object RecordatorioAlarmScheduler {
         val pendingIntent = crearPendingIntent(context, RecordatorioProgramado(requestCode, "", null, 0, 0))
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
+        actualizarServicioBocina(context)
     }
 
     fun reprogramarTodosDespuesDeReinicio(context: Context) {
         for (r in leerDePrefs(context)) {
             armarAlarma(context, r)
+        }
+        actualizarServicioBocina(context)
+    }
+
+    // 📍 El servicio en primer plano que mantiene la bocina conectada solo debe existir
+    // mientras de verdad haya algún recordatorio activo que la use — si no, es batería
+    // desperdiciada y una notificación fija sin ningún propósito.
+    private fun actualizarServicioBocina(context: Context) {
+        val castId = leerDePrefs(context).firstOrNull { !it.castId.isNullOrEmpty() }?.castId
+        if (castId != null) {
+            BocinaForegroundService.iniciar(context, castId)
+        } else {
+            BocinaForegroundService.detener(context)
         }
     }
 

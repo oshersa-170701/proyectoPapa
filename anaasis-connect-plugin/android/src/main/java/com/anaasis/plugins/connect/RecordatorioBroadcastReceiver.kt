@@ -11,6 +11,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Locale
@@ -70,6 +71,7 @@ class RecordatorioBroadcastReceiver : BroadcastReceiver() {
             val datos = Data.Builder()
                 .putString("texto", texto)
                 .putString("castId", castId)
+                .putLong("horaDisparo", System.currentTimeMillis())
                 .build()
             // ⏱️ Retrasamos el anuncio en la bocina para que no se empalme con la voz
             // nativa del teléfono, que empieza a hablar de inmediato (arriba).
@@ -77,7 +79,17 @@ class RecordatorioBroadcastReceiver : BroadcastReceiver() {
                 .setInputData(datos)
                 .setInitialDelay(RETRASO_ANUNCIO_BOCINA_SEGUNDOS, TimeUnit.SECONDS)
                 .build()
-            WorkManager.getInstance(appContext).enqueue(solicitud)
+            // 📍 enqueueUniqueWork + REPLACE: si el recordatorio anterior de ESTE MISMO
+            // slot (ej. cada 5 min en modo prueba) seguía reintentando por no encontrar la
+            // bocina, lo cancelamos antes de programar el nuevo. Sin esto, varios intentos
+            // viejos se acumulaban reintentando con el backoff de WorkManager y, cuando la
+            // bocina volvía a la red, todos reproducían su audio casi al mismo tiempo —
+            // eso era lo que se escuchaba como "las voces cruzadas".
+            WorkManager.getInstance(appContext).enqueueUniqueWork(
+                "recordatorio_bocina_$requestCode",
+                ExistingWorkPolicy.REPLACE,
+                solicitud
+            )
         }
 
         // 🧪 Modo de prueba (repetición cada N minutos, ej. cada 5 min): no pasa por
@@ -98,46 +110,63 @@ class RecordatorioBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
+    // 📍 Instrumentado a propósito: el paciente reporta que la voz de prueba suena cada
+    // vez, pero la notificación visual a veces no aparece ni siquiera en la barra — eso
+    // significa que nm.notify() no se está completando (o ni se está llamando), y sin
+    // logs no podemos ver por qué. Envolvemos TODO el método (no solo notify) para
+    // capturar cualquier excepción, y dejamos un log de éxito explícito para confirmar
+    // cuándo sí se completa.
     private fun mostrarNotificacionNativa(context: Context, requestCode: Int, texto: String) {
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val canalExistente = nm.getNotificationChannel(CANAL_PRUEBA_ID)
-            if (canalExistente == null) {
-                val canal = NotificationChannel(
-                    CANAL_PRUEBA_ID,
-                    "Recordatorios de prueba",
-                    NotificationManager.IMPORTANCE_HIGH
-                )
-                nm.createNotificationChannel(canal)
-            }
-        }
-
-        // 📍 El ícono de launcher (adaptive, a color) se ve casi invisible en la barra de
-        // estado porque Android solo toma su canal alfa. Usamos un ícono propio de
-        // silueta blanca (ic_stat_anaasis) generado a partir del logo, con el ícono a
-        // color (ic_notification_large) para la vista expandida.
-        val smallIconRes = context.resources.getIdentifier("ic_stat_anaasis", "drawable", context.packageName)
-        val largeIconRes = context.resources.getIdentifier("ic_notification_large", "drawable", context.packageName)
-
-        val builder = NotificationCompat.Builder(context, CANAL_PRUEBA_ID)
-            .setContentTitle("Prueba de recordatorio")
-            .setContentText(texto)
-            .setSmallIcon(if (smallIconRes != 0) smallIconRes else context.applicationInfo.icon)
-            .setColor(android.graphics.Color.parseColor("#00A0AB"))
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        if (largeIconRes != 0) {
-            builder.setLargeIcon(android.graphics.BitmapFactory.decodeResource(context.resources, largeIconRes))
-        }
-
-        val notificacion = builder.build()
-
         try {
-            nm.notify(requestCode, notificacion)
-        } catch (e: SecurityException) {
-            Log.w(TAG, "Sin permiso de notificaciones, no se pudo mostrar la de prueba: ${e.message}")
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            val notificacionesHabilitadas = androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
+            Log.i(TAG, "mostrarNotificacionNativa: notificacionesHabilitadas=$notificacionesHabilitadas requestCode=$requestCode")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val canalExistente = nm.getNotificationChannel(CANAL_PRUEBA_ID)
+                if (canalExistente == null) {
+                    val canal = NotificationChannel(
+                        CANAL_PRUEBA_ID,
+                        "Recordatorios de prueba",
+                        NotificationManager.IMPORTANCE_HIGH
+                    )
+                    nm.createNotificationChannel(canal)
+                    Log.i(TAG, "Canal '$CANAL_PRUEBA_ID' creado (no existía)")
+                } else {
+                    Log.i(TAG, "Canal '$CANAL_PRUEBA_ID' ya existía con importance=${canalExistente.importance}")
+                }
+            }
+
+            // 📍 El ícono de launcher (adaptive, a color) se ve casi invisible en la barra de
+            // estado porque Android solo toma su canal alfa. Usamos un ícono propio de
+            // silueta blanca (ic_stat_anaasis) generado a partir del logo, con el ícono a
+            // color (ic_notification_large) para la vista expandida.
+            val smallIconRes = context.resources.getIdentifier("ic_stat_anaasis", "drawable", context.packageName)
+            val largeIconRes = context.resources.getIdentifier("ic_notification_large", "drawable", context.packageName)
+
+            val builder = NotificationCompat.Builder(context, CANAL_PRUEBA_ID)
+                .setContentTitle("Prueba de recordatorio")
+                .setContentText(texto)
+                .setSmallIcon(if (smallIconRes != 0) smallIconRes else context.applicationInfo.icon)
+                .setColor(android.graphics.Color.parseColor("#00A0AB"))
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+
+            if (largeIconRes != 0) {
+                try {
+                    builder.setLargeIcon(android.graphics.BitmapFactory.decodeResource(context.resources, largeIconRes))
+                } catch (e: Exception) {
+                    Log.w(TAG, "No se pudo decodificar el ícono grande, se omite: ${e.message}")
+                }
+            }
+
+            nm.notify(requestCode, builder.build())
+            Log.i(TAG, "Notificación de prueba mostrada OK, id=$requestCode")
+        } catch (e: Exception) {
+            Log.e(TAG, "FALLÓ mostrarNotificacionNativa (id=$requestCode): ${e.javaClass.simpleName}: ${e.message}", e)
         }
     }
 }

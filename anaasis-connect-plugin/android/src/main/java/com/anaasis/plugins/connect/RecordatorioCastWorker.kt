@@ -28,6 +28,11 @@ private const val API_KEY = "ANAASIS_2026"
 private const val DURACION_ESCANEO_MS = 4000L
 private const val TIMEOUT_REPRODUCCION_S = 15L
 
+// 📍 Si por reintentos de red (Result.retry) un anuncio queda pendiente más de esto,
+// mejor lo descartamos que reproducirlo tarde: un recordatorio de "hace rato" solo
+// confundiría al paciente y, peor, se empalmaría con el siguiente que ya sea vigente.
+private const val VIGENCIA_MAXIMA_MS = 3 * 60 * 1000L
+
 // 📍 Corre en segundo plano (WorkManager, no depende de la app/webview) para anunciar
 // el recordatorio en la bocina Google Home: pide el mp3 a generate_tts y lo castea.
 // Si algo falla por red, se reintenta solo (Result.retry) con el backoff de WorkManager.
@@ -36,6 +41,12 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
     override fun doWork(): Result {
         val texto = inputData.getString("texto") ?: return Result.failure()
         val castId = inputData.getString("castId") ?: return Result.failure()
+
+        val horaDisparo = inputData.getLong("horaDisparo", 0L)
+        if (horaDisparo > 0L && System.currentTimeMillis() - horaDisparo > VIGENCIA_MAXIMA_MS) {
+            Log.w(TAG, "Anuncio descartado por estar vencido (reintentos acumulados): $texto")
+            return Result.success()
+        }
 
         val audioUrl = try {
             pedirAudioTts(texto)
