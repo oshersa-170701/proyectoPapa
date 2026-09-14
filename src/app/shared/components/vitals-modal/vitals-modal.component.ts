@@ -37,6 +37,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
   private readonly userService = inject(User);
   private readonly voice = inject(Voice);
   private updateTimer: any;
+  private cerrado = false;
 
   constructor() {
     addIcons({
@@ -58,9 +59,17 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.updateTimer) clearInterval(this.updateTimer);
+    // 📍 Sin esto, si el paciente cerraba el modal a la mitad de la lectura por bloques
+    // (pulso, oxígeno, sueño, temperatura...), el ciclo seguía leyendo el resto de las
+    // frases aunque el modal ya no estuviera en pantalla. cerrado=true corta el ciclo en
+    // la siguiente vuelta y detener() para la voz que estuviera sonando en ese instante.
+    this.cerrado = true;
+    this.voice.detener().catch(() => { });
   }
 
   dismiss() {
+    this.cerrado = true;
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss();
   }
 
@@ -125,8 +134,9 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
 
         console.log("[ANAasis TTS] Iniciando lectura por bloques lógicos de salud...");
         
-        // 🔄 Reproducción secuencial obligatoria
+        // 🔄 Reproducción secuencial obligatoria (se corta si el modal ya se cerró)
         for (const frase of bloquesDeTexto) {
+          if (this.cerrado) break;
           await this.speak(frase);
         }
 
@@ -141,6 +151,7 @@ export class VitalsModalComponent implements OnInit, OnDestroy {
     }
   }
   async speak(text: string) {
+    if (this.cerrado) return;
     try {
       await this.voice.detener();
       await this.voice.hablar(text, { pitch: 1.1 });

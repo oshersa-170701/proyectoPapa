@@ -8,7 +8,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ToastController, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline, homeOutline } from 'ionicons/icons';
+import { closeOutline, medicalOutline, alarmOutline, alertCircleOutline, syncOutline, homeOutline, trashOutline } from 'ionicons/icons';
 import { MedicalService } from 'src/app/core/services/medical';
 import { User } from 'src/app/core/services/user';
 import { ReminderScheduler } from 'src/app/core/services/reminder-scheduler';
@@ -63,7 +63,7 @@ export class MisMedicamentosModalComponent implements OnInit {
   private readonly anaconnectService = inject(Anaconnect);
 
   constructor() {
-    addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline,homeOutline});
+    addIcons({closeOutline,alertCircleOutline,syncOutline,medicalOutline,alarmOutline,homeOutline,trashOutline});
   }
 
   ngOnInit() {
@@ -184,6 +184,41 @@ export class MisMedicamentosModalComponent implements OnInit {
       cssClass: 'custom-toast-error'
     });
     await toast.present();
+  }
+
+  // 📍 Antes solo se podía desvincular la bocina abriendo el modal de AnaConnect aparte;
+  // el paciente pidió poder hacerlo directo desde el mismo indicador de "Mis medicamentos".
+  async desvincularBocina() {
+    const nombre = this.bocinaConectada?.device_name || 'esta bocina';
+    const confirmacion = await this.alertController.create({
+      header: 'Desvincular bocina',
+      message: `¿Ya no quieres que "${nombre}" anuncie tus recordatorios de medicamento?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Desvincular', role: 'destructive', handler: () => this.confirmarDesvinculo() }
+      ]
+    });
+    await confirmacion.present();
+  }
+
+  private async confirmarDesvinculo() {
+    const phone = this.userService.getProfile()?.phone;
+    if (!phone) return;
+
+    try {
+      await firstValueFrom(this.medicalService.saveGoogleHomeDevice(phone, null, null));
+      this.bocinaConectada = null;
+      await this.presentToast('Bocina desvinculada.');
+
+      const patientId = this.userService.getProfile()?.patient_id;
+      if (patientId) {
+        this.reminderScheduler.resincronizarBocinaEnTodosLosRecordatorios(patientId)
+          .catch(e => console.error('[MisMedicamentos] Error re-sincronizando tras desvincular:', e));
+      }
+    } catch (e) {
+      console.error('[MisMedicamentos] Error desvinculando bocina:', e);
+      await this.presentToast('Error de conexión al desvincular la bocina.');
+    }
   }
 
   dismiss() {

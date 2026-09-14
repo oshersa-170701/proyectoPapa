@@ -22,6 +22,13 @@
         <div class="bocina-status bocina-status-conectada">
           <ion-icon name="home-outline"></ion-icon>
           <span>Conectada a 1 bocina: <strong>{{ bocinaConectada.device_name }}</strong></span>
+          <ion-button
+            fill="clear"
+            size="small"
+            class="btn-olvidar-bocina"
+            (click)="desvincularBocina()">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
         </div>
       } @else {
         <div class="bocina-status bocina-status-desconectada">

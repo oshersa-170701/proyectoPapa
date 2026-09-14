@@ -506,7 +506,7 @@ app-medical-map {
       font-weight: 800; // Solo resaltamos el nombre
       position: relative;
       
-      // Una bolita sutil que indica "conectado/vivo"
+      // Una bolita sutil que indica "conectado/vivo", con parpadeo
       &::after {
         content: '';
         display: inline-block;
@@ -516,9 +516,15 @@ app-medical-map {
         border-radius: 50%;
         margin-left: 4px;
         vertical-align: middle;
+        animation: parpadeo-vivo 1.6s ease-in-out infinite;
       }
     }
   }
+}
+
+@keyframes parpadeo-vivo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
 }
 .help-suggestion {
   text-align: center;
