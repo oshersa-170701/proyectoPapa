@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    La app maneja datos de salud del paciente (signos vitales, medicamentos, citas) y
+    solo debe hablar con angelesmedic.com.mx por HTTPS. cleartextTrafficPermitted="false"
+    bloquea explícitamente cualquier intento de HTTP sin cifrar, incluso si en el futuro
+    se baja el targetSdk (que hoy ya lo bloquea por defecto a partir de API 28).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
