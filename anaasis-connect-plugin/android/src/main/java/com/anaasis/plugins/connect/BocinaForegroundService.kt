@@ -44,12 +44,25 @@ class BocinaForegroundService : Service() {
     private val routerCallback = object : MediaRouter.Callback() {}
 
     private val sessionListener = object : SessionManagerListener<CastSession> {
-        override fun onSessionEnded(session: CastSession, error: Int) { intentarConectar() }
-        override fun onSessionStartFailed(session: CastSession, error: Int) { intentarConectar() }
-        override fun onSessionResumeFailed(session: CastSession, error: Int) { intentarConectar() }
-        override fun onSessionStarted(session: CastSession, sessionId: String) {}
+        override fun onSessionEnded(session: CastSession, error: Int) {
+            Log.w(TAG, "Sesión terminada (error=$error), reintentando conectar")
+            intentarConectar()
+        }
+        override fun onSessionStartFailed(session: CastSession, error: Int) {
+            Log.w(TAG, "Falló el inicio de sesión (error=$error), reintentando conectar")
+            intentarConectar()
+        }
+        override fun onSessionResumeFailed(session: CastSession, error: Int) {
+            Log.w(TAG, "Falló resumir sesión (error=$error), reintentando conectar")
+            intentarConectar()
+        }
+        override fun onSessionStarted(session: CastSession, sessionId: String) {
+            Log.i(TAG, "Sesión conectada correctamente (sessionId=$sessionId)")
+        }
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {}
-        override fun onSessionSuspended(session: CastSession, reason: Int) {}
+        override fun onSessionSuspended(session: CastSession, reason: Int) {
+            Log.w(TAG, "Sesión suspendida (reason=$reason)")
+        }
         override fun onSessionStarting(session: CastSession) {}
         override fun onSessionEnding(session: CastSession) {}
         override fun onSessionResuming(session: CastSession, sessionId: String) {}
@@ -105,17 +118,32 @@ class BocinaForegroundService : Service() {
         handler.removeCallbacksAndMessages(null)
 
         val sesionActual = sessionManager?.currentCastSession
-        if (sesionActual != null && sesionActual.isConnected) {
-            return // Ya conectada, nada que hacer hasta que se caiga (onSessionEnded)
+        if (sesionActual != null) {
+            if (sesionActual.isConnected) {
+                Log.i(TAG, "intentarConectar: ya conectada, no hago nada")
+                return // Ya conectada, nada que hacer hasta que se caiga (onSessionEnded)
+            }
+            // 📍 BUG que encontramos: antes, aunque ya hubiera una sesión en proceso de
+            // conectar (seleccionada pero sin terminar el handshake todavía), volvíamos a
+            // llamar ruta.select() cada 15s de todos modos — eso reinicia el intento de
+            // conexión en curso una y otra vez, sin dejarlo terminar nunca. Por eso tardaba
+            // tanto en hablar aunque estuviera en la misma red: nunca se le daba tiempo de
+            // completar la conexión. Ahora, si ya hay una sesión en curso, solo esperamos.
+            Log.i(TAG, "intentarConectar: hay una sesión en curso conectando, espero sin re-seleccionar")
+            handler.postDelayed({ intentarConectar() }, INTERVALO_REINTENTO_MS)
+            return
         }
 
         val ruta = mediaRouter?.routes?.firstOrNull { it.id == id }
         if (ruta != null) {
+            Log.i(TAG, "intentarConectar: ruta encontrada, seleccionando (${ruta.name})")
             try {
                 ruta.select()
             } catch (e: Exception) {
                 Log.w(TAG, "No se pudo seleccionar la ruta de la bocina: ${e.message}")
             }
+        } else {
+            Log.w(TAG, "intentarConectar: la bocina no aparece todavía en router.routes (${mediaRouter?.routes?.size ?: 0} rutas visibles)")
         }
 
         // La bocina puede tardar en aparecer en la red (o seguir sin estarlo): reintentamos

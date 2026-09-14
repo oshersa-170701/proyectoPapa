@@ -114,6 +114,7 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
         val context = applicationContext
         val latch = CountDownLatch(1)
         var resultado = false
+        val inicio = System.currentTimeMillis()
 
         Handler(Looper.getMainLooper()).post {
             // 📍 Si mientras esperábamos nuestro turno en el hilo principal ya nos reemplazó
@@ -129,10 +130,15 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
                 val sesionActual = sessionManager.currentCastSession
 
                 if (sesionActual != null && sesionActual.isConnected) {
+                    // 📍 Camino rápido: el BocinaForegroundService ya la tenía conectada, así
+                    // que reproducimos de inmediato sin escanear ni reconectar desde cero.
+                    Log.i(TAG, "Sesión ya conectada (gracias al servicio en primer plano), reproduciendo directo")
                     resultado = cargarMedia(sesionActual, audioUrl)
                     latch.countDown()
                     return@post
                 }
+
+                Log.w(TAG, "Sesión NO estaba conectada al momento de anunciar — se necesita escanear/reconectar (esto agrega ~4-15s de retraso)")
 
                 val router = MediaRouter.getInstance(context)
                 val selector = MediaRouteSelector.Builder()
@@ -199,6 +205,7 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
             if (latch.await(200, TimeUnit.MILLISECONDS)) break
         }
 
+        Log.i(TAG, "reproducirEnBocina terminó en ${System.currentTimeMillis() - inicio}ms (éxito=$resultado, isStopped=$isStopped)")
         return resultado && !isStopped
     }
 
