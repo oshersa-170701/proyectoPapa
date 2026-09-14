@@ -29,9 +29,10 @@ private const val DURACION_ESCANEO_MS = 4000L
 private const val TIMEOUT_REPRODUCCION_S = 15L
 
 // 📍 Si por reintentos de red (Result.retry) un anuncio queda pendiente más de esto,
-// mejor lo descartamos que reproducirlo tarde: un recordatorio de "hace rato" solo
-// confundiría al paciente y, peor, se empalmaría con el siguiente que ya sea vigente.
-private const val VIGENCIA_MAXIMA_MS = 3 * 60 * 1000L
+// mejor lo descartamos que reproducirlo tarde: el paciente pidió explícitamente que sea
+// en tiempo real — si ya pasó, que se calle y espere al siguiente disparo, no que
+// reproduzca notificaciones atrasadas cuando la bocina por fin reconecta.
+private const val VIGENCIA_MAXIMA_MS = 60 * 1000L
 
 // 📍 Corre en segundo plano (WorkManager, no depende de la app/webview) para anunciar
 // el recordatorio en la bocina Google Home: pide el mp3 a generate_tts y lo castea.
@@ -42,9 +43,14 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
         val texto = inputData.getString("texto") ?: return Result.failure()
         val castId = inputData.getString("castId") ?: return Result.failure()
 
+        // 📍 horaDisparo=0 significa que este trabajo se encoló ANTES de que existiera esta
+        // marca de tiempo (una versión anterior de la app, ya instalada, con reintentos
+        // acumulados en la cola de WorkManager) — lo tratamos como vencido también, no como
+        // "sin dato": si no, ese backlog viejo se cuela sin pasar por el control de vigencia.
         val horaDisparo = inputData.getLong("horaDisparo", 0L)
-        if (horaDisparo > 0L && System.currentTimeMillis() - horaDisparo > VIGENCIA_MAXIMA_MS) {
-            Log.w(TAG, "Anuncio descartado por estar vencido (reintentos acumulados): $texto")
+        val vencido = horaDisparo <= 0L || System.currentTimeMillis() - horaDisparo > VIGENCIA_MAXIMA_MS
+        if (vencido) {
+            Log.w(TAG, "Anuncio descartado por estar vencido (en tiempo real ya no aplica): $texto")
             return Result.success()
         }
 

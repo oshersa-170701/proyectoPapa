@@ -23,6 +23,7 @@ interface HablarOpciones {
 export class Voice {
   private readonly medicalService = inject(MedicalService);
   private audioActual: HTMLAudioElement | null = null;
+  private resolverAudioActual: (() => void) | null = null;
 
   async hablar(texto: string, opciones: HablarOpciones = {}): Promise<void> {
     const textoLimpio = texto?.trim();
@@ -54,8 +55,9 @@ export class Voice {
       this.detenerAudioLocal();
       const audio = new Audio(url);
       this.audioActual = audio;
-      audio.onended = () => resolve();
-      audio.onerror = (e) => reject(e);
+      this.resolverAudioActual = resolve;
+      audio.onended = () => { this.resolverAudioActual = null; resolve(); };
+      audio.onerror = (e) => { this.resolverAudioActual = null; reject(e); };
       audio.play().catch(reject);
     });
   }
@@ -64,6 +66,16 @@ export class Voice {
     if (this.audioActual) {
       this.audioActual.pause();
       this.audioActual = null;
+    }
+    // 📍 Si alguien interrumpe la reproducción a la mitad (detener(), o una frase nueva
+    // que reemplaza a esta), hay que resolver la promesa pendiente de la frase anterior
+    // aquí mismo — si no, home.page.ts encadena cada speak() al anterior para que no se
+    // hablen encimadas, y una promesa que nunca resuelve dejaría muda a la app para
+    // siempre (todo lo que se intente decir después se quedaría esperando en la cola).
+    if (this.resolverAudioActual) {
+      const resolver = this.resolverAudioActual;
+      this.resolverAudioActual = null;
+      resolver();
     }
   }
 

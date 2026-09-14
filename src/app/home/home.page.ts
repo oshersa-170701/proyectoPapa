@@ -622,16 +622,25 @@ export class HomePage implements AfterViewChecked {
       }
     });
   }
- async speak(text: string, isManual: boolean = false): Promise<void> {
+  // 📍 "mis medicamentos" dispara DOS mensajes seguidos ("Claro, un momento..." y luego
+  // el resumen con los resultados) y cada uno llama a speak() sin esperar al anterior.
+  // Como voiceService.hablar() pide el audio a Google TTS por red, si el segundo speak()
+  // se dispara antes de que el primero termine de pedir/reproducir su audio, ambos
+  // corren en paralelo y se pisan (se escuchaba "doble"/encimado). Esta cola encadena
+  // cada speak() al anterior para que SIEMPRE se hablen en el orden correcto, uno a la vez.
+  private colaDeVoz: Promise<void> = Promise.resolve();
+
+  async speak(text: string, isManual: boolean = false): Promise<void> {
     if (this.isMutedGlobal && !isManual) return Promise.resolve();
 
-    try {
-      // 🔊 Voz de Google (misma que suena en la bocina) mientras la app está abierta;
-      // si no hay internet, el servicio cae solo a la voz nativa del teléfono.
-      await this.voiceService.hablar(text);
-    } catch (error) {
-      console.error("[ANAasis Voice] Error en el tipado o hardware de voz:", error);
-    }
+    this.colaDeVoz = this.colaDeVoz
+      .catch(() => { })
+      .then(() => this.voiceService.hablar(text))
+      .catch((error) => {
+        console.error("[ANAasis Voice] Error en el tipado o hardware de voz:", error);
+      });
+
+    return this.colaDeVoz;
   }
   isMutedGlobal = false;
   toggleAppMute() {
