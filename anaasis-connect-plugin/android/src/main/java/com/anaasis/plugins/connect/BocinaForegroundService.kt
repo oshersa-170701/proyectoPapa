@@ -10,6 +10,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.mediarouter.media.MediaRouteSelector
@@ -19,6 +21,8 @@ import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
 import com.google.android.gms.cast.framework.SessionManagerListener
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "BocinaForegroundService"
 private const val CANAL_ID = "anaasis_bocina_conectada"
@@ -40,6 +44,7 @@ class BocinaForegroundService : Service() {
     private var sessionManager: SessionManager? = null
     private val handler = Handler(Looper.getMainLooper())
     private var vigilando = false
+    private var tts: TextToSpeech? = null
 
     private val routerCallback = object : MediaRouter.Callback() {}
 
@@ -71,6 +76,35 @@ class BocinaForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(NOTIF_ID, construirNotificacion())
+        inicializarTts()
+    }
+
+    // 📍 El paciente reportó que la voz del TELÉFONO en los recordatorios tardaba en
+    // responder. Causa: RecordatorioBroadcastReceiver creaba un TextToSpeech() nuevo en
+    // CADA disparo, y ese motor tiene que enlazarse (bind) al servicio del sistema antes
+    // de poder hablar — ese enlace es justo lo que tardaba. Aquí precargamos UN solo motor
+    // que vive mientras el servicio esté activo, listo para hablar sin esperar el bind.
+    private fun inicializarTts() {
+        tts = TextToSpeech(applicationContext) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.language = Locale("es", "MX")
+                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {
+                        utteranceId?.let { callbacksTtsPendientes.remove(it)?.invoke() }
+                    }
+                    @Deprecated("Deprecated in Java")
+                    override fun onError(utteranceId: String?) {
+                        utteranceId?.let { callbacksTtsPendientes.remove(it)?.invoke() }
+                    }
+                })
+                ttsCompartido = tts
+                ttsListo = true
+                Log.i(TAG, "TTS del teléfono precargado y listo (sin esperar bind en cada recordatorio)")
+            } else {
+                Log.w(TAG, "No se pudo precargar el TTS del teléfono: status=$status")
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -182,12 +216,40 @@ class BocinaForegroundService : Service() {
             Log.w(TAG, "Error limpiando al detener el servicio: ${e.message}")
         }
         handler.removeCallbacksAndMessages(null)
+        ttsListo = false
+        ttsCompartido = null
+        tts?.shutdown()
+        tts = null
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
+        // 📍 Motor de TTS precargado por la instancia viva del servicio, y el mapa de
+        // callbacks pendientes por utteranceId — así, aunque dos recordatorios se encimen,
+        // cada uno recibe su propio aviso de "ya terminé de hablar" sin pisar al otro
+        // (el listener del motor es uno solo, pero despacha por id a quien corresponda).
+        @Volatile private var ttsCompartido: TextToSpeech? = null
+        @Volatile private var ttsListo = false
+        private val callbacksTtsPendientes = ConcurrentHashMap<String, () -> Unit>()
+
+        /**
+         * Intenta hablar usando el motor ya precargado por el servicio (rápido, sin esperar
+         * bind). Devuelve false si el servicio no está corriendo o el motor no está listo
+         * todavía, para que el que llama use su propio camino de respaldo.
+         */
+        fun hablarConTtsCompartido(texto: String, utteranceId: String, alTerminar: () -> Unit): Boolean {
+            val motor = if (ttsListo) ttsCompartido else null
+            if (motor == null) return false
+
+            callbacksTtsPendientes[utteranceId] = alTerminar
+            // QUEUE_ADD (no FLUSH): si dos recordatorios caen casi juntos, se hablan uno
+            // tras otro en vez de que el segundo corte al primero a la mitad.
+            motor.speak(texto, TextToSpeech.QUEUE_ADD, null, utteranceId)
+            return true
+        }
+
         fun iniciar(context: Context, castId: String) {
             val intent = Intent(context, BocinaForegroundService::class.java).putExtra("castId", castId)
             try {

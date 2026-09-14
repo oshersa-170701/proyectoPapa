@@ -44,26 +44,46 @@ class RecordatorioBroadcastReceiver : BroadcastReceiver() {
 
         val appContext = context.applicationContext
         val pendingResult = goAsync()
-        var tts: TextToSpeech? = null
-        tts = TextToSpeech(appContext) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale("es", "MX")
-                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                    override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) {
-                        tts?.shutdown()
-                        pendingResult.finish()
-                    }
+        val horaInicioVoz = System.currentTimeMillis()
 
-                    @Deprecated("Deprecated in Java")
-                    override fun onError(utteranceId: String?) {
-                        tts?.shutdown()
-                        pendingResult.finish()
-                    }
-                })
-                tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "anaasis_recordatorio_$requestCode")
-            } else {
-                pendingResult.finish()
+        // 📍 Camino rápido: si BocinaForegroundService está corriendo (hay recordatorios
+        // con bocina activos), ya tiene un motor TextToSpeech precargado y enlazado, así
+        // que hablamos de inmediato sin esperar el bind. Si no está disponible (por
+        // ejemplo, no hay bocina emparejada), caemos al camino de siempre.
+        val usoMotorCompartido = BocinaForegroundService.hablarConTtsCompartido(
+            texto,
+            "anaasis_recordatorio_$requestCode"
+        ) {
+            Log.i(TAG, "Voz del teléfono (motor compartido) terminó en ${System.currentTimeMillis() - horaInicioVoz}ms")
+            pendingResult.finish()
+        }
+
+        if (usoMotorCompartido) {
+            Log.i(TAG, "Hablando con el motor TTS precargado (sin esperar bind)")
+        } else {
+            Log.w(TAG, "Motor TTS compartido no disponible, creando uno nuevo (esto agrega el retraso del bind)")
+            var tts: TextToSpeech? = null
+            tts = TextToSpeech(appContext) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    tts?.language = Locale("es", "MX")
+                    tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        override fun onStart(utteranceId: String?) {}
+                        override fun onDone(utteranceId: String?) {
+                            Log.i(TAG, "Voz del teléfono (motor nuevo) terminó en ${System.currentTimeMillis() - horaInicioVoz}ms")
+                            tts?.shutdown()
+                            pendingResult.finish()
+                        }
+
+                        @Deprecated("Deprecated in Java")
+                        override fun onError(utteranceId: String?) {
+                            tts?.shutdown()
+                            pendingResult.finish()
+                        }
+                    })
+                    tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "anaasis_recordatorio_$requestCode")
+                } else {
+                    pendingResult.finish()
+                }
             }
         }
 
