@@ -34,11 +34,13 @@ export class LoginModalComponent  {
   }
 
   dismiss() {
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss();
   }
 
   //  Función para saltar al registro
   goToRegister() {
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss({ redirectToRegister: true });
   }
 

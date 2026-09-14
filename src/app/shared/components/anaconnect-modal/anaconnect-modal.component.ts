@@ -55,6 +55,7 @@ export class AnaconnectModalComponent implements OnInit {
   }
 
   dismiss() {
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss();
   }
 
@@ -133,6 +134,7 @@ export class AnaconnectModalComponent implements OnInit {
           await this.presentToastExito(`"${device.name}" quedó conectada correctamente.`);
           this.resincronizarRecordatorios();
 
+          this.voice.detener().catch(() => { });
           this.modalCtrl.dismiss({ bocinaEmparejada: this.bocinaEmparejada });
         } else {
           await this.presentToast('No se pudo emparejar la bocina.');

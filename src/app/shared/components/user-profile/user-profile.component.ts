@@ -38,6 +38,7 @@ export class UserProfileComponent implements OnInit {
 }
 
   dismiss() {
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss();
   }
 

@@ -36,6 +36,7 @@ ngOnInit() {
     this.cargarCitas();
   }
   dismiss() {
+    this.voice.detener().catch(() => { });
     this.modalCtrl.dismiss();
   }
 cargarCitas() {

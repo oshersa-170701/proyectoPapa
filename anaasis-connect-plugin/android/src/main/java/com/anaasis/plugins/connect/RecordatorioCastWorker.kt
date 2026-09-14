@@ -42,14 +42,9 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
     override fun doWork(): Result {
         val texto = inputData.getString("texto") ?: return Result.failure()
         val castId = inputData.getString("castId") ?: return Result.failure()
-
-        // 📍 horaDisparo=0 significa que este trabajo se encoló ANTES de que existiera esta
-        // marca de tiempo (una versión anterior de la app, ya instalada, con reintentos
-        // acumulados en la cola de WorkManager) — lo tratamos como vencido también, no como
-        // "sin dato": si no, ese backlog viejo se cuela sin pasar por el control de vigencia.
         val horaDisparo = inputData.getLong("horaDisparo", 0L)
-        val vencido = horaDisparo <= 0L || System.currentTimeMillis() - horaDisparo > VIGENCIA_MAXIMA_MS
-        if (vencido) {
+
+        if (estaVencido(horaDisparo)) {
             Log.w(TAG, "Anuncio descartado por estar vencido (en tiempo real ya no aplica): $texto")
             return Result.success()
         }
@@ -66,8 +61,25 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
             return Result.failure()
         }
 
-        val exito = reproducirEnBocina(castId, audioUrl)
+        // 📍 Re-chequeamos justo antes de reproducir: entre que llegamos aquí y que se pidió
+        // el audio pudo pasar tiempo suficiente para que ya no valga la pena, o puede haber
+        // llegado un recordatorio más nuevo que reemplazó a este (isStopped).
+        if (isStopped || estaVencido(horaDisparo)) {
+            Log.w(TAG, "Anuncio descartado justo antes de castear (reemplazado o vencido): $texto")
+            return Result.success()
+        }
+
+        val exito = reproducirEnBocina(castId, audioUrl, horaDisparo)
+        if (isStopped) return Result.success() // Reemplazado por uno más nuevo mientras casteábamos
         return if (exito) Result.success() else Result.retry()
+    }
+
+    // 📍 horaDisparo<=0 significa que este trabajo se encoló ANTES de que existiera esta
+    // marca de tiempo (una versión anterior de la app, ya instalada, con reintentos
+    // acumulados en la cola de WorkManager) — lo tratamos como vencido también, no como
+    // "sin dato": si no, ese backlog viejo se cuela sin pasar por el control de vigencia.
+    private fun estaVencido(horaDisparo: Long): Boolean {
+        return horaDisparo <= 0L || System.currentTimeMillis() - horaDisparo > VIGENCIA_MAXIMA_MS
     }
 
     private fun pedirAudioTts(texto: String): String? {
@@ -98,12 +110,19 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
         return json.optString("audio_url").takeIf { it.isNotBlank() }
     }
 
-    private fun reproducirEnBocina(castId: String, audioUrl: String): Boolean {
+    private fun reproducirEnBocina(castId: String, audioUrl: String, horaDisparo: Long): Boolean {
         val context = applicationContext
         val latch = CountDownLatch(1)
         var resultado = false
 
         Handler(Looper.getMainLooper()).post {
+            // 📍 Si mientras esperábamos nuestro turno en el hilo principal ya nos reemplazó
+            // un recordatorio más nuevo (o ya se venció), ni siquiera intentamos conectar.
+            if (isStopped || estaVencido(horaDisparo)) {
+                latch.countDown()
+                return@post
+            }
+
             try {
                 CastContext.getSharedInstance(context)
                 val sessionManager = CastContext.getSharedInstance(context).sessionManager
@@ -124,9 +143,17 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
                 router.addCallback(selector, callback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN)
 
                 Handler(Looper.getMainLooper()).postDelayed({
-                    val ruta = router.routes.firstOrNull { it.id == castId }
                     router.removeCallback(callback)
 
+                    // 📍 Mismo chequeo aquí: pudieron pasar varios segundos de escaneo y, en
+                    // ese lapso, llegar un recordatorio más nuevo que ya nos reemplazó.
+                    if (isStopped || estaVencido(horaDisparo)) {
+                        Log.w(TAG, "Anuncio cancelado a media conexión (reemplazado o vencido)")
+                        latch.countDown()
+                        return@postDelayed
+                    }
+
+                    val ruta = router.routes.firstOrNull { it.id == castId }
                     if (ruta == null) {
                         Log.w(TAG, "No se encontró la bocina en la red (¿sigue en la misma WiFi?)")
                         latch.countDown()
@@ -136,7 +163,7 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
                     val listener = object : SessionManagerListener<CastSession> {
                         override fun onSessionStarted(session: CastSession, sessionId: String) {
                             sessionManager.removeSessionManagerListener(this, CastSession::class.java)
-                            resultado = cargarMedia(session, audioUrl)
+                            resultado = if (isStopped || estaVencido(horaDisparo)) false else cargarMedia(session, audioUrl)
                             latch.countDown()
                         }
 
@@ -162,8 +189,17 @@ class RecordatorioCastWorker(context: Context, params: WorkerParameters) : Worke
             }
         }
 
-        latch.await(TIMEOUT_REPRODUCCION_S, TimeUnit.SECONDS)
-        return resultado
+        // 📍 Esperamos en tramos cortos (en vez de un solo await largo) para poder salir en
+        // cuanto WorkManager marque este trabajo como reemplazado (isStopped) — así un
+        // recordatorio viejo no se queda "vivo" reproduciéndose después de que uno nuevo ya
+        // lo sustituyó.
+        val limite = System.currentTimeMillis() + TIMEOUT_REPRODUCCION_S * 1000
+        while (System.currentTimeMillis() < limite) {
+            if (isStopped) break
+            if (latch.await(200, TimeUnit.MILLISECONDS)) break
+        }
+
+        return resultado && !isStopped
     }
 
     private fun cargarMedia(session: CastSession, audioUrl: String): Boolean {
