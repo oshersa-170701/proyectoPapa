@@ -122,6 +122,74 @@
   }
 }
 
+// 👆 SECCIÓN DE HUELLA DIGITAL
+.biometric-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 10px;
+}
+
+.fingerprint-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 110px;
+  background: linear-gradient(135deg, #0b3d91 0%, #1a6bb5 100%);
+  border: none;
+  border-radius: 24px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(11, 61, 145, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  ion-icon {
+    font-size: 3.2rem;
+    color: white;
+  }
+
+  span {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  &:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25);
+  }
+}
+
+.biometric-hint {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: #888;
+  text-align: center;
+}
+
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 10px 20px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.divider-text {
+  font-size: 0.8rem;
+  color: #aaa;
+  white-space: nowrap;
+}
+
 // 🔗 ENLACE INFERIOR
 .footer-link {
   margin-top: 30px;

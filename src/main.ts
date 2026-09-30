@@ -4,14 +4,15 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { ToastController } from '@ionic/angular/standalone'; // 📍 Asegúrate de esta línea
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { apiInterceptor } from './app/core/interceptors/api.interceptor';
 
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular({ mode: 'md' }), // 📍 Esto ya configura los controladores internamente
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([apiInterceptor])),
     // ToastController // 💡 Nota: provideIonicAngular ya incluye los controladores, puedes quitar esta línea si gustas
   ],
 });

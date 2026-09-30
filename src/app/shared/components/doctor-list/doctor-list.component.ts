@@ -96,7 +96,6 @@ private confirmarCita(slot: string, doctor: any) {
 
   const datosCita = {
     action: 'create_appointment',
-    api_key: 'ANAASIS_2026',
     doctor_id: doctor.id,
     patient_id: profile.patient_id,
     name: profile.name, 

@@ -305,10 +305,10 @@ export class HomePage implements AfterViewChecked {
     }
     //5. 📅 DETECCIÓN DE CITAS POR VOZ
     if (userText.includes('cita') || userText.includes('agenda') || userText.includes('mis consultas')) {
-      const userJson = localStorage.getItem('anaasis_user_data');
+      const userProfile = this.userService.getProfile();
       let txtBot = '';
 
-      if (!userJson) {
+      if (!userProfile) {
         txtBot = 'No cuento con citas registradas a tu nombre. Debes registrarte o iniciar sesión primero para solicitar una cita con algún médico.';
       } else {
         txtBot = 'Claro, revisando tu agenda médica ahora mismo...';
@@ -325,9 +325,9 @@ export class HomePage implements AfterViewChecked {
     }
     // 📝 6. DETECCIÓN DE REGISTRO POR VOZ
     if (userText.includes('registrarme') || userText.includes('crear perfil') || userText.includes('mi cuenta') || userText.includes('darme de alta') || userText.includes('regístrame')) {
-      const userJson = localStorage.getItem('anaasis_user_data');
+      const userProfile = this.userService.getProfile();
 
-      if (userJson) {
+      if (userProfile) {
         const yaRegistrado = "Ya cuento con tus datos en mi sistema. ¿Deseas ver tu perfil?";
         this.chatMessages.push({ role: 'bot', text: yaRegistrado });
         this.speak(yaRegistrado, true);
@@ -356,9 +356,9 @@ export class HomePage implements AfterViewChecked {
     }
     // 🔑 9. DETECCIÓN DE INICIO DE SESIÓN POR VOZ
     if (userText.includes('Iniciar sesión') || userText.includes('entrar a mi cuenta') || userText.includes('ya tengo cuenta') || userText.includes('loguearme') || userText.includes('sesión')) {
-      const userJson = localStorage.getItem('anaasis_user_data');
+      const userProfile = this.userService.getProfile();
 
-      if (userJson) {
+      if (userProfile) {
         const yaLogueado = "Ya te encuentras dentro de tu cuenta. ¿Deseas revisar tu agenda o tu perfil?";
         this.chatMessages.push({ role: 'bot', text: yaLogueado });
         this.speak(yaLogueado, true);
@@ -753,7 +753,7 @@ export class HomePage implements AfterViewChecked {
       const infoPaciente = `Alerta SOS desde App ANAasis - Paciente crítico (${profile.name || 'Usuario'})`;
 
       // 🚨 PASO 3: Envío del reporte al proxy con datos reales de producción
-      this.medicalService.enviarAlertaAmbulancia(latUsuario, lngUsuario, infoPaciente).subscribe({
+      this.medicalService.enviarAlertaAmbulancia(latUsuario, lngUsuario, infoPaciente, profile.phone ?? '').subscribe({
         next: async (res: any) => {
           this.isLoading = false;
           this.sosEnviado = true; // Cambia el botón a enviado en la interfaz
@@ -851,10 +851,9 @@ export class HomePage implements AfterViewChecked {
   }
   // Función auxiliar para abrir el modal
   async openAppointments() {
-    const userJson = localStorage.getItem('anaasis_user_data');
+    const userProfile = this.userService.getProfile();
 
-    // 🛡️ Si no hay registro, ANAasis lo detecta antes de abrir el modal
-    if (!userJson) {
+    if (!userProfile) {
       const mensaje = "No puedo mostrarte una agenda si aún no te has registrado. ¿Te gustaría hacerlo ahora?";
       this.chatMessages.push({ role: 'bot', text: mensaje });
       this.speak(mensaje, true);

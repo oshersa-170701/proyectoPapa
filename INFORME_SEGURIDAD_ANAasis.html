@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="Generator" content="Microsoft Word compatible">
+<style>
+  body {
+    font-family: "Calibri", sans-serif;
+    font-size: 11pt;
+    color: #000000;
+    margin: 2.54cm 3.17cm 2.54cm 3.17cm;
+    line-height: 1.4;
+  }
+  h1 {
+    font-family: "Calibri", sans-serif;
+    font-size: 20pt;
+    font-weight: bold;
+    color: #1F3864;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 6pt;
+  }
+  h2 {
+    font-family: "Calibri", sans-serif;
+    font-size: 14pt;
+    font-weight: bold;
+    color: #1F3864;
+    border-bottom: 2px solid #1F3864;
+    padding-bottom: 4px;
+    margin-top: 20pt;
+    margin-bottom: 8pt;
+  }
+  h3 {
+    font-family: "Calibri", sans-serif;
+    font-size: 12pt;
+    font-weight: bold;
+    color: #2E74B5;
+    margin-top: 14pt;
+    margin-bottom: 4pt;
+  }
+  .portada {
+    text-align: center;
+    margin-bottom: 30pt;
+    padding: 20pt;
+    border: 2px solid #1F3864;
+    background-color: #EBF3FB;
+  }
+  .portada p {
+    font-size: 11pt;
+    margin: 4pt 0;
+  }
+  .confidencial {
+    font-size: 9pt;
+    color: #C00000;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 16pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10pt 0 14pt 0;
+    font-size: 10.5pt;
+  }
+  th {
+    background-color: #1F3864;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 7pt 10pt;
+    text-align: left;
+    border: 1px solid #1F3864;
+  }
+  td {
+    padding: 6pt 10pt;
+    border: 1px solid #BDD7EE;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background-color: #EBF3FB;
+  }
+  .critico    { background-color: #C00000 !important; color: white; font-weight: bold; text-align: center; }
+  .alto       { background-color: #FF0000 !important; color: white; font-weight: bold; text-align: center; }
+  .medio      { background-color: #FF8C00 !important; color: white; font-weight: bold; text-align: center; }
+  .bajo       { background-color: #FFD700 !important; color: #000; font-weight: bold; text-align: center; }
+  .info       { background-color: #70AD47 !important; color: white; font-weight: bold; text-align: center; }
+  .hallazgo-box {
+    border-left: 5px solid #1F3864;
+    padding: 10pt 14pt;
+    margin: 10pt 0;
+    background-color: #F2F2F2;
+  }
+  .hallazgo-critico { border-left-color: #C00000; background-color: #FFF2F2; }
+  .hallazgo-alto    { border-left-color: #FF0000; background-color: #FFF5F5; }
+  .hallazgo-medio   { border-left-color: #FF8C00; background-color: #FFF8F0; }
+  .hallazgo-bajo    { border-left-color: #DAA520; background-color: #FEFCF0; }
+  pre, code {
+    font-family: "Courier New", monospace;
+    font-size: 9pt;
+    background-color: #F5F5F5;
+    border: 1px solid #CCCCCC;
+    padding: 6pt 10pt;
+    display: block;
+    margin: 6pt 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .etiqueta {
+    font-weight: bold;
+    color: #1F3864;
+  }
+  .verde { color: #375623; font-weight: bold; }
+  .rojo  { color: #C00000; font-weight: bold; }
+  .separador { border: none; border-top: 1px solid #BDD7EE; margin: 16pt 0; }
+  ul, ol {
+    margin: 6pt 0 6pt 0;
+    padding-left: 20pt;
+  }
+  li {
+    margin-bottom: 4pt;
+  }
+  .pie-pagina {
+    font-size: 8.5pt;
+    color: #595959;
+    text-align: center;
+    margin-top: 30pt;
+    border-top: 1px solid #BDD7EE;
+    padding-top: 8pt;
+  }
+  .resumen-ejecutivo {
+    background-color: #EBF3FB;
+    border: 1px solid #2E74B5;
+    padding: 12pt 16pt;
+    margin: 14pt 0;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- PORTADA -->
+<!-- ============================================================ -->
+<div class="portada">
+  <p style="font-size:9pt; color:#595959; margin-bottom:10pt;">DOCUMENTO INTERNO — USO RESTRINGIDO</p>
+  <h1>INFORME DE AUDITORÍA DE SEGURIDAD</h1>
+  <p style="font-size:15pt; font-weight:bold; color:#2E74B5; margin:8pt 0;">Aplicación Móvil ANAasis</p>
+  <p style="font-size:11pt; color:#404040; margin:4pt 0;">Sistema de Monitoreo de Salud del Paciente</p>
+  <hr style="border:1px solid #2E74B5; margin:12pt 0;">
+  <p><strong>Proyecto:</strong> proyecto-papa (ANAasis Vitals)</p>
+  <p><strong>Plataforma:</strong> Ionic / Angular / Capacitor — Android</p>
+  <p><strong>Backend:</strong> angelesmedic.com.mx/crm/api</p>
+  <p><strong>Fecha del informe:</strong> 20 de septiembre de 2026</p>
+  <p><strong>Perfil de auditoría:</strong> Quick — pase único, cobertura parcial</p>
+  <p><strong>Revisión de commit:</strong> f9c9953 (rama main)</p>
+</div>
+
+<p class="confidencial">&#x26A0; CONFIDENCIAL — CONTIENE HALLAZGOS DE SEGURIDAD SENSIBLES &#x26A0;</p>
+
+<!-- ============================================================ -->
+<!-- 1. RESUMEN EJECUTIVO -->
+<!-- ============================================================ -->
+<h2>1. Resumen Ejecutivo</h2>
+
+<div class="resumen-ejecutivo">
+  <p>
+    La auditoría identificó <strong>6 hallazgos de seguridad</strong> en el código fuente de la
+    aplicación ANAasis: 1 crítico, 2 altos, 2 medios y 1 bajo.
+  </p>
+  <p>
+    El riesgo más urgente es la combinación de una <strong>clave de API hardcodeada en el
+    bundle distribuido públicamente</strong> con un sistema de <strong>autenticación basado
+    únicamente en número de teléfono</strong>. Juntos, estos dos defectos permiten que cualquier
+    persona que descargue la app pueda consultar el historial médico, prescripciones y signos
+    vitales de <em>cualquier paciente</em> conociendo solo su número de teléfono.
+  </p>
+  <p>
+    Dado que la aplicación maneja <strong>datos de salud sensibles</strong> (signos vitales,
+    prescripciones, historial médico, ubicación GPS) de pacientes reales, se recomienda
+    tratar los hallazgos críticos y altos como <strong>bloqueadores para producción</strong>.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. TABLA DE HALLAZGOS -->
+<!-- ============================================================ -->
+<h2>2. Tabla de Hallazgos</h2>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Hallazgo</th>
+    <th>Severidad</th>
+    <th>Archivo principal</th>
+  </tr>
+  <tr>
+    <td>F-01</td>
+    <td>Clave de API hardcodeada en el bundle del cliente</td>
+    <td class="critico">CRITICO</td>
+    <td>user.ts, medical.ts, RecordatorioCastWorker.kt</td>
+  </tr>
+  <tr>
+    <td>F-02</td>
+    <td>Autenticación solo por numero de telefono (sin contrasena ni OTP)</td>
+    <td class="alto">ALTO</td>
+    <td>user.ts, login-modal.component.ts</td>
+  </tr>
+  <tr>
+    <td>F-03</td>
+    <td>Contrasena provisional identica para todos los usuarios</td>
+    <td class="alto">ALTO</td>
+    <td>user.ts</td>
+  </tr>
+  <tr>
+    <td>F-04</td>
+    <td>Datos del paciente almacenados en localStorage sin cifrar</td>
+    <td class="medio">MEDIO</td>
+    <td>user.ts, home.page.ts</td>
+  </tr>
+  <tr>
+    <td>F-05</td>
+    <td>Endpoint de alerta SOS sin autenticacion ni trazabilidad</td>
+    <td class="medio">MEDIO</td>
+    <td>medical.ts</td>
+  </tr>
+  <tr>
+    <td>F-06</td>
+    <td>Inconsistencia: chat.php y doctors.php sin ningun mecanismo de auth</td>
+    <td class="bajo">BAJO</td>
+    <td>medical.ts</td>
+  </tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 3. DETALLE DE HALLAZGOS -->
+<!-- ============================================================ -->
+<h2>3. Detalle de Hallazgos</h2>
+
+<!-- F-01 -->
+<div class="hallazgo-box hallazgo-critico">
+  <h3>F-01 &mdash; Clave de API hardcodeada en el bundle del cliente</h3>
+  <p><span class="etiqueta">Severidad:</span> <span class="rojo">CRITICO</span></p>
+  <p><span class="etiqueta">Archivos afectados:</span></p>
+  <ul>
+    <li><code>src/app/core/services/user.ts</code> &mdash; lineas 27, 72</li>
+    <li><code>src/app/core/services/medical.ts</code> &mdash; 12 ocurrencias</li>
+    <li><code>anaasis-connect-plugin/android/.../RecordatorioCastWorker.kt</code> &mdash; linea 22</li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    La cadena <code>"ANAASIS_2026"</code> se usa como unica clave de autorizacion en todas
+    las llamadas al API de <code>anaasis.php</code>. Al estar hardcodeada en el codigo fuente
+    del cliente, queda compilada dentro del APK de Android y el bundle JavaScript.
+    Cualquier persona que descargue la aplicacion puede extraerla en minutos usando
+    herramientas publicas como <strong>apktool</strong> o inspeccionando el JS con las
+    DevTools del navegador.
+  </p>
+  <pre>
+// user.ts:27 y medical.ts (multiple)
+api_key: "ANAASIS_2026"
+
+// RecordatorioCastWorker.kt:22
+private const val API_KEY = "ANAASIS_2026"
+  </pre>
+  <p><span class="etiqueta">Impacto:</span><br>
+    Con la clave extraida, un atacante puede llamar directamente a
+    <code>angelesmedic.com.mx/crm/api/anaasis.php</code> con acciones como
+    <code>get_vitals</code>, <code>get_prescriptions</code>, <code>save_vitals</code>,
+    <code>get_user_appointments</code> para cualquier numero de telefono, sin ser usuario
+    registrado.
+  </p>
+  <p><span class="etiqueta">Cambio requerido:</span></p>
+  <ol>
+    <li>Eliminar la clave estatica de todo el codigo cliente.</li>
+    <li>En el login, el servidor debe emitir un <strong>token de sesion</strong> (JWT o
+        token opaco con expiracion) ligado al usuario autenticado.</li>
+    <li>Todas las llamadas subsecuentes deben incluir ese token en el header HTTP
+        (<code>Authorization: Bearer &lt;token&gt;</code>), nunca una clave compartida.</li>
+    <li>El servidor valida el token en cada peticion; si no es valido o expiro, responde
+        401 y el cliente redirige al login.</li>
+    <li>Implementar rate limiting por IP en el servidor para limitar abuso en caso de que
+        una clave o token sea comprometido.</li>
+  </ol>
+</div>
+
+<hr class="separador">
+
+<!-- F-02 -->
+<div class="hallazgo-box hallazgo-alto">
+  <h3>F-02 &mdash; Autenticacion basada unicamente en numero de telefono</h3>
+  <p><span class="etiqueta">Severidad:</span> <span class="rojo">ALTO</span></p>
+  <p><span class="etiqueta">Archivos afectados:</span></p>
+  <ul>
+    <li><code>src/app/core/services/user.ts</code> &mdash; lineas 68&ndash;78</li>
+    <li><code>src/app/shared/components/login-modal/login-modal.component.ts</code></li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    El inicio de sesion envia al servidor unicamente el numero de telefono del paciente
+    (y la clave de API compartida del hallazgo F-01). No existe contrasena, OTP ni
+    ningun segundo factor de verificacion.
+  </p>
+  <pre>
+// user.ts:68-78
+const body = {
+  action: "login_user",
+  api_key: "ANAASIS_2026",
+  phone: credentials.phone   // unico dato del usuario
+};
+  </pre>
+  <p><span class="etiqueta">Impacto:</span><br>
+    Cualquier persona que conozca o adivine el numero de telefono de un paciente puede
+    iniciar sesion como esa persona y acceder a su historial medico completo: signos
+    vitales, prescripciones, citas medicas y ubicacion GPS.
+  </p>
+  <p><span class="etiqueta">Cambio requerido:</span></p>
+  <ol>
+    <li>Agregar verificacion por <strong>OTP via SMS</strong> al numero de telefono
+        registrado como minimo viable de seguridad para una app de salud.</li>
+    <li>Alternativamente, implementar contrasena real definida por el usuario en el
+        registro (ver F-03).</li>
+    <li>El servidor debe devolver un token de sesion unicamente si la verificacion es
+        exitosa (resuelve tambien F-01).</li>
+  </ol>
+</div>
+
+<hr class="separador">
+
+<!-- F-03 -->
+<div class="hallazgo-box hallazgo-alto">
+  <h3>F-03 &mdash; Contrasena provisional identica para todos los usuarios</h3>
+  <p><span class="etiqueta">Severidad:</span> <span class="rojo">ALTO</span></p>
+  <p><span class="etiqueta">Archivo afectado:</span></p>
+  <ul>
+    <li><code>src/app/core/services/user.ts</code> &mdash; linea 28</li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    En el flujo de registro, el cliente envia una contrasena hardcodeada identica para
+    todos los pacientes que se registren en la aplicacion.
+  </p>
+  <pre>
+// user.ts:28
+password: "password_provisional_2026",  // mismo valor para TODOS los usuarios
+  </pre>
+  <p><span class="etiqueta">Impacto:</span><br>
+    Si el servidor llegara a implementar autenticacion por contrasena en el futuro,
+    todos los usuarios existentes ya tendrian su contrasena comprometida. Ademas,
+    cualquier atacante que extraiga el bundle conoce la contrasena de todos los pacientes
+    registrados desde el inicio de operaciones.
+  </p>
+  <p><span class="etiqueta">Cambio requerido:</span></p>
+  <ol>
+    <li>Eliminar este campo del request de registro.</li>
+    <li>Redisenar el flujo de registro para que el paciente defina su propia contrasena,
+        o usar OTP (lo que resuelve tambien F-02).</li>
+    <li>El servidor debe almacenar la contrasena como hash (<code>bcrypt</code> o
+        <code>Argon2</code>), nunca en texto plano.</li>
+  </ol>
+</div>
+
+<hr class="separador">
+
+<!-- F-04 -->
+<div class="hallazgo-box hallazgo-medio">
+  <h3>F-04 &mdash; Datos del paciente en localStorage sin cifrar</h3>
+  <p><span class="etiqueta">Severidad:</span> MEDIO</p>
+  <p><span class="etiqueta">Archivos afectados:</span></p>
+  <ul>
+    <li><code>src/app/core/services/user.ts</code> &mdash; lineas 45&ndash;61</li>
+    <li><code>src/app/home/home.page.ts</code> &mdash; lineas 308, 328, 359, 854</li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    El perfil del paciente (nombre, telefono, <code>patient_id</code>) se persiste en
+    <code>localStorage</code> del WebView en formato JSON sin ningun cifrado.
+  </p>
+  <pre>
+// user.ts:45
+localStorage.setItem(this.USER_KEY, JSON.stringify(profile));
+// Clave: 'anaasis_user_data' — visible en texto plano
+  </pre>
+  <p><span class="etiqueta">Impacto:</span><br>
+    En un dispositivo Android rooteado, o ante acceso fisico al dispositivo, los datos
+    del paciente son legibles directamente desde el sistema de archivos sin necesidad de
+    conocer ninguna credencial. Para una aplicacion de salud este dato es suficiente para
+    realizar ataques de enumeracion sobre el API (ver F-01 y F-02).
+  </p>
+  <p><span class="etiqueta">Cambio requerido:</span></p>
+  <ol>
+    <li>Reemplazar <code>localStorage</code> por <code>@capacitor/preferences</code>,
+        que en Android usa <code>EncryptedSharedPreferences</code> respaldado por el
+        Android Keystore.</li>
+    <li>Actualizar todas las referencias directas a <code>localStorage.getItem
+        ('anaasis_user_data')</code> en <code>home.page.ts</code> para usar el servicio
+        <code>User</code> centralizado.</li>
+  </ol>
+</div>
+
+<hr class="separador">
+
+<!-- F-05 -->
+<div class="hallazgo-box hallazgo-medio">
+  <h3>F-05 &mdash; Endpoint de alerta SOS sin autenticacion ni trazabilidad</h3>
+  <p><span class="etiqueta">Severidad:</span> MEDIO</p>
+  <p><span class="etiqueta">Archivo afectado:</span></p>
+  <ul>
+    <li><code>src/app/core/services/medical.ts</code> &mdash; lineas 53&ndash;60</li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    La funcion que dispara la alerta de ambulancia no incluye ninguna clave, token ni
+    identificador del paciente. El endpoint <code>sos_proxy.php</code> recibe coordenadas
+    GPS y datos del paciente sin verificar la identidad del solicitante.
+  </p>
+  <pre>
+// medical.ts:53-60
+enviarAlertaAmbulancia(lat, lng, detalle) {
+  return this.http.post(`${this.API_URL}/sos_proxy.php`, {
+    latitud: lat,
+    longitud: lng,
+    paciente: detalle
+    // sin api_key, sin token, sin identificacion del usuario
+  });
+}
+  </pre>
+  <p><span class="etiqueta">Impacto:</span><br>
+    Cualquier actor que conozca el endpoint puede enviar alertas de ambulancia falsas
+    con coordenadas y datos de paciente arbitrarios, sin dejar ninguna traza que permita
+    identificar al responsable.
+  </p>
+  <p><span class="etiqueta">Cambio requerido:</span></p>
+  <ol>
+    <li>Incluir el token de sesion del usuario (una vez implementado en F-01) en el
+        body o header de la peticion.</li>
+    <li>El servidor debe validar que el solicitante es un paciente autenticado antes de
+        procesar la alerta.</li>
+    <li>Registrar en el servidor el identificador del paciente, IP de origen y timestamp
+        en cada alerta SOS para trazabilidad.</li>
+  </ol>
+</div>
+
+<hr class="separador">
+
+<!-- F-06 -->
+<div class="hallazgo-box hallazgo-bajo">
+  <h3>F-06 &mdash; Inconsistencia: chat.php y doctors.php sin mecanismo de auth</h3>
+  <p><span class="etiqueta">Severidad:</span> BAJO</p>
+  <p><span class="etiqueta">Archivo afectado:</span></p>
+  <ul>
+    <li><code>src/app/core/services/medical.ts</code> &mdash; lineas 16&ndash;26</li>
+  </ul>
+  <p><span class="etiqueta">Descripcion:</span><br>
+    A diferencia del resto de llamadas al API, las peticiones al chat y a la lista de
+    doctores no incluyen ninguna forma de autenticacion (ni siquiera la clave estatica
+    del resto del sistema).
+  </p>
+  <pre>
+sendMessage(message: string) {
+  return this.http.post(`${this.API_URL}/chat.php`, { message }); // sin nada
+}
+getDoctors() {
+  return this.http.get(`${this.API_URL}/doctors.php`); // sin nada
+}
+  </pre>
+  <p><span class="etiqueta">Cambio requerido:</span><br>
+    Una vez implementado el sistema de tokens de sesion (F-01), incluir el token en estas
+    llamadas tambien. El chat en particular recibe mensajes de texto libre y deberia estar
+    siempre asociado a un usuario autenticado.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. PLAN DE CAMBIOS PRIORIZADO -->
+<!-- ============================================================ -->
+<h2>4. Plan de Cambios Requeridos</h2>
+
+<p>Los cambios estan ordenados por dependencia tecnica — los primeros desbloquean a los siguientes.</p>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Cambio</th>
+    <th>Archivo(s) a modificar</th>
+    <th>Bloqueante para produccion</th>
+  </tr>
+  <tr>
+    <td><strong>C-01</strong></td>
+    <td>Implementar OTP por SMS en registro y login. El servidor emite un token de sesion firmado (JWT) al verificar exitosamente.</td>
+    <td>user.ts &mdash; loginUser(), registerUser()<br>login-modal.component.ts<br>register-modal.component.ts<br>Servidor: anaasis.php</td>
+    <td class="critico">SI</td>
+  </tr>
+  <tr>
+    <td><strong>C-02</strong></td>
+    <td>Eliminar api_key "ANAASIS_2026" de todo el codigo cliente. Reemplazar por header Authorization: Bearer &lt;token&gt; en todas las llamadas HTTP.</td>
+    <td>user.ts<br>medical.ts (12 ocurrencias)<br>RecordatorioCastWorker.kt</td>
+    <td class="critico">SI</td>
+  </tr>
+  <tr>
+    <td><strong>C-03</strong></td>
+    <td>Eliminar campo password hardcodeado del registro.</td>
+    <td>user.ts &mdash; registerUser() linea 28</td>
+    <td class="alto">SI</td>
+  </tr>
+  <tr>
+    <td><strong>C-04</strong></td>
+    <td>Migrar almacenamiento del perfil de localStorage a @capacitor/preferences (EncryptedSharedPreferences en Android).</td>
+    <td>user.ts &mdash; saveProfile(), getProfile(), deleteProfile()<br>home.page.ts &mdash; 4 accesos directos a localStorage</td>
+    <td class="medio">Recomendado</td>
+  </tr>
+  <tr>
+    <td><strong>C-05</strong></td>
+    <td>Agregar token de sesion a la llamada enviarAlertaAmbulancia() y al servidor validar identidad antes de procesar.</td>
+    <td>medical.ts &mdash; enviarAlertaAmbulancia()<br>Servidor: sos_proxy.php</td>
+    <td class="medio">Recomendado</td>
+  </tr>
+  <tr>
+    <td><strong>C-06</strong></td>
+    <td>Agregar token de sesion a sendMessage() y getDoctors().</td>
+    <td>medical.ts &mdash; sendMessage(), getDoctors()</td>
+    <td class="bajo">Menor</td>
+  </tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 5. BUENAS PRACTICAS YA IMPLEMENTADAS -->
+<!-- ============================================================ -->
+<h2>5. Buenas Practicas ya Implementadas Correctamente</h2>
+
+<p>Los siguientes controles de seguridad estan correctamente implementados en el proyecto
+y no requieren cambios:</p>
+
+<table>
+  <tr>
+    <th>Control</th>
+    <th>Ubicacion</th>
+    <th>Estado</th>
+  </tr>
+  <tr>
+    <td>Backups de ADB deshabilitados (<code>allowBackup="false"</code>)</td>
+    <td>AndroidManifest.xml</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>HTTP en texto claro bloqueado (<code>cleartextTrafficPermitted="false"</code>)</td>
+    <td>network_security_config.xml</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>Solo certificados del sistema como trust anchors (sin cert. de usuario/debug)</td>
+    <td>network_security_config.xml</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>BroadcastReceiver de recordatorios con <code>exported="false"</code></td>
+    <td>Plugin AndroidManifest.xml</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>BocinaForegroundService con <code>exported="false"</code></td>
+    <td>Plugin AndroidManifest.xml</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td><code>PendingIntent.FLAG_IMMUTABLE</code> en todas las alarmas</td>
+    <td>RecordatorioAlarmScheduler.kt</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>Sanitizacion de numero de telefono antes de <code>window.open('tel:')</code></td>
+    <td>doctor-list.component.ts</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+  <tr>
+    <td>Uso de <code>encodeURIComponent</code> en queries a Overpass API</td>
+    <td>overpass.ts</td>
+    <td class="info">CORRECTO</td>
+  </tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- 6. PAGINAS DE REFERENCIA -->
+<!-- ============================================================ -->
+<h2>6. Paginas de Referencia para el Informe</h2>
+
+<p>Las siguientes fuentes soportan los hallazgos y guian los cambios recomendados:</p>
+
+<h3>Autenticacion y Gestion de Tokens</h3>
+<ul>
+  <li>OWASP Mobile Top 10 &mdash; M1: Improper Credential Usage<br>
+      <code>owasp.org/www-project-mobile-top-10/2023-risks/m1-improper-credential-usage</code></li>
+  <li>OWASP Mobile Top 10 &mdash; M3: Insecure Authentication/Authorization<br>
+      <code>owasp.org/www-project-mobile-top-10/2023-risks/m3-insecure-authentication-authorization</code></li>
+  <li>OWASP ASVS v4 &mdash; V2: Authentication Verification Requirements<br>
+      <code>owasp.org/www-project-application-security-verification-standard</code></li>
+  <li>RFC 9068 &mdash; JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens<br>
+      <code>datatracker.ietf.org/doc/html/rfc9068</code></li>
+</ul>
+
+<h3>Almacenamiento Seguro en Android</h3>
+<ul>
+  <li>Android Developer &mdash; EncryptedSharedPreferences<br>
+      <code>developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences</code></li>
+  <li>Capacitor Preferences Plugin<br>
+      <code>capacitorjs.com/docs/apis/preferences</code></li>
+  <li>OWASP Mobile Top 10 &mdash; M9: Insecure Data Storage<br>
+      <code>owasp.org/www-project-mobile-top-10/2023-risks/m9-insecure-data-storage</code></li>
+</ul>
+
+<h3>Secretos en Codigo Fuente</h3>
+<ul>
+  <li>OWASP &mdash; Hardcoded Credentials (CWE-798)<br>
+      <code>owasp.org/www-community/vulnerabilities/Use_of_hard-coded_credentials</code></li>
+  <li>CWE-798: Use of Hard-coded Credentials<br>
+      <code>cwe.mitre.org/data/definitions/798.html</code></li>
+</ul>
+
+<h3>Seguridad en Android (Configuracion)</h3>
+<ul>
+  <li>Android Network Security Configuration<br>
+      <code>developer.android.com/privacy-and-security/security-config</code></li>
+  <li>Android Security Best Practices<br>
+      <code>developer.android.com/privacy-and-security/security-tips</code></li>
+</ul>
+
+<h3>Regulacion de Datos de Salud (Mexico)</h3>
+<ul>
+  <li>NOM-004-SSA3-2012 &mdash; Del expediente clinico (obligatoria para datos medicos en Mexico)</li>
+  <li>Ley Federal de Proteccion de Datos Personales en Posesion de los Particulares (LFPDPPP)<br>
+      <code>diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf</code></li>
+  <li>INAI &mdash; Guia para Implementar un Sistema de Gestion de Seguridad de Datos Personales<br>
+      <code>inai.org.mx</code></li>
+</ul>
+
+<!-- ============================================================ -->
+<!-- PIE DE PAGINA -->
+<!-- ============================================================ -->
+<div class="pie-pagina">
+  <p>
+    Informe generado el 20 de septiembre de 2026 &mdash; Auditoría de perfil <em>quick</em>,
+    pase único. Esta revisión cubre el código fuente del cliente Angular, el plugin nativo
+    Android y la configuración de seguridad del manifiesto. No se auditaron: código del
+    servidor (anaasis.php, sos_proxy.php, chat.php), infraestructura de red, ni pruebas
+    de penetración activas sobre endpoints en producción.
+  </p>
+  <p>
+    <strong>Este documento es confidencial.</strong> Contiene detalles técnicos de
+    vulnerabilidades activas. Distribuir únicamente a los responsables de desarrollo y
+    seguridad del proyecto.
+  </p>
+</div>
+
+</body>
+</html>

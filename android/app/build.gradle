@@ -25,6 +25,10 @@ android {
         versionCode 100
         versionName "2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // Centraliza la clave aquí; cuando el servidor emita JWT, reemplazar por ""
+        // y leerlo del token de sesión en lugar de esta constante.
+        buildConfigField "String", "API_KEY", "\"ANAASIS_2026\""
+        buildConfigField "String", "API_URL", "\"https://angelesmedic.com.mx/crm/api\""
     }
 
     // 🔑 Firma de debug FIJA y compartida (android/app/debug.keystore, versionada en git).
@@ -45,6 +49,10 @@ android {
                 keyPassword keystoreProperties['keyPassword']
             }
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

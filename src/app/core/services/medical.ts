@@ -1,148 +1,114 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MedicalService {
-  //  Esta es la URL correcta según lo que te pasaron por WhatsApp
-  private readonly API_URL = 'https://angelesmedic.com.mx/crm/api';
+  private readonly API_URL = environment.apiUrl;
 
   constructor(private readonly http: HttpClient) { }
 
-  /**  Chat con ANAasis */
+  /** Chat con ANAasis — F-06: api_key inyectada por interceptor */
   sendMessage(message: string): Observable<any> {
     return this.http.post(`${this.API_URL}/chat.php`, { message });
   }
 
-  /**  Lista de Doctores */
+  /** Lista de Doctores */
   getDoctors(): Observable<any> {
     return this.http.get(`${this.API_URL}/doctors.php`);
   }
 
-  /**  Hospitales cercanos */
+  /** Hospitales cercanos */
   getNearbyHospitals(lat: number, lng: number): Observable<any> {
-    // Usamos los nombres de parámetros que Daniel puso: lat y lng
     return this.http.get(`${this.API_URL}/places.php?lat=${lat}&lng=${lng}`);
   }
-  // Añade este método a tu clase MedicalService
-  // En src/app/core/services/medical.ts
-  //ESTA ES LA FUNCION PARA OBTENER DOCTORES CERCANOS, APUNTA AL ENDPOINT CORRECTO Y USA LOS PARAMETROS QUE TE PASARON POR WHATSAPP
+
   getNearbyDoctors(lat: number, lng: number): Observable<any> {
-    const body = {
-      action: "get_doctors_nearby",
-      api_key: "ANAASIS_2026", //  Agregamos la llave por si Daniel la pide
-      lat: lat,
-      lng: lng
-    };
-    return this.http.post(`${this.API_URL}/anaasis.php`, body); //  Usamos el endpoint correcto para obtener doctores cercanos
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'get_doctors_nearby',
+      lat,
+      lng
+    });
   }
-  /** Obtener horarios disponibles REALES desde anaasis.php */
+
   getAvailability(doctorId: number, date: string): Observable<any> {
-    const body = {
-      action: "get_slots",
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'get_slots',
       doctor_id: doctorId,
-      date: date, // Formato YYYY-MM-DD
-      api_key: "ANAASIS_2026"
-    };
-    // 🚀 CAMBIO: Ahora apuntamos a anaasis.php
-    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+      date
+    });
   }
-  /** Crear la cita médica en anaasis.php */
+
   createAppointment(data: any): Observable<any> {
-    const body = {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
       ...data,
-      action: "create_appointment",
-      api_key: "ANAASIS_2026"
-    };
-    // 🚀 CAMBIO: Ahora apuntamos a anaasis.php
-    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+      action: 'create_appointment'
+    });
   }
-  enviarAlertaAmbulancia(lat: number, lng: number, detalle: string): Observable<any> {
-    // Ahora apuntamos a tu proxy
-    const url = `${this.API_URL}/sos_proxy.php`;
-    const body = {
+
+  enviarAlertaAmbulancia(lat: number, lng: number, detalle: string, phone: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/sos_proxy.php`, {
       latitud: lat,
       longitud: lng,
-      paciente: detalle
-    };
-    return this.http.post(url, body);
+      paciente: detalle,
+      telefono: phone
+    });
   }
-  /** Obtener el historial de citas del usuario por su teléfono */
+
   getUserAppointments(phone: string): Observable<any> {
-    const body = {
-      action: "get_user_appointments",
-      api_key: "ANAASIS_2026",
-      phone: phone
-    };
-    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'get_user_appointments',
+      phone
+    });
   }
-  /** Cancelar una cita médica */
+
   cancelAppointment(appointmentId: number): Observable<any> {
-    const body = {
-      action: "cancel_appointment",
-      api_key: "ANAASIS_2026",
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'cancel_appointment',
       appointment_id: appointmentId
-    };
-    return this.http.post(`${this.API_URL}/anaasis.php`, body);
+    });
   }
-  /** Guardar signos (vienen de la pulsera o manual) */
-  // En src/app/core/services/medical.ts
-/** Guardar signos (vienen de la pulsera o manual con temperatura) */
-/** Guardar signos y datos fitness (vienen de la pulsera o manual) */
+
   saveVitals(data: any): Observable<any> {
-    const url = `${this.API_URL}/anaasis.php`;
-    return this.http.post(url, {
-      action: "save_vitals",
-      api_key: "ANAASIS_2026",
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'save_vitals',
       phone: data.phone,
       name: data.name,
       heart_rate: data.heart_rate || 0,
       spo2: data.spo2 || 0,
       sleep_hours: data.sleep_hours || 0,
       temperature: data.temperature || 0,
-      steps: data.steps || 0,         // 👟 Pasos dinámicos
-      calories: data.calories || 0.0,  // 🔥 Calorías dinámicas
+      steps: data.steps || 0,
+      calories: data.calories || 0.0,
       latitude: data.latitude || null,
       longitude: data.longitude || null
     });
   }
 
-  /** Obtener los últimos signos para mostrar en el modal */
   getLatestVitals(phone: string): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "get_vitals",
-      api_key: "ANAASIS_2026",
-      phone: phone
+      action: 'get_vitals',
+      phone
     });
   }
-  /** Consultar las coordenadas en tiempo real de la ambulancia asignada */
-getEmergencyTracking(phone: string): Observable<any> {
-    // 🛡️ Aseguramos que viajen exactamente 'action' y 'api_key' en formato JSON limpio
-    const payload = {
-      action: "get_emergency_tracking",
-      api_key: "ANAASIS_2026",
-      phone: phone
-    };
-    
-    console.log("[HTTP Request] Consultando GPS para el teléfono:", phone);
-    
-    // Verifica que la URL termine correctamente en /anaasis.php
-    return this.http.post(`${this.API_URL}/anaasis.php`, payload);
+
+  getEmergencyTracking(phone: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/anaasis.php`, {
+      action: 'get_emergency_tracking',
+      phone
+    });
   }
 
-  /** Obtener las prescripciones (consulta + hospitalización) del paciente */
- getPrescriptions(patientId: number): Observable<any> {
+  getPrescriptions(patientId: number): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis_v2.php`, {
-      action: "get_prescriptions",
-      api_key: "ANAASIS_2026",
+      action: 'get_prescriptions',
       patient_id: patientId
     });
   }
- 
 
-  /** El paciente activa/desactiva y elige la frecuencia del recordatorio de un medicamento */
   setMedicationReminder(data: {
     source_table: 'prescriptions' | 'hospital_medication_orders';
     source_id: number;
@@ -150,39 +116,31 @@ getEmergencyTracking(phone: string): Observable<any> {
     frequency_hours: number | null;
   }): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "set_medication_reminder",
-      api_key: "ANAASIS_2026",
+      action: 'set_medication_reminder',
       ...data
     });
   }
 
-  /** Guarda (o borra, si vienen vacíos) la bocina Google Home emparejada del paciente */
   saveGoogleHomeDevice(phone: string, deviceName: string | null, castId: string | null): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "save_google_home_device",
-      api_key: "ANAASIS_2026",
-      phone: phone,
+      action: 'save_google_home_device',
+      phone,
       device_name: deviceName,
       cast_id: castId
     });
   }
 
-  /** Obtiene la bocina Google Home emparejada del paciente */
   getGoogleHomeDevice(phone: string): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "get_google_home_device",
-      api_key: "ANAASIS_2026",
-      phone: phone
+      action: 'get_google_home_device',
+      phone
     });
   }
 
-  /** Genera un audio TTS en el servidor (Google Cloud TTS) y regresa su URL pública */
   generateTts(text: string): Observable<any> {
     return this.http.post(`${this.API_URL}/anaasis.php`, {
-      action: "generate_tts",
-      api_key: "ANAASIS_2026",
-      text: text
+      action: 'generate_tts',
+      text
     });
   }
-
 }

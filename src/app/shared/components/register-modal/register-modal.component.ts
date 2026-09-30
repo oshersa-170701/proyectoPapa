@@ -1,14 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { 
-  IonHeader, IonToolbar, IonTitle, IonContent, IonItem, 
-  IonLabel, IonInput, IonButton, IonButtons, IonIcon, 
-  ModalController, ToastController // 📍 Agregamos ToastController
+import {
+  IonHeader, IonToolbar, IonTitle, IonContent, IonItem,
+  IonLabel, IonInput, IonButton, IonButtons, IonIcon,
+  ModalController, ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { closeOutline, personOutline, callOutline, mailOutline, chevronForwardOutline } from 'ionicons/icons';
 import { User } from '../../../core/services/user';
+import { BiometricService } from '../../../core/services/biometric';
 
 @Component({
   selector: 'app-register-modal',
@@ -16,7 +17,7 @@ import { User } from '../../../core/services/user';
   styleUrls: ['./register-modal.component.scss'],
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle, 
+    CommonModule, ReactiveFormsModule, IonHeader, IonToolbar, IonTitle,
     IonContent, IonItem, IonLabel, IonInput, IonButton, IonButtons, IonIcon
   ]
 })
@@ -24,16 +25,16 @@ export class RegisterModalComponent {
   private fb = inject(FormBuilder);
   private userService = inject(User);
   private modalCtrl = inject(ModalController);
-  private toastCtrl = inject(ToastController); // 📍 Inyectamos el controlador de Toast
+  private toastCtrl = inject(ToastController);
+  private biometric = inject(BiometricService);
 
   registerForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-    //email: ['', [Validators.required, Validators.email]]
   });
 
   constructor() {
-    addIcons({closeOutline,personOutline,callOutline,chevronForwardOutline,mailOutline});
+    addIcons({ closeOutline, personOutline, callOutline, chevronForwardOutline, mailOutline });
   }
 
   dismiss() {
@@ -43,32 +44,40 @@ export class RegisterModalComponent {
   onSubmit() {
     if (this.registerForm.valid) {
       this.userService.registerUser(this.registerForm.value).subscribe({
-        next: async (res) => { // 📍 Agregamos async para el toast
+        next: async (res) => {
           if (res.success) {
-            await this.presentSuccessToast(); // 1. Mostramos el Toast
-            this.modalCtrl.dismiss(res);     // 2. Cerramos el modal automáticamente
+            // Try to save biometric credentials silently — no error if device doesn't support it
+            const phone = this.registerForm.value.phone;
+            const available = await this.biometric.isAvailable();
+            if (available) {
+              try {
+                await this.biometric.savePhone(phone);
+              } catch { /* not critical, continue */ }
+            }
+
+            await this.presentSuccessToast();
+            this.modalCtrl.dismiss(res);
           }
         },
         error: (err) => {
           console.error('Error en registro:', err);
-          // Opcional: mostrar un toast de error si la conexión falla
         }
       });
     }
   }
-  // 📍 Función para mostrar el Toast de éxito
+
   async presentSuccessToast() {
     const toast = await this.toastCtrl.create({
-      message: '¡Perfil creado con éxito!',
-      duration: 2000,
+      message: '¡Perfil creado con éxito! La próxima vez puedes entrar con tu huella.',
+      duration: 3000,
       position: 'bottom',
       color: 'success',
       buttons: [{ text: 'OK', role: 'cancel' }]
     });
     await toast.present();
   }
+
   async goToLogin() {
-  // Cerramos el modal de registro y mandamos una señal
-  await this.modalCtrl.dismiss({ redirectToLogin: true });
-}
+    await this.modalCtrl.dismiss({ redirectToLogin: true });
+  }
 }

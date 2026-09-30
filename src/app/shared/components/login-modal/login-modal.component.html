@@ -19,16 +19,32 @@
     </div>
   </div>
 
+  @if (canUseBiometric) {
+    <div class="biometric-section results-fade-in">
+      <button class="fingerprint-btn" (click)="loginWithFingerprint()">
+        <ion-icon name="finger-print-outline"></ion-icon>
+        <span>ENTRAR CON HUELLA</span>
+      </button>
+      <p class="biometric-hint">Toca el botón y apoya tu dedo en el sensor</p>
+    </div>
+
+    <div class="divider-row">
+      <div class="divider-line"></div>
+      <span class="divider-text">o ingresa tu número</span>
+      <div class="divider-line"></div>
+    </div>
+  }
+
   <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form results-fade-in">
-    
+
     <div class="input-container">
       <ion-label class="input-label">Número de Teléfono</ion-label>
       <ion-item lines="none" class="custom-login-item">
         <ion-icon name="call-outline" slot="start" color="primary"></ion-icon>
-        <ion-input 
-          formControlName="phone" 
-          type="tel" 
-          maxlength="10" 
+        <ion-input
+          formControlName="phone"
+          type="tel"
+          maxlength="10"
           placeholder="Ej. 951 123 4567"
           class="large-input">
         </ion-input>

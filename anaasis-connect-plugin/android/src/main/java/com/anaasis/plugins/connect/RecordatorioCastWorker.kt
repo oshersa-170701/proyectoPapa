@@ -23,8 +23,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "RecordatorioCastWorker"
-private const val ENDPOINT = "https://angelesmedic.com.mx/crm/api/anaasis.php"
-private const val API_KEY = "ANAASIS_2026"
+private val ENDPOINT = "${BuildConfig.API_URL}/anaasis.php"
+private val API_KEY = BuildConfig.API_KEY
 private const val DURACION_ESCANEO_MS = 4000L
 private const val TIMEOUT_REPRODUCCION_S = 15L
 

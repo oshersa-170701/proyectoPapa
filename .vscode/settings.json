@@ -4,7 +4,6 @@
     "@ionic/angular"
   ],
   "workbench.colorCustomizations": {
-    "activityBar.activeBorder": "#ffffff",
     "statusBar.noFolderBackground": "#626262",
     "focusBorder": "#888888",
     "statusBar.noFolderForeground": "#FBFBEA"
